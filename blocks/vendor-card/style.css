@@ -1,0 +1,23 @@
+.siff-vendor-card {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.siff-vendor-card__logo img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.siff-vendor-card__details {
+    margin-block-start: 1rem;
+}
+
+.siff-vendor-card__details h3 {
+    margin-block: 0 .5rem;
+}
+
+.siff-vendor-card__details p {
+    margin-block: .75rem;
+}

@@ -1,0 +1,33 @@
+.siff-featured-vendors {
+    padding: 2rem 1rem;
+}
+
+.siff-featured-vendors .siff-featured-vendors__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+    list-style: none;
+    padding: 0;
+}
+
+.siff-featured-vendors .siff-featured-vendors__grid > li {
+    min-width: 0;
+}
+
+.siff-featured-vendors .wp-block-post-featured-image {
+    margin: 0;
+}
+
+.siff-featured-vendors .wp-block-post-featured-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+@media (max-width: 600px) {
+    .siff-featured-vendors .siff-featured-vendors__grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
