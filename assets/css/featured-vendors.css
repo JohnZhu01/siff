@@ -1,11 +1,16 @@
 .siff-featured-vendors {
-    padding: 2rem 1rem;
+    padding: var(--wp--preset--spacing--50, 2rem) var(--wp--preset--spacing--30, 1rem);
+}
+
+.siff-featured-vendors > * {
+    max-width: var(--wp--style--global--content-size, 75rem);
+    margin-inline: auto;
 }
 
 .siff-featured-vendors .siff-featured-vendors__grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1.5rem;
+    gap: var(--wp--preset--spacing--40, 1.5rem);
     list-style: none;
     padding: 0;
 }
@@ -15,19 +20,34 @@
 }
 
 .siff-featured-vendors .wp-block-post-featured-image {
-    margin: 0;
+    position: relative;
+    aspect-ratio: 3 / 2;
+    margin: 0 auto;
+}
+
+.siff-featured-vendors__platinum .wp-block-post-featured-image {
+    width: 100%;
+    max-width: 20rem;
+}
+
+.siff-featured-vendors__gold .wp-block-post-featured-image {
+    width: 80%;
+    max-width: 16rem;
 }
 
 .siff-featured-vendors .wp-block-post-featured-image img {
     display: block;
+    position: absolute;
+    inset: 0;
     width: 100%;
-    height: auto;
+    height: 100%;
     object-fit: contain;
+    object-position: center;
 }
 
 @media (max-width: 600px) {
     .siff-featured-vendors .siff-featured-vendors__grid {
         grid-template-columns: 1fr;
-        gap: 1rem;
+        gap: var(--wp--preset--spacing--30, 1rem);
     }
 }

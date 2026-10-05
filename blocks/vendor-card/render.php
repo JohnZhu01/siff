@@ -31,7 +31,6 @@ if ( function_exists( 'get_field' ) ) {
 <article <?php echo get_block_wrapper_attributes( array( 'class' => 'siff-vendor-card' ) ); ?> aria-label="<?php echo esc_attr( $name ); ?>">
 	<?php if ( $logo_id ) : ?>
 		<div class="siff-vendor-card__logo">
-			<?php // WordPress escapes image attributes and uses the attachment's existing alt text. ?>
 			<?php echo wp_get_attachment_image( $logo_id, 'full' ); ?>
 		</div>
 	<?php endif; ?>
