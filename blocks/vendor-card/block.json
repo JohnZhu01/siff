@@ -1,0 +1,12 @@
+{
+  "apiVersion": 3,
+  "name": "siff/vendor-card",
+  "title": "SIFF Vendor Card",
+  "category": "widgets",
+  "icon": "store",
+  "description": "Displays the current vendor from a Query Loop, including its ACF details.",
+  "textdomain": "siff-theme",
+  "usesContext": ["postId", "postType"],
+  "supports": {"html": false, "autoRegister": true},
+  "style": "file:./style.css"
+}
