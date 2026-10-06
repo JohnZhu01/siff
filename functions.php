@@ -39,3 +39,27 @@ function siff_register_featured_vendors_style() {
 }
 
 add_action( 'init', 'siff_register_featured_vendors_style' );
+
+// Load type filtering on the Vendors page.
+function siff_enqueue_vendor_directory_assets() {
+	if ( ! is_page( 'vendors' ) ) {
+		return;
+	}
+
+	wp_enqueue_script(
+		'siff-vendor-directory',
+		get_theme_file_uri( 'assets/js/vendor-directory.js' ),
+		array(),
+		filemtime( get_theme_file_path( 'assets/js/vendor-directory.js' ) ),
+		true
+	);
+
+	wp_enqueue_style(
+		'siff-vendor-directory',
+		get_theme_file_uri( 'assets/css/vendor-directory.css' ),
+		array(),
+		filemtime( get_theme_file_path( 'assets/css/vendor-directory.css' ) )
+	);
+}
+
+add_action( 'wp_enqueue_scripts', 'siff_enqueue_vendor_directory_assets' );
