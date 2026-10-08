@@ -14,3 +14,8 @@ Text Domain: siff-theme
 Update URI: false 
 */
 
+#wp-custom-map {
+    width: 100%;
+    height: 450px; /* Adjust height as needed */
+    border: 1px solid #ccc;
+}
