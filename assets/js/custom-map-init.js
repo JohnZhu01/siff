@@ -1,0 +1,14 @@
+import { LeafletMap, TileLayer, Marker, Circle, Polygon, Popup } from "leaflet";
+
+document.addEventListener("DOMContentLoaded", function () {
+  const map = new LeafletMap("wp-custom-map").setView([49.39, -123.502055], 14);
+  new TileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution:
+      '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  }).addTo(map);
+  const marker = new Marker([49.393968, -123.502055]).addTo(map);
+
+  marker.bindPopup("<b>SIFF Event Location</b><br>I am a popup.").openPopup();
+  
+});
