@@ -52,8 +52,30 @@ function siff_enqueue_event_modal_assets() {
 add_action('wp_enqueue_scripts', 'siff_enqueue_event_modal_assets');
 
 function siff_localize_event_modal() {
+    $events = array();
+
+    if (is_page('events')) {
+        $event_ids = get_posts(array(
+            'post_type' => 'siff-event',
+            'post_status' => 'publish',
+            'numberposts' => 50,
+            'orderby' => 'date',
+            'order' => 'DESC',
+            'fields' => 'ids',
+        ));
+
+        foreach ($event_ids as $event_id) {
+            $details = siff_event_details_data($event_id);
+
+            if ($details) {
+                $events[$event_id] = $details;
+            }
+        }
+    }
+
     wp_localize_script('siff-event-modal', 'siffModal', array(
         'ajaxUrl' => admin_url('admin-ajax.php'),
+        'events' => $events,
     ));
 }
 
@@ -64,7 +86,26 @@ add_action('wp_ajax_siff_event_details', 'siff_get_event_details');
 add_action('wp_ajax_nopriv_siff_event_details', 'siff_get_event_details');
 
 function siff_get_event_details() {
+    if (!function_exists('get_field')) {
+        wp_send_json_error('Event fields are unavailable.', 503);
+    }
+
     $event_id = absint($_GET['event_id'] ?? 0);
+    $details = siff_event_details_data($event_id);
+
+    if (!$details) {
+        wp_send_json_error('Event not found.', 404);
+    }
+
+    wp_send_json_success($details);
+}
+
+function siff_event_details_data($event_id) {
+    $event_id = absint($event_id);
+    if (!$event_id) {
+        return null;
+    }
+
     $event = get_post($event_id);
 
     // Only expose published event posts.
@@ -73,11 +114,11 @@ function siff_get_event_details() {
         $event->post_type !== 'siff-event' ||
         $event->post_status !== 'publish'
     ) {
-        wp_send_json_error('Event not found.', 404);
+        return null;
     }
 
     if (!function_exists('get_field')) {
-        wp_send_json_error('Event fields are unavailable.', 503);
+        return null;
     }
 
     $event_types = wp_get_post_terms(
@@ -89,8 +130,7 @@ function siff_get_event_details() {
     if (is_wp_error($event_types)) {
         $event_types = array();
     }
-
-    wp_send_json_success(array(
+    return array(
         'types' => $event_types,
         'instructor' => get_field('instructor', $event_id),
         'instructor_profession' => get_field('instructor_profession', $event_id),
@@ -111,7 +151,7 @@ function siff_get_event_details() {
         'venue' => get_field('venue', $event_id),
         'duration' => get_field('runtime', $event_id)
             ?: get_field('duration', $event_id),
-    ));
+    );
 }
 
 // Register the vendor card block.
