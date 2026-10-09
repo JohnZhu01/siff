@@ -1,6 +1,6 @@
 <?php
-// Open Modal//
-add_action('wp_footer', function () {
+// Event modal.
+function siff_render_event_modal() {
     ?>
     <dialog id="siff-event-modal" aria-labelledby="siff-modal-title">
         <button type="button" id="siff-modal-close" aria-label="Close event details">
@@ -8,7 +8,6 @@ add_action('wp_footer', function () {
         </button>
 
         <div class="siff-modal-layout">
-
             <div class="siff-modal-image">
                 <img id="siff-modal-image" alt="" hidden>
             </div>
@@ -26,19 +25,21 @@ add_action('wp_footer', function () {
 
                 <div id="siff-modal-content"></div>
             </div>
-
         </div>
     </dialog>
     <?php
-});
-// Close Modal//
-add_action('wp_enqueue_scripts', function () {
+}
+
+add_action('wp_footer', 'siff_render_event_modal');
+
+function siff_enqueue_event_modal_assets() {
     wp_enqueue_style(
         'siff-event-modal',
         get_theme_file_uri('/assets/css/event-modal.css'),
         array(),
         filemtime(get_theme_file_path('/assets/css/event-modal.css'))
     );
+
     wp_enqueue_script(
         'siff-event-modal',
         get_theme_file_uri('/assets/js/event-modal.js'),
@@ -46,21 +47,23 @@ add_action('wp_enqueue_scripts', function () {
         filemtime(get_theme_file_path('/assets/js/event-modal.js')),
         true
     );
-});
+}
 
-// Make WordPress's AJAX URL available to the modal script.
-add_action('wp_enqueue_scripts', function () {
+add_action('wp_enqueue_scripts', 'siff_enqueue_event_modal_assets');
+
+function siff_localize_event_modal() {
     wp_localize_script('siff-event-modal', 'siffModal', array(
         'ajaxUrl' => admin_url('admin-ajax.php'),
     ));
-}, 20);
+}
 
-// Allow visitors and logged-in users to request event details.
+add_action('wp_enqueue_scripts', 'siff_localize_event_modal', 20);
+
+// Event details for the modal.
 add_action('wp_ajax_siff_event_details', 'siff_get_event_details');
 add_action('wp_ajax_nopriv_siff_event_details', 'siff_get_event_details');
 
-function siff_get_event_details()
-{
+function siff_get_event_details() {
     $event_id = absint($_GET['event_id'] ?? 0);
     $event = get_post($event_id);
 
@@ -174,3 +177,57 @@ function siff_enqueue_vendor_directory_assets() {
 }
 
 add_action( 'wp_enqueue_scripts', 'siff_enqueue_vendor_directory_assets' );
+
+// Replace the marked Post Date block with the event's ACF date and time.
+add_filter('render_block_core/post-date', function ($html, $attributes, $block) {
+    $classes = preg_split('/\s+/', trim($attributes['attrs']['className'] ?? ''));
+    $event_id = absint($block->context['postId'] ?? 0);
+
+    if (!in_array('siff-event-date', $classes, true)
+        || get_post_type($event_id) !== 'siff-event'
+        || !function_exists('get_field')) {
+        return $html;
+    }
+
+    $date = get_field('screening_date_and_time', $event_id)
+        ?: get_field('date_and_time', $event_id);
+
+    // Never fall back to the publication date for an event card.
+    if (!$date) {
+        return '';
+    }
+
+    return '<div class="' . esc_attr('wp-block-post-date ' . implode(' ', $classes))
+        . '">' . esc_html($date) . '</div>';
+}, 10, 3);
+
+// Event type labels inside cards.
+function siff_event_type_labels($html, $parsed_block) {
+    if (($parsed_block['attrs']['term'] ?? '') !== 'siff-event-types') {
+        return $html;
+    }
+
+    return preg_replace('/<\/?a\b[^>]*>/i', '', $html);
+}
+
+add_filter('render_block_core/post-terms', 'siff_event_type_labels', 10, 2);
+
+// Connect event titles to the modal.
+add_filter('render_block_core/post-title', function ($html, $parsed_block, $block) {
+    $classes = preg_split('/\s+/', trim($parsed_block['attrs']['className'] ?? ''));
+    $event_id = absint($block->context['postId'] ?? 0);
+
+    if (!in_array('siff-event-trigger', $classes, true)
+        || get_post_type($event_id) !== 'siff-event') {
+        return $html;
+    }
+
+    $processor = new WP_HTML_Tag_Processor($html);
+    if ($processor->next_tag('A')) {
+        $processor->set_attribute('data-event-id', $event_id);
+        $processor->set_attribute('aria-haspopup', 'dialog');
+        $processor->set_attribute('aria-controls', 'siff-event-modal');
+    }
+
+    return $processor->get_updated_html();
+}, 10, 3);

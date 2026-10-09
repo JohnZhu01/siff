@@ -86,6 +86,33 @@
 .siff-modal-description h3 {
   margin: 0 0 0.5rem;
 }
+
 #siff-modal-meta .siff-modal-credit-start {
   margin-top: 2.5rem;
+}
+
+.siff-event-card {
+  cursor: pointer;
+}
+
+.siff-event-card:focus-within {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+.wp-block-post-template > .wp-block-post[hidden] {
+  display: none !important;
+}
+
+.siff-event-filters button {
+  cursor: pointer;
+}
+
+.siff-event-filters button[aria-pressed="true"] {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+.siff-event-filters button:focus-visible {
+  outline: 3px dashed currentColor;
+  outline-offset: 5px;
 }
