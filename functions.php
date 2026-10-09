@@ -75,30 +75,46 @@ function siff_localize_event_modal()
     }
 
     wp_localize_script('siff-event-modal', 'siffModal', array(
-        'ajaxUrl' => admin_url('admin-ajax.php'),
+        'restUrl' => rest_url('siff/v1/events/'),
         'events' => $events,
     ));
 }
 
 add_action('wp_enqueue_scripts', 'siff_localize_event_modal', 20);
 
-// Event details for the modal.
-add_action('wp_ajax_siff_event_details', 'siff_get_event_details');
-add_action('wp_ajax_nopriv_siff_event_details', 'siff_get_event_details');
+function siff_register_event_routes()
+{
+    register_rest_route('siff/v1', '/events/(?P<id>[1-9]\d*)', array(
+        'methods' => WP_REST_Server::READABLE,
+        'callback' => 'siff_rest_event_details',
+        'permission_callback' => '__return_true',
+    ));
+}
 
-function siff_get_event_details() {
+add_action('rest_api_init', 'siff_register_event_routes');
+
+function siff_rest_event_details($request)
+{
     if (!function_exists('get_field')) {
-        wp_send_json_error('Event fields are unavailable.', 503);
+        return new WP_Error(
+            'siff_fields_unavailable',
+            'Event fields are unavailable.',
+            array('status' => 503)
+        );
     }
 
-    $event_id = absint($_GET['event_id'] ?? 0);
+    $event_id = absint($request['id']);
     $details = siff_event_details_data($event_id);
 
     if (!$details) {
-        wp_send_json_error('Event not found.', 404);
+        return new WP_Error(
+            'siff_event_not_found',
+            'Event not found.',
+            array('status' => 404)
+        );
     }
 
-    wp_send_json_success($details);
+    return rest_ensure_response($details);
 }
 
 function siff_event_details_data($event_id) {
