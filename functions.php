@@ -231,3 +231,37 @@ add_filter('render_block_core/post-title', function ($html, $parsed_block, $bloc
 
     return $processor->get_updated_html();
 }, 10, 3);
+
+
+//load leaflet css and js
+function siff_enqueue_leaflet_assets(){
+    wp_enqueue_style(
+        'leaflet',
+        'https://cdn.jsdelivr.net/npm/leaflet@2.0.0-alpha.1/dist/leaflet.css',
+        array(),
+        '2.0.0-alpha.1'
+    );
+
+    wp_register_script_module(
+        'leaflet',
+        'https://cdn.jsdelivr.net/npm/leaflet@2.0.0-alpha.1/dist/leaflet.js',
+        array(),
+        '2.0.0-alpha.1'
+    );
+
+    wp_enqueue_script_module(
+        'siff-location-map',
+        get_theme_file_uri('/assets/js/custom-map-init.js'),
+        array('leaflet'),
+        filemtime( get_theme_file_path( 'assets/js/custom-map-init.js' ) )
+    );
+    wp_enqueue_style(
+		'custom-map',
+		get_theme_file_uri( 'assets/css/custom-map.css' ),
+		array(),
+		filemtime( get_theme_file_path( 'assets/css/custom-map.css' ) )
+	);
+
+
+}
+add_action( 'wp_enqueue_scripts', 'siff_enqueue_leaflet_assets' );
