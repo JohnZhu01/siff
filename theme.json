@@ -19,6 +19,11 @@
 					"color": "#05c7f2",
 					"name": "Accents",
 					"slug": "custom-accents"
+				},
+				{
+					"color": "#023859",
+					"name": "Deep Blue",
+					"slug": "custom-deep-blue"
 				}
 			]
 		},
@@ -303,6 +308,29 @@
 		"useRootPaddingAwareAlignments": true
 	},
 	"styles": {
+		"blocks": {
+			"core/button": {
+				"border": {
+					"radius": {
+						"bottomLeft": "4px",
+						"bottomRight": "4px",
+						"topLeft": "4px",
+						"topRight": "4px"
+					}
+				},
+				"spacing": {
+					"padding": {
+						"bottom": "var(--wp--preset--spacing--30)",
+						"left": "var(--wp--preset--spacing--40)",
+						"right": "var(--wp--preset--spacing--40)",
+						"top": "var(--wp--preset--spacing--30)"
+					}
+				},
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--small)"
+				}
+			}
+		},
 		"elements": {
 			"button": {
 				"color": {
