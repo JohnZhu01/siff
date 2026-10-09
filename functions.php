@@ -265,3 +265,22 @@ function siff_enqueue_leaflet_assets(){
 
 }
 add_action( 'wp_enqueue_scripts', 'siff_enqueue_leaflet_assets' );
+
+
+// Overwrite the add to cart button in the shop page
+add_filter( 'woocommerce_product_add_to_cart_url', 'custom_box_office_add_to_cart_url', 10, 2 );
+function custom_box_office_add_to_cart_url( $url, $product ) {
+    if ( $product && 'yes' === get_post_meta( $product->get_id(), '_ticket', true ) && $product->is_purchasable() && $product->is_in_stock() ) {
+        $current_url = remove_query_arg( array( 'add-to-cart', 'quantity' ) );
+        return add_query_arg( 'add-to-cart', $product->get_id(), $current_url );
+    }
+    return $url;
+}
+
+add_filter( 'woocommerce_product_add_to_cart_text', 'custom_box_office_add_to_cart_text', 10, 2 );
+function custom_box_office_add_to_cart_text( $text, $product ) {
+    if ( $product && 'yes' === get_post_meta( $product->get_id(), '_ticket', true ) && $product->is_purchasable() && $product->is_in_stock() ) {
+        return __( 'Buy Ticket', 'siff-theme' );
+    }
+    return $text;
+}
