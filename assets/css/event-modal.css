@@ -1,6 +1,7 @@
 #siff-event-modal {
   box-sizing: border-box;
   width: min(48rem, calc(100% - 2rem));
+  height: min(44rem, 85vh);
   max-height: 85vh;
   padding: 3.5rem 2rem 2rem;
   border: none;
@@ -8,6 +9,7 @@
   background: #fff;
   color: #222;
   overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 
 #siff-event-modal::backdrop {
@@ -164,4 +166,41 @@
 .siff-event-filters button:focus-visible {
   outline: 3px dashed currentColor;
   outline-offset: 5px;
+}
+/* Animations */
+#siff-event-modal[open] {
+  animation: modal-enter 400ms ease-out;
+}
+
+#siff-event-modal[open]::backdrop {
+  animation: backdrop-enter 400ms ease-out;
+}
+
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes backdrop-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #siff-event-modal[open],
+  #siff-event-modal[open]::backdrop {
+    animation: none;
+  }
 }

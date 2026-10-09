@@ -4,13 +4,15 @@ function initEventModal() {
   const title = document.querySelector("#siff-modal-title");
   const content = document.querySelector("#siff-modal-content");
   const meta = document.querySelector("#siff-modal-meta");
-  const descriptionTitle = document.querySelector("#siff-modal-description-title");
+  const descriptionTitle = document.querySelector(
+    "#siff-modal-description-title",
+  );
   const image = document.querySelector("#siff-modal-image");
 
   if (!modal || !closeButton || !title || !content || !image || !meta) return;
   let activeRequest;
   let activeTrigger;
- const eventCache = new Map(Object.entries(siffModal.events || {}));
+  const eventCache = new Map(Object.entries(siffModal.events || {}));
 
   document.addEventListener("click", async (event) => {
     // Leave links and controls inside the dialog alone.
@@ -21,11 +23,13 @@ function initEventModal() {
     if (!trigger) {
       const card = event.target.closest(".siff-event-card");
       if (!card) return;
-      if (event.target.closest("a, button, input, select, textarea, label")) return;
+      if (event.target.closest("a, button, input, select, textarea, label"))
+        return;
       trigger = card.querySelector(".siff-event-trigger a[data-event-id]");
     }
     if (!trigger) return;
-    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)
+      return;
 
     event.preventDefault();
     activeTrigger = trigger;
@@ -34,6 +38,8 @@ function initEventModal() {
     activeRequest = request;
 
     const eventId = trigger.dataset.eventId;
+    const loadingStarted = performance.now();
+    const minimumLoadingTime = 500;
     title.textContent = "Event details";
     if (descriptionTitle) descriptionTitle.textContent = "Description";
     content.textContent = "Loading…";
@@ -60,6 +66,13 @@ function initEventModal() {
         details = result.data;
         eventCache.set(eventId, details);
       }
+      const remaining =
+        minimumLoadingTime - (performance.now() - loadingStarted);
+      if (remaining > 0) {
+        await new Promise((resolve) => setTimeout(resolve, remaining));
+      }
+      if (request.signal.aborted || !modal.open) return;
+
       title.textContent = details.title;
       const types = details.types || [];
       if (descriptionTitle) {
