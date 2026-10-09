@@ -51,7 +51,8 @@ function siff_enqueue_event_modal_assets() {
 
 add_action('wp_enqueue_scripts', 'siff_enqueue_event_modal_assets');
 
-function siff_localize_event_modal() {
+function siff_localize_event_modal()
+{
     $events = array();
 
     if (is_page('events')) {
@@ -101,11 +102,6 @@ function siff_get_event_details() {
 }
 
 function siff_event_details_data($event_id) {
-    $event_id = absint($event_id);
-    if (!$event_id) {
-        return null;
-    }
-
     $event = get_post($event_id);
 
     // Only expose published event posts.

@@ -10,9 +10,7 @@ function initEventModal() {
   if (!modal || !closeButton || !title || !content || !image || !meta) return;
   let activeRequest;
   let activeTrigger;
-  const eventCache = new Map(
-    Object.entries(siffModal.events || {})
-  );
+ const eventCache = new Map(Object.entries(siffModal.events || {}));
 
   document.addEventListener("click", async (event) => {
     // Leave links and controls inside the dialog alone.
