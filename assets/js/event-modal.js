@@ -49,21 +49,24 @@ function initEventModal() {
     if (!modal.open) modal.showModal();
 
     try {
-      const url = new URL(siffModal.ajaxUrl);
-      url.searchParams.set("action", "siff_event_details");
-      url.searchParams.set("event_id", eventId);
-
       let details = eventCache.get(eventId);
+
       if (!details) {
-        const response = await fetch(url, { signal: request.signal });
+        const url = new URL(encodeURIComponent(eventId), siffModal.restUrl);
+
+        const response = await fetch(url, {
+          signal: request.signal,
+        });
+
         const result = await response.json();
 
-        if (!response.ok || !result.success) {
-          throw new Error("Unable to load this event.");
+        if (!response.ok) {
+          throw new Error(result.message || "Unable to load this event.");
         }
+
         if (request.signal.aborted) return;
 
-        details = result.data;
+        details = result;
         eventCache.set(eventId, details);
       }
       const remaining =
