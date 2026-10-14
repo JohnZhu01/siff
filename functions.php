@@ -1,4 +1,38 @@
 <?php
+// Give role paragraphs the current post ID from their Query Loop.
+add_filter('register_block_type_args', function ($args, $name) {
+    if ($name === 'core/paragraph') {
+        $args['uses_context'] = array_unique(array_merge(
+            $args['uses_context'] ?? array(),
+            array('postId')
+        ));
+    }
+
+    return $args;
+}, 10, 2);
+
+function siff_render_guest_role($html, $parsed_block, $block) {
+    $classes = preg_split('/\s+/', trim($parsed_block['attrs']['className'] ?? ''));
+    $guest_id = absint($block->context['postId'] ?? 0);
+
+    if (!in_array('siff-guest-role', $classes, true)
+        || !$guest_id || get_post_type($guest_id) !== 'guest'
+        || !function_exists('get_field')) {
+        return $html;
+    }
+
+    $role = get_field('role', $guest_id);
+    if (!$role) {
+        return '';
+    }
+
+    return preg_replace_callback('/(<p\b[^>]*>).*?(<\/p>)/s', function ($match) use ($role) {
+        return $match[1] . esc_html($role) . $match[2];
+    }, $html, 1);
+}
+
+add_filter('render_block_core/paragraph', 'siff_render_guest_role', 10, 3);
+
 // Event modal.
 function siff_render_event_modal() {
     ?>
