@@ -2,15 +2,15 @@
 /**
  * Title: Events Grid
  * Slug: siff-theme/events-grid
- * Categories: query
- * Description: Event cards with category filters, screening dates, and the shared details modal.
+ * Categories: featured
+ * Description: Searchable event cards with category filters and the details modal.
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 ?>
-<!-- wp:query {"query":{"perPage":50,"pages":0,"offset":0,"postType":"siff-event","order":"desc","orderBy":"date","inherit":false}} -->
+<!-- wp:query {"queryId":2,"query":{"perPage":50,"pages":0,"offset":0,"postType":"siff-event","order":"desc","orderBy":"date","inherit":false,"excludeCurrent":null},"metadata":{"categories":["featured"],"patternName":"siff-theme/events-grid","name":"Events Grid"}} -->
 <div class="wp-block-query"><!-- wp:group {"className":"siff-event-filters","layout":{"type":"flex","flexWrap":"wrap"}} -->
 <div class="wp-block-group siff-event-filters"><!-- wp:buttons -->
 <div class="wp-block-buttons"><!-- wp:button {"className":"siff-filter-all"} -->
@@ -28,16 +28,18 @@ if (!defined('ABSPATH')) {
 <!-- wp:button {"className":"siff-filter-panel"} -->
 <div class="wp-block-button siff-filter-panel"><a class="wp-block-button__link wp-element-button">Panels</a></div>
 <!-- /wp:button --></div>
-<!-- /wp:buttons --></div>
+<!-- /wp:buttons -->
+
+<!-- wp:search {"label":"Search","width":100,"widthUnit":"%","buttonText":"Search","className":"siff-event-search"} /--></div>
 <!-- /wp:group -->
 
 <!-- wp:post-template {"layout":{"type":"grid","columnCount":3}} -->
 <!-- wp:group {"className":"siff-event-card","layout":{"type":"constrained"}} -->
 <div class="wp-block-group siff-event-card"><!-- wp:post-title {"isLink":true,"className":"siff-event-trigger"} /-->
 
-<!-- wp:post-featured-image {"isLink":false,"sizeSlug":"large","aspectRatio":"16/9","scale":"contain"} /-->
+<!-- wp:post-featured-image {"aspectRatio":"16/9","scale":"contain","sizeSlug":"large"} /-->
 
-<!-- wp:post-date {"className":"siff-event-date"} /-->
+<!-- wp:post-date {"metadata":{"bindings":{"datetime":{"source":"core/post-data","args":{"field":"date"}}}},"className":"siff-event-date"} /-->
 
 <!-- wp:post-terms {"term":"siff-event-types"} /--></div>
 <!-- /wp:group -->

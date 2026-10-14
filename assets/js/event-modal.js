@@ -140,6 +140,9 @@ document.querySelectorAll(".siff-event-filters").forEach((filters) => {
   const query = filters.closest(".wp-block-query");
   const grid = query?.querySelector(".wp-block-post-template");
   if (!grid) return;
+  const searchForm=query.querySelector(".siff-event-search");
+const searchInput = searchForm?.querySelector('input[type="search"]');
+  let activeType="all"
 
   const cards = [...grid.children].filter((card) =>
     card.classList.contains("wp-block-post"),
@@ -169,11 +172,19 @@ document.querySelectorAll(".siff-event-filters").forEach((filters) => {
   grid.before(status);
 
   function applyFilter(type) {
+    activeType = type;
+    const searchText = (searchInput?.value || "").trim().toLowerCase();
     let count = 0;
 
     cards.forEach((card) => {
-      const matches =
+      const title = (
+        card.querySelector(".wp-block-post-title")?.textContent || ""
+      ).toLowerCase();
+
+      const matchesType =
         type === "all" || card.classList.contains(`siff-event-types-${type}`);
+
+      const matches = matchesType && title.includes(searchText);
 
       card.hidden = !matches;
       if (matches) count++;
@@ -188,12 +199,67 @@ document.querySelectorAll(".siff-event-filters").forEach((filters) => {
 
     status.textContent = count
       ? `${count} event${count === 1 ? "" : "s"} shown`
-      : "No events in this category.";
+      : "No matching events.";
   }
 
   controls.forEach(({ type, button }) => {
     button.addEventListener("click", () => applyFilter(type));
   });
+searchInput?.addEventListener("input", () => {
+  applyFilter(activeType);
+});
 
+searchForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  applyFilter(activeType);
+});
   applyFilter("all");
+});
+
+document.querySelectorAll(".siff-guests").forEach((query) => {
+  const grid = query.querySelector(".wp-block-post-template");
+  const more = query.querySelector(".wp-load-more__button");
+  const pagination = more?.closest(".wp-block-buttons");
+
+  if (!grid || !pagination) return;
+
+  const originalCards = grid.innerHTML;
+  const originalPagination = pagination.cloneNode(true);
+  const initialCount = grid.children.length;
+
+  const less = document.createElement("button");
+  less.type = "button";
+  less.className = more.className;
+  less.classList.remove("wp-load-more__button", "loading");
+  less.classList.add("siff-guests-less");
+  less.style.cssText = more.style.cssText;
+  less.textContent = "See less";
+
+  const lessPagination = originalPagination.cloneNode(true);
+  lessPagination.classList.add("siff-guests-less-controls");
+  lessPagination.querySelector(".wp-load-more__button").replaceWith(less);
+  lessPagination.hidden = true;
+  query.append(lessPagination);
+
+  document.addEventListener("qllmLoadStart", () => {
+    less.disabled = true;
+  });
+
+  document.addEventListener("qllmLoadEnd", () => {
+    less.disabled = false;
+    lessPagination.hidden = grid.children.length <= initialCount;
+  });
+
+  less.addEventListener("click", () => {
+    grid.innerHTML = originalCards;
+
+    query.querySelectorAll(".wp-load-more__button").forEach((button) => {
+      button.closest(".wp-block-buttons")?.remove();
+    });
+
+    const restoredPagination = originalPagination.cloneNode(true);
+    lessPagination.before(restoredPagination);
+    lessPagination.hidden = true;
+    restoredPagination.querySelector(".wp-load-more__button")?.focus();
+  });
 });
