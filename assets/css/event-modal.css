@@ -204,3 +204,11 @@
     animation: none;
   }
 }
+
+.siff-guests-less {
+  cursor: pointer;
+}
+
+.siff-guests-less-controls[hidden] {
+  display: none !important;
+}

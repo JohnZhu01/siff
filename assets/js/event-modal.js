@@ -197,3 +197,51 @@ document.querySelectorAll(".siff-event-filters").forEach((filters) => {
 
   applyFilter("all");
 });
+
+document.querySelectorAll(".siff-guests").forEach((query) => {
+  const grid = query.querySelector(".wp-block-post-template");
+  const more = query.querySelector(".wp-load-more__button");
+  const pagination = more?.closest(".wp-block-buttons");
+
+  if (!grid || !pagination) return;
+
+  const originalCards = grid.innerHTML;
+  const originalPagination = pagination.cloneNode(true);
+  const initialCount = grid.children.length;
+
+  const less = document.createElement("button");
+  less.type = "button";
+  less.className = more.className;
+  less.classList.remove("wp-load-more__button", "loading");
+  less.classList.add("siff-guests-less");
+  less.style.cssText = more.style.cssText;
+  less.textContent = "See less";
+
+  const lessPagination = originalPagination.cloneNode(true);
+  lessPagination.classList.add("siff-guests-less-controls");
+  lessPagination.querySelector(".wp-load-more__button").replaceWith(less);
+  lessPagination.hidden = true;
+  query.append(lessPagination);
+
+  document.addEventListener("qllmLoadStart", () => {
+    less.disabled = true;
+  });
+
+  document.addEventListener("qllmLoadEnd", () => {
+    less.disabled = false;
+    lessPagination.hidden = grid.children.length <= initialCount;
+  });
+
+  less.addEventListener("click", () => {
+    grid.innerHTML = originalCards;
+
+    query.querySelectorAll(".wp-load-more__button").forEach((button) => {
+      button.closest(".wp-block-buttons")?.remove();
+    });
+
+    const restoredPagination = originalPagination.cloneNode(true);
+    lessPagination.before(restoredPagination);
+    lessPagination.hidden = true;
+    restoredPagination.querySelector(".wp-load-more__button")?.focus();
+  });
+});
