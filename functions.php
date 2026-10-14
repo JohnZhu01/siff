@@ -352,28 +352,37 @@ function siff_enqueue_leaflet_assets(){
 }
 add_action( 'wp_enqueue_scripts', 'siff_enqueue_leaflet_assets' );
 
-// Register the grid even when the theme's pattern file cache is stale.
+// Keep the Events patterns available after file-based deployments.
 function siff_register_events_grid_pattern() {
     $registry = WP_Block_Patterns_Registry::get_instance();
-    if ($registry->is_registered('siff-theme/events-grid')) {
-        return;
+    $patterns = array(
+        'special-guests' => __('Special Guests', 'siff-theme'),
+        'events-grid' => __('Events Grid', 'siff-theme'),
+        'events-page' => __('Events Page', 'siff-theme'),
+    );
+
+    foreach ($patterns as $name => $title) {
+        $slug = 'siff-theme/' . $name;
+        if ($registry->is_registered($slug)) {
+            continue;
+        }
+
+        $file = get_theme_file_path('/patterns/' . $name . '.php');
+        if (!is_readable($file)) {
+            continue;
+        }
+
+        ob_start();
+        include $file;
+        $content = ob_get_clean();
+
+        register_block_pattern($slug, array(
+            'title' => $title,
+            'categories' => array('featured'),
+            'inserter' => true,
+            'content' => $content,
+        ));
     }
-
-    $file = get_theme_file_path('/patterns/events-grid.php');
-    if (!is_readable($file)) {
-        return;
-    }
-
-    ob_start();
-    include $file;
-    $content = ob_get_clean();
-
-    register_block_pattern('siff-theme/events-grid', array(
-        'title' => __('Events Grid', 'siff-theme'),
-        'categories' => array('featured'),
-        'inserter' => true,
-        'content' => $content,
-    ));
 }
 
 add_action('init', 'siff_register_events_grid_pattern', 20);

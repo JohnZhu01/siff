@@ -140,6 +140,9 @@ document.querySelectorAll(".siff-event-filters").forEach((filters) => {
   const query = filters.closest(".wp-block-query");
   const grid = query?.querySelector(".wp-block-post-template");
   if (!grid) return;
+  const searchForm=query.querySelector(".siff-event-search");
+const searchInput = searchForm?.querySelector('input[type="search"]');
+  let activeType="all"
 
   const cards = [...grid.children].filter((card) =>
     card.classList.contains("wp-block-post"),
@@ -169,11 +172,19 @@ document.querySelectorAll(".siff-event-filters").forEach((filters) => {
   grid.before(status);
 
   function applyFilter(type) {
+    activeType = type;
+    const searchText = (searchInput?.value || "").trim().toLowerCase();
     let count = 0;
 
     cards.forEach((card) => {
-      const matches =
+      const title = (
+        card.querySelector(".wp-block-post-title")?.textContent || ""
+      ).toLowerCase();
+
+      const matchesType =
         type === "all" || card.classList.contains(`siff-event-types-${type}`);
+
+      const matches = matchesType && title.includes(searchText);
 
       card.hidden = !matches;
       if (matches) count++;
@@ -188,13 +199,20 @@ document.querySelectorAll(".siff-event-filters").forEach((filters) => {
 
     status.textContent = count
       ? `${count} event${count === 1 ? "" : "s"} shown`
-      : "No events in this category.";
+      : "No matching events.";
   }
 
   controls.forEach(({ type, button }) => {
     button.addEventListener("click", () => applyFilter(type));
   });
+searchInput?.addEventListener("input", () => {
+  applyFilter(activeType);
+});
 
+searchForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  applyFilter(activeType);
+});
   applyFilter("all");
 });
 
