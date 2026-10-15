@@ -1,0 +1,204 @@
+{
+  "key": "group_6ac3f4af76b9b",
+  "title": "Film Details",
+  "fields": [
+    {
+      "key": "field_6ac3f4b0561c2",
+      "label": "Genre",
+      "name": "genre",
+      "aria-label": "",
+      "type": "taxonomy",
+      "instructions": "",
+      "required": 1,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "taxonomy": "siff-film-genres",
+      "add_term": 1,
+      "save_terms": 1,
+      "load_terms": 1,
+      "return_format": "id",
+      "field_type": "multi_select",
+      "allow_null": 0,
+      "allow_in_bindings": 0,
+      "bidirectional": 0,
+      "multiple": 0,
+      "bidirectional_target": []
+    },
+    {
+      "key": "field_6ac3f60b561c3",
+      "label": "Synopsis",
+      "name": "synopsis",
+      "aria-label": "",
+      "type": "textarea",
+      "instructions": "",
+      "required": 1,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "default_value": "",
+      "maxlength": "",
+      "allow_in_bindings": 0,
+      "rows": "",
+      "placeholder": "",
+      "new_lines": ""
+    },
+    {
+      "key": "field_6ac3f62c561c4",
+      "label": "Runtime",
+      "name": "runtime",
+      "aria-label": "",
+      "type": "text",
+      "instructions": "",
+      "required": 1,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "default_value": "",
+      "maxlength": "",
+      "allow_in_bindings": 0,
+      "placeholder": "",
+      "prepend": "",
+      "append": ""
+    },
+    {
+      "key": "field_6ac3f68d561c5",
+      "label": "Filmmaker",
+      "name": "filmmaker",
+      "aria-label": "",
+      "type": "text",
+      "instructions": "",
+      "required": 1,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "default_value": "",
+      "maxlength": "",
+      "allow_in_bindings": 0,
+      "placeholder": "",
+      "prepend": "",
+      "append": ""
+    },
+    {
+      "key": "field_6ac3f6ca561c6",
+      "label": "Director",
+      "name": "director",
+      "aria-label": "",
+      "type": "text",
+      "instructions": "",
+      "required": 1,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "default_value": "",
+      "maxlength": "",
+      "allow_in_bindings": 0,
+      "placeholder": "",
+      "prepend": "",
+      "append": ""
+    },
+    {
+      "key": "field_6ac3f6de561c7",
+      "label": "Screening date and time",
+      "name": "screening_date_and_time",
+      "aria-label": "",
+      "type": "date_time_picker",
+      "instructions": "",
+      "required": 1,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "display_format": "F j, Y g:i a",
+      "return_format": "d/m/Y g:i a",
+      "first_day": 1,
+      "default_to_current_date": 0,
+      "allow_in_bindings": 0
+    },
+    {
+      "key": "field_6ac3f705561c8",
+      "label": "Venue",
+      "name": "venue",
+      "aria-label": "",
+      "type": "text",
+      "instructions": "",
+      "required": 1,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "default_value": "",
+      "maxlength": "",
+      "allow_in_bindings": 0,
+      "placeholder": "",
+      "prepend": "",
+      "append": ""
+    },
+    {
+      "key": "field_6ac440a646bfe",
+      "label": "Film Category",
+      "name": "film_category",
+      "aria-label": "",
+      "type": "taxonomy",
+      "instructions": "",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "taxonomy": "film-category",
+      "add_term": 1,
+      "save_terms": 1,
+      "load_terms": 1,
+      "return_format": "id",
+      "field_type": "multi_select",
+      "allow_null": 1,
+      "allow_in_bindings": 0,
+      "bidirectional": 0,
+      "multiple": 0,
+      "bidirectional_target": []
+    }
+  ],
+  "location": [
+    [
+      {
+        "param": "post_taxonomy",
+        "operator": "==",
+        "value": "siff-event-types:film"
+      }
+    ]
+  ],
+  "menu_order": 0,
+  "position": "normal",
+  "style": "default",
+  "label_placement": "top",
+  "instruction_placement": "label",
+  "hide_on_screen": "",
+  "active": true,
+  "description": "",
+  "show_in_rest": 0,
+  "display_title": "",
+  "allow_ai_access": false,
+  "ai_description": ""
+}
