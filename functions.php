@@ -1,4 +1,7 @@
 <?php
+// Schedule Query Loops and the reusable event row.
+require_once get_theme_file_path( 'inc/schedule.php' );
+
 // Give role paragraphs the current post ID from their Query Loop.
 add_filter('register_block_type_args', function ($args, $name) {
     if ($name === 'core/paragraph') {
