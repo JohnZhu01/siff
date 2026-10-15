@@ -1,0 +1,132 @@
+/* These selectors belong only to the Schedule pattern and its dynamic row. */
+.siff-schedule-day,
+.siff-schedule-page #friday,
+.siff-schedule-page #saturday,
+.siff-schedule-page #sunday {
+	scroll-margin-top: 4rem;
+}
+
+.siff-schedule-query .wp-block-post-template {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--wp--preset--spacing--30, 1rem);
+	padding: 0;
+	list-style: none;
+}
+
+.siff-schedule-query .wp-block-post-template > li {
+	min-width: 0;
+	margin: 0;
+}
+
+.siff-schedule-row {
+	box-sizing: border-box;
+	display: grid;
+	grid-template-columns: 7.5rem minmax(0, 1fr) minmax(5rem, 8rem) auto;
+	align-items: center;
+	gap: var(--wp--preset--spacing--30, 1rem);
+	padding: var(--wp--preset--spacing--30, 1rem);
+	border: 1px solid currentColor;
+	border-color: color-mix(in srgb, currentColor 35%, transparent);
+	border-radius: 4px;
+	color: inherit;
+	font-family: inherit;
+	font-size: 1rem;
+	line-height: 1.5;
+}
+
+.siff-schedule-row > * {
+	min-width: 0;
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+.siff-schedule-row h3 {
+	margin: 0;
+	font-family: var(--wp--preset--font-family--montserrat, inherit);
+	font-size: 1.125rem;
+	line-height: 1.4;
+}
+
+.siff-schedule-row__type {
+	margin: 0.25rem 0 0;
+	font-size: 0.875rem;
+}
+
+.siff-schedule-row__date {
+	display: block;
+	font-size: 0.75rem;
+}
+
+.siff-schedule-row .siff-schedule-row__view {
+	min-height: 44px;
+	padding: 0.625rem 0.875rem;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	background: var(--wp--preset--color--custom-accents);
+	color: var(--wp--preset--color--custom-background);
+	font-family: var(--wp--preset--font-family--montserrat, inherit);
+	font-size: 0.875rem;
+	font-weight: 600;
+	white-space: nowrap;
+	cursor: pointer;
+}
+
+.siff-schedule-row .siff-schedule-row__view:hover {
+	text-decoration: underline;
+}
+
+.siff-schedule-row .siff-schedule-row__view:focus-visible,
+.siff-schedule-page a[href="#friday"]:focus-visible,
+.siff-schedule-page a[href="#saturday"]:focus-visible,
+.siff-schedule-page a[href="#sunday"]:focus-visible {
+	outline: 3px solid currentColor;
+	outline-offset: 4px;
+}
+
+/* A light outline stays visible outside the accent button on the dark days. */
+.siff-schedule-row .siff-schedule-row__view:focus-visible {
+	outline-color: var(--wp--preset--color--custom-text);
+	box-shadow: 0 0 0 2px var(--wp--preset--color--custom-background);
+}
+
+@media (max-width: 760px) {
+	.siff-schedule-row {
+		grid-template-columns: minmax(0, 1fr) auto;
+	}
+
+	.siff-schedule-row__time,
+	.siff-schedule-row__details {
+		grid-column: 1 / -1;
+	}
+
+	/*
+	 * Temporary Schedule-only accommodation: the shared two-column modal clipped
+	 * titles and overflowed at phone widths. Use one column, less padding and a
+	 * shorter image here; desktop layout, REST loading and focus logic are unchanged.
+	 * TODO (coordinate with Johnny): move an agreed mobile fix into event-modal.css,
+	 * verify Events and other modal consumers, then remove these local overrides.
+	 * Until then, other pages retain Johnny's existing modal presentation.
+	 */
+	.siff-schedule-page #siff-event-modal {
+		padding: 3.5rem 1rem 1rem;
+	}
+
+	.siff-schedule-page #siff-event-modal .siff-modal-layout {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.siff-schedule-page #siff-event-modal .siff-modal-image {
+		height: auto;
+		max-height: 16rem;
+	}
+
+	.siff-schedule-page #siff-modal-image {
+		max-height: 16rem;
+	}
+
+	.siff-schedule-page #siff-modal-title,
+	.siff-schedule-page #siff-modal-meta {
+		overflow-wrap: anywhere;
+	}
+}

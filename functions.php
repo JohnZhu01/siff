@@ -1,4 +1,7 @@
 <?php
+// Schedule Query Loops and the reusable event row.
+require_once get_theme_file_path( 'inc/schedule.php' );
+
 // Event modal.
 function siff_render_event_modal() {
     ?>
