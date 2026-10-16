@@ -1,4 +1,4 @@
-<!-- wp:template-part {"slug":"header","area":"header"} /-->
+<!-- wp:template-part {"slug":"header","theme":"siff-theme","area":"header"} /-->
 
 <!-- wp:group {"tagName":"main","layout":{"inherit":true,"type":"constrained"}} -->
 <main class="wp-block-group"><!-- wp:heading {"level":1} -->
@@ -9,7 +9,7 @@
 <p>June 11–13, 2027 · Gibsons, BC<br>Choose a festival pass, join us for a day, or book an individual screening.<br>Prices in CAD. Taxes and fees calculated at checkout.<br></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:woocommerce/product-collection {"queryId":1,"query":{"perPage":3,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{"product_cat":[65]},"isProductCollectionBlock":true,"featured":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[],"filterable":false,"relatedBy":{"categories":true,"tags":true}},"tagName":"div","displayLayout":{"type":"flex","columns":3,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/by-category","hideControls":["inherit","hand-picked","filterable"],"queryContextIncludes":["collection"]} -->
+<!-- wp:woocommerce/product-collection {"queryId":0,"query":{"perPage":3,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"price","search":"","exclude":[],"inherit":false,"taxQuery":{"product_cat":[65]},"isProductCollectionBlock":true,"featured":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[],"filterable":false,"relatedBy":{"categories":true,"tags":true}},"tagName":"div","displayLayout":{"type":"flex","columns":3,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/by-category","hideControls":["inherit","hand-picked","filterable"],"queryContextIncludes":["collection"],"layout":{"type":"default"}} -->
 <div class="wp-block-woocommerce-product-collection"><!-- wp:heading {"style":{"spacing":{"margin":{"bottom":"1rem"}}}} -->
 <h2 class="wp-block-heading" style="margin-bottom:1rem">Festival passes</h2>
 <!-- /wp:heading -->
@@ -19,17 +19,17 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:woocommerce/product-template -->
-<!-- wp:post-title {"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+<!-- wp:post-title {"level":3,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
 
 <!-- wp:woocommerce/product-summary {"isDescendentOfQueryLoop":true,"showDescriptionIfEmpty":true} /-->
 
 <!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small"} /-->
 
-<!-- wp:woocommerce/product-button {"textAlign":"center","isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
+<!-- wp:woocommerce/product-button {"textAlign":"center","width":100,"isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
 <!-- /wp:woocommerce/product-template --></div>
 <!-- /wp:woocommerce/product-collection -->
 
-<!-- wp:woocommerce/product-collection {"queryId":2,"query":{"perPage":2,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{"product_cat":[66]},"isProductCollectionBlock":true,"featured":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[],"filterable":false,"relatedBy":{"categories":true,"tags":true}},"tagName":"div","displayLayout":{"type":"flex","columns":2,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/by-category","hideControls":["inherit","hand-picked","filterable"],"queryContextIncludes":["collection"]} -->
+<!-- wp:woocommerce/product-collection {"queryId":1,"query":{"perPage":2,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{"product_cat":[66]},"isProductCollectionBlock":true,"featured":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[],"filterable":false,"relatedBy":{"categories":true,"tags":true}},"tagName":"div","displayLayout":{"type":"flex","columns":2,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/by-category","hideControls":["inherit","hand-picked","filterable"],"queryContextIncludes":["collection"],"layout":{"type":"default"}} -->
 <div class="wp-block-woocommerce-product-collection"><!-- wp:heading {"style":{"spacing":{"margin":{"bottom":"1rem"}}}} -->
 <h2 class="wp-block-heading" style="margin-bottom:1rem">Day passes</h2>
 <!-- /wp:heading -->
@@ -38,18 +38,20 @@
 <p>Saturday and Sunday passes include that day’s films and events. For Friday’s opening film, choose a $15 single ticket below.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:woocommerce/product-template -->
-<!-- wp:post-title {"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+<!-- wp:woocommerce/product-template {"layout":{}} -->
+<!-- wp:post-title {"level":3,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
 
 <!-- wp:woocommerce/product-summary {"isDescendentOfQueryLoop":true,"showDescriptionIfEmpty":true} /-->
 
 <!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small"} /-->
 
-<!-- wp:woocommerce/product-button {"textAlign":"center","isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
+<!-- wp:woocommerce/product-button {"textAlign":"center","width":100,"isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
 <!-- /wp:woocommerce/product-template --></div>
 <!-- /wp:woocommerce/product-collection -->
 
-<!-- wp:woocommerce/product-collection {"queryId":3,"query":{"perPage":2,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{"product_cat":[67]},"isProductCollectionBlock":true,"featured":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[],"filterable":false,"relatedBy":{"categories":true,"tags":true}},"tagName":"div","displayLayout":{"type":"flex","columns":2,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/by-category","hideControls":["inherit","hand-picked","filterable"],"queryContextIncludes":["collection"]} -->
+<!-- wp:columns {"verticalAlignment":null} -->
+<div class="wp-block-columns"><!-- wp:column {"width":"50%","style":{"spacing":{"blockGap":"0"}}} -->
+<div class="wp-block-column" style="flex-basis:50%"><!-- wp:woocommerce/product-collection {"queryId":2,"query":{"perPage":1,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{"product_cat":[67]},"isProductCollectionBlock":true,"featured":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[],"filterable":false,"relatedBy":{"categories":true,"tags":true}},"tagName":"div","displayLayout":{"type":"flex","columns":1,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/by-category","hideControls":["inherit","hand-picked","filterable"],"queryContextIncludes":["collection"]} -->
 <div class="wp-block-woocommerce-product-collection"><!-- wp:heading {"style":{"spacing":{"margin":{"bottom":"1rem"}}}} -->
 <h2 class="wp-block-heading" style="margin-bottom:1rem">Single screening tickets</h2>
 <!-- /wp:heading -->
@@ -59,15 +61,109 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:woocommerce/product-template -->
-<!-- wp:post-title {"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+<!-- wp:post-title {"level":3,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
 
 <!-- wp:woocommerce/product-summary {"isDescendentOfQueryLoop":true,"showDescriptionIfEmpty":true} /-->
 
 <!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small"} /-->
 
-<!-- wp:woocommerce/product-button {"textAlign":"center","isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
+<!-- wp:woocommerce/product-button {"textAlign":"center","width":100,"isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
 <!-- /wp:woocommerce/product-template --></div>
-<!-- /wp:woocommerce/product-collection --></main>
+<!-- /wp:woocommerce/product-collection --></div>
+<!-- /wp:column -->
+
+<!-- wp:column {"verticalAlignment":"top","width":"50%","style":{"spacing":{"padding":{"top":"var:preset|spacing|30"}}},"layout":{"type":"default"}} -->
+<div class="wp-block-column is-vertically-aligned-top" style="padding-top:var(--wp--preset--spacing--30);flex-basis:50%"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">One ticket. One screening.</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Your $15 ticket covers either a feature film or an entire shorts programme.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Browse the schedule for film and venue details.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="http://siff.local/schedule/" data-type="page" data-id="230">View Schedule</a></p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:column --></div>
+<!-- /wp:columns -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Ticket information</h2>
+<!-- /wp:heading -->
+
+<!-- wp:columns {"verticalAlignment":null} -->
+<div class="wp-block-columns"><!-- wp:column -->
+<div class="wp-block-column"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Admission</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Each ticket or pass admits one person. Friday’s reception and guest introduction are open to festival attendees at no extra charge. Admission is subject to capacity.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Ticket refund &amp; cancellation policy</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:column -->
+
+<!-- wp:column {"verticalAlignment":"top"} -->
+<div class="wp-block-column is-vertically-aligned-top"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Your Tickets</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Tickets are emailed after payment. Have your ticket ready when you arrive.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"style":{"typography":{"textAlign":"left"}}} -->
+<p class="has-text-align-left"><a href="http://siff.local/plan-your-visit/" data-type="page" data-id="232">Venues &amp; accessibility</a></p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">VIP Extras</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Guest meet-and-greet: exclusive to VIP passholders at Friday’s reception.<br>Cup refills and popcorn: participating festival concessions.<br>Priority seats are released shortly before each screening.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:column --></div>
+<!-- /wp:columns -->
+
+<!-- wp:group {"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"default"}} -->
+<div class="wp-block-group"><!-- wp:image {"id":340,"sizeSlug":"full","linkDestination":"none","isDecorative":true} -->
+<figure class="wp-block-image size-full"><img src="https://siff.bcitwebdeveloper.ca/wp-content/uploads/2026/10/siff-ocean-charcoal-top.webp" alt="" class="wp-image-340" role="none"/></figure>
+<!-- /wp:image -->
+
+<!-- wp:group {"style":{"color":{"background":"#202428"},"elements":{"link":{"color":{"text":"var:preset|color|custom-text"}}},"spacing":{"padding":{"top":"3rem","bottom":"3rem","left":"var:preset|spacing|60","right":"var:preset|spacing|60"},"blockGap":"var:preset|spacing|50"}},"textColor":"custom-text","layout":{"type":"constrained"}} -->
+<div class="wp-block-group has-custom-text-color has-text-color has-background has-link-color" style="background-color:#202428;padding-top:3rem;padding-right:var(--wp--preset--spacing--60);padding-bottom:3rem;padding-left:var(--wp--preset--spacing--60)"><!-- wp:heading -->
+<h2 class="wp-block-heading">Plan your festival weekend</h2>
+<!-- /wp:heading -->
+
+<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->
+<div class="wp-block-group"><!-- wp:paragraph -->
+<p>Explore the films, workshops and panels before choosing your pass</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:buttons {"layout":{"type":"flex","justifyContent":"right"}} -->
+<div class="wp-block-buttons"><!-- wp:button -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="/schedule/">View Schedule</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons --></div>
+<!-- /wp:group --></div>
 <!-- /wp:group -->
 
-<!-- wp:template-part {"slug":"footer"} /-->
+<!-- wp:image {"id":341,"sizeSlug":"full","linkDestination":"none","isDecorative":true} -->
+<figure class="wp-block-image size-full"><img src="https://siff.bcitwebdeveloper.ca/wp-content/uploads/2026/10/siff-ocean-charcoal-bottom.webp" alt="" class="wp-image-341" role="none"/></figure>
+<!-- /wp:image --></div>
+<!-- /wp:group -->
+
+<!-- wp:block {"ref":398} /--></main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","theme":"siff-theme"} /-->
