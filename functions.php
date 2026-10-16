@@ -1,4 +1,41 @@
 <?php
+// Schedule Query Loops and the reusable event row.
+require_once get_theme_file_path( 'inc/schedule.php' );
+
+// Give role paragraphs the current post ID from their Query Loop.
+add_filter('register_block_type_args', function ($args, $name) {
+    if ($name === 'core/paragraph') {
+        $args['uses_context'] = array_unique(array_merge(
+            $args['uses_context'] ?? array(),
+            array('postId')
+        ));
+    }
+
+    return $args;
+}, 10, 2);
+
+function siff_render_guest_role($html, $parsed_block, $block) {
+    $classes = preg_split('/\s+/', trim($parsed_block['attrs']['className'] ?? ''));
+    $guest_id = absint($block->context['postId'] ?? 0);
+
+    if (!in_array('siff-guest-role', $classes, true)
+        || !$guest_id || get_post_type($guest_id) !== 'guest'
+        || !function_exists('get_field')) {
+        return $html;
+    }
+
+    $role = get_field('role', $guest_id);
+    if (!$role) {
+        return '';
+    }
+
+    return preg_replace_callback('/(<p\b[^>]*>).*?(<\/p>)/s', function ($match) use ($role) {
+        return $match[1] . esc_html($role) . $match[2];
+    }, $html, 1);
+}
+
+add_filter('render_block_core/paragraph', 'siff_render_guest_role', 10, 3);
+
 // Event modal.
 function siff_render_event_modal() {
     ?>
@@ -75,30 +112,46 @@ function siff_localize_event_modal()
     }
 
     wp_localize_script('siff-event-modal', 'siffModal', array(
-        'ajaxUrl' => admin_url('admin-ajax.php'),
+        'restUrl' => rest_url('siff/v1/events/'),
         'events' => $events,
     ));
 }
 
 add_action('wp_enqueue_scripts', 'siff_localize_event_modal', 20);
 
-// Event details for the modal.
-add_action('wp_ajax_siff_event_details', 'siff_get_event_details');
-add_action('wp_ajax_nopriv_siff_event_details', 'siff_get_event_details');
+function siff_register_event_routes()
+{
+    register_rest_route('siff/v1', '/events/(?P<id>[1-9]\d*)', array(
+        'methods' => WP_REST_Server::READABLE,
+        'callback' => 'siff_rest_event_details',
+        'permission_callback' => '__return_true',
+    ));
+}
 
-function siff_get_event_details() {
+add_action('rest_api_init', 'siff_register_event_routes');
+
+function siff_rest_event_details($request)
+{
     if (!function_exists('get_field')) {
-        wp_send_json_error('Event fields are unavailable.', 503);
+        return new WP_Error(
+            'siff_fields_unavailable',
+            'Event fields are unavailable.',
+            array('status' => 503)
+        );
     }
 
-    $event_id = absint($_GET['event_id'] ?? 0);
+    $event_id = absint($request['id']);
     $details = siff_event_details_data($event_id);
 
     if (!$details) {
-        wp_send_json_error('Event not found.', 404);
+        return new WP_Error(
+            'siff_event_not_found',
+            'Event not found.',
+            array('status' => 404)
+        );
     }
 
-    wp_send_json_success($details);
+    return rest_ensure_response($details);
 }
 
 function siff_event_details_data($event_id) {
@@ -302,6 +355,40 @@ function siff_enqueue_leaflet_assets(){
 }
 add_action( 'wp_enqueue_scripts', 'siff_enqueue_leaflet_assets' );
 
+// Keep the Events patterns available after file-based deployments.
+function siff_register_events_grid_pattern() {
+    $registry = WP_Block_Patterns_Registry::get_instance();
+    $patterns = array(
+        'special-guests' => __('Special Guests', 'siff-theme'),
+        'events-grid' => __('Events Grid', 'siff-theme'),
+        'events-page' => __('Events Page', 'siff-theme'),
+    );
+
+    foreach ($patterns as $name => $title) {
+        $slug = 'siff-theme/' . $name;
+        if ($registry->is_registered($slug)) {
+            continue;
+        }
+
+        $file = get_theme_file_path('/patterns/' . $name . '.php');
+        if (!is_readable($file)) {
+            continue;
+        }
+
+        ob_start();
+        include $file;
+        $content = ob_get_clean();
+
+        register_block_pattern($slug, array(
+            'title' => $title,
+            'categories' => array('featured'),
+            'inserter' => true,
+            'content' => $content,
+        ));
+    }
+}
+
+add_action('init', 'siff_register_events_grid_pattern', 20);
 
 // Overwrite the add to cart button in the shop page
 add_filter( 'woocommerce_product_add_to_cart_url', 'custom_box_office_add_to_cart_url', 10, 2 );
