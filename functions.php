@@ -228,20 +228,17 @@ function siff_render_vendor_card( $attributes, $content, $block ) {
 	return ob_get_clean();
 }
 
-// Load featured vendor styles in the editor and front end.
-function siff_register_featured_vendors_style() {
-	wp_enqueue_block_style(
-		'core/group',
-		array(
-			'handle' => 'siff-featured-vendors',
-			'src'    => get_theme_file_uri( 'assets/css/featured-vendors.css' ),
-			'path'   => get_theme_file_path( 'assets/css/featured-vendors.css' ),
-			'ver'    => filemtime( get_theme_file_path( 'assets/css/featured-vendors.css' ) ),
-		)
+// Load the theme stylesheet in front-end and block editor content.
+function siff_enqueue_theme_styles() {
+	wp_enqueue_style(
+		'siff-theme',
+		get_stylesheet_uri(),
+		array(),
+		filemtime( get_stylesheet_directory() . '/style.css' )
 	);
 }
 
-add_action( 'init', 'siff_register_featured_vendors_style' );
+add_action( 'enqueue_block_assets', 'siff_enqueue_theme_styles' );
 
 // Load type filtering on the Vendors page.
 function siff_enqueue_vendor_directory_assets() {
