@@ -16,8 +16,8 @@ if (!defined('ABSPATH')) {
 
 <!-- wp:post-title /-->
 
-<!-- wp:paragraph {"className":"siff-guest-role"} -->
-<p class="siff-guest-role">Role</p>
+<!-- wp:paragraph {"className":"siff-guest-role","metadata":{"bindings":{"content":{"source":"acf/field","args":{"key":"role"}}}}} -->
+<p class="siff-guest-role"></p>
 <!-- /wp:paragraph -->
 <!-- /wp:post-template -->
 

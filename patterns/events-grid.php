@@ -39,7 +39,7 @@ if (!defined('ABSPATH')) {
 
 <!-- wp:post-featured-image {"aspectRatio":"16/9","scale":"contain","sizeSlug":"large"} /-->
 
-<!-- wp:post-date {"metadata":{"bindings":{"datetime":{"source":"core/post-data","args":{"field":"date"}}}},"className":"siff-event-date"} /-->
+<!-- wp:siff/event-date /-->
 
 <!-- wp:post-terms {"term":"siff-event-types"} /--></div>
 <!-- /wp:group -->
