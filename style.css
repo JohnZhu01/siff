@@ -20,7 +20,7 @@ Update URI: false
     border: 1px solid #ccc;
 }
 
-/* Featured vendors */
+/* Legacy featured-vendor pattern styles */
 .siff-featured-vendors {
     padding: var(--wp--preset--spacing--50, 2rem) var(--wp--preset--spacing--30, 1rem);
 }
