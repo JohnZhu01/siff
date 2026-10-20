@@ -17,13 +17,13 @@ function siff_render_event_modal() {
         </button>
 
         <div class="siff-modal-layout">
+            <h2 id="siff-modal-title">Event details</h2>
+
             <div class="siff-modal-image">
                 <img id="siff-modal-image" alt="" hidden>
             </div>
 
             <div class="siff-modal-info">
-                <h2 id="siff-modal-title">Event details</h2>
-
                 <div id="siff-modal-meta"></div>
 
                 <p id="siff-modal-person" hidden></p>
