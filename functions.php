@@ -43,6 +43,23 @@ function siff_enqueue_theme_styles() {
 
 add_action( 'enqueue_block_assets', 'siff_enqueue_theme_styles' );
 
+// Load the policy navigation on the policy page.
+function siff_enqueue_policy_navigation() {
+    if (!is_page('privacy-policy')) {
+        return;
+    }
+
+    wp_enqueue_script(
+        'siff-policy-navigation',
+        get_theme_file_uri('/assets/js/policy-navigation.js'),
+        array(),
+        filemtime(get_theme_file_path('/assets/js/policy-navigation.js')),
+        true
+    );
+}
+
+add_action('wp_enqueue_scripts', 'siff_enqueue_policy_navigation');
+
 // Load type filtering on the Vendors page.
 function siff_enqueue_vendor_directory_assets() {
 	if ( ! is_page( 'vendors' ) ) {
