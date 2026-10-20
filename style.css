@@ -74,3 +74,57 @@ Update URI: false
         gap: var(--wp--preset--spacing--30, 1rem);
     }
 }
+
+/* Policy section navigation */
+.siff-policy-nav {
+    position: sticky;
+    top: var(--wp-admin--admin-bar--height, 0px);
+    z-index: 20;
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border-bottom: 1px solid #ddd;
+    background: #fff;
+}
+
+.siff-policy-nav > p {
+    flex: 0 1 auto;
+    margin: 0;
+}
+
+.siff-policy-nav a {
+    display: block;
+    padding: 0.65rem 1rem;
+    border-radius: 999px;
+    color: #222;
+    font-weight: 600;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+    transition: background 200ms ease, color 200ms ease;
+}
+
+.siff-policy-nav a:hover {
+    background: #eee;
+}
+
+.siff-policy-nav a.is-active {
+    background: #222;
+    color: #fff;
+}
+
+.siff-policy-nav a:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .siff-policy-nav a {
+        transition: none;
+    }
+}
+
+body.page-id-3 .wp-block-heading[id] {
+    scroll-margin-top: calc(var(--wp-admin--admin-bar--height, 0px) + 6rem);
+}

@@ -39,6 +39,16 @@ function siff_enqueue_theme_styles() {
         array(),
         filemtime(get_theme_file_path('/style.css'))
     );
+
+    if (is_page('privacy-policy')) {
+        wp_enqueue_script(
+            'siff-policy-navigation',
+            get_theme_file_uri('/assets/js/policy-navigation.js'),
+            array(),
+            filemtime(get_theme_file_path('/assets/js/policy-navigation.js')),
+            true
+        );
+    }
 }
 
 add_action('wp_enqueue_scripts', 'siff_enqueue_theme_styles');
