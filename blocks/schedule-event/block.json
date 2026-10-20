@@ -1,0 +1,13 @@
+{
+  "apiVersion": 3,
+  "name": "siff/schedule-event",
+  "title": "SIFF Schedule Event",
+  "category": "widgets",
+  "icon": "calendar-alt",
+  "description": "The current event's scheduled start, title, type, venue and shared details modal.",
+  "textdomain": "siff-theme",
+  "usesContext": ["postId", "postType"],
+  "ancestor": ["core/post-template"],
+  "supports": {"html": false, "autoRegister": true},
+  "style": "siff-schedule"
+}

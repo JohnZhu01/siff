@@ -1,6 +1,7 @@
 <?php
 
 require_once get_theme_file_path('/inc/event-modal.php');
+require_once get_theme_file_path('/inc/schedule.php');
 
 // Enable ACF field bindings in the editor.
 add_filter('acf/settings/enable_datastore', '__return_true');
