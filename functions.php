@@ -31,20 +31,25 @@ function siff_render_vendor_card( $attributes, $content, $block ) {
 	return ob_get_clean();
 }
 
-// Load featured vendor styles in the editor and front end.
-function siff_register_featured_vendors_style() {
-	wp_enqueue_block_style(
-		'core/group',
-		array(
-			'handle' => 'siff-featured-vendors',
-			'src'    => get_theme_file_uri( 'assets/css/featured-vendors.css' ),
-			'path'   => get_theme_file_path( 'assets/css/featured-vendors.css' ),
-			'ver'    => filemtime( get_theme_file_path( 'assets/css/featured-vendors.css' ) ),
-		)
-	);
+// Load the main stylesheet on the site.
+function siff_enqueue_theme_styles() {
+    wp_enqueue_style(
+        'siff-theme',
+        get_theme_file_uri('/style.css'),
+        array(),
+        filemtime(get_theme_file_path('/style.css'))
+    );
 }
 
-add_action( 'init', 'siff_register_featured_vendors_style' );
+add_action('wp_enqueue_scripts', 'siff_enqueue_theme_styles');
+
+// Load the same stylesheet inside the editor.
+function siff_setup_editor_styles() {
+    add_theme_support('editor-styles');
+    add_editor_style('style.css');
+}
+
+add_action('after_setup_theme', 'siff_setup_editor_styles');
 
 // Load type filtering on the Vendors page.
 function siff_enqueue_vendor_directory_assets() {

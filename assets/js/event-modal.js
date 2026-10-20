@@ -112,7 +112,27 @@ function initEventModal() {
         if (startsCredit) {
           paragraph.classList.add("siff-modal-credit-start");
         }
-        paragraph.textContent = label ? `${label}: ${value}` : value;
+        if (label) {
+          const labelText = document.createElement("strong");
+          labelText.textContent = label + ":";
+          const detailText = document.createElement("span");
+          const dateParts = label === "Date and time"
+            ? String(value).match(/^(\d{1,2}\/\d{1,2}\/\d{4}|\d{4}-\d{2}-\d{2})[,\sT]*(\d{1,2}:\d{2}(?::\d{2})?\s*(?:am|pm)?)$/i)
+            : null;
+
+          if (dateParts) {
+            detailText.append(
+              dateParts[1],
+              document.createElement("br"),
+              dateParts[2]
+            );
+          } else {
+            detailText.textContent = value;
+          }
+          paragraph.append(labelText, " ", detailText);
+        } else {
+          paragraph.textContent = value;
+        }
         container.append(paragraph);
       }
 
