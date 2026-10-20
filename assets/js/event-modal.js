@@ -1,3 +1,13 @@
+function showEventLoader(container){
+  container.innerHTML =`
+        <div role="status">
+            <div class="siff-modal-loader" aria-hidden="true"></div>
+            <span class="screen-reader-text">Loading event details…</span>
+        </div>
+    `;
+}
+
+
 function initEventModal() {
   const modal = document.querySelector("#siff-event-modal");
   const closeButton = document.querySelector("#siff-modal-close");
@@ -42,7 +52,7 @@ function initEventModal() {
     const minimumLoadingTime = 500;
     title.textContent = "Event details";
     if (descriptionTitle) descriptionTitle.textContent = "Description";
-    content.textContent = "Loading…";
+   showEventLoader(content);
     meta.replaceChildren();
     image.hidden = true;
     image.removeAttribute("src");
@@ -128,6 +138,19 @@ function initEventModal() {
   });
 
   closeButton.addEventListener("click", () => modal.close());
+  modal.addEventListener("click", (event) => {
+    const bounds = modal.getBoundingClientRect();
+  
+    const clickedOutside =
+      event.clientX < bounds.left ||
+      event.clientX > bounds.right ||
+      event.clientY < bounds.top ||
+      event.clientY > bounds.bottom;
+  
+    if (event.target === modal && clickedOutside) {
+      modal.close();
+    }
+  });
   modal.addEventListener("close", () => {
     activeRequest?.abort();
     activeTrigger?.focus();

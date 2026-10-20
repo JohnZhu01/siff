@@ -1,11 +1,12 @@
 #siff-event-modal {
   box-sizing: border-box;
-  width: min(48rem, calc(100% - 2rem));
+  width: min(56rem, calc(100% - 2rem));
   height: min(44rem, 85vh);
   max-height: 85vh;
   padding: 3.5rem 2rem 2rem;
   border: none;
-  border-radius: 1rem;
+  border-radius: 1.25rem;
+  box-shadow: 0 24px 80px rgb(0 0 0 / 25%);
   background: #fff;
   color: #222;
   overflow-y: auto;
@@ -13,7 +14,8 @@
 }
 
 #siff-event-modal::backdrop {
-  background: rgb(20 20 20 / 75%);
+  background: rgb(0 0 0 / 65%);
+  backdrop-filter: blur(4px);
 }
 
 #siff-modal-close {
@@ -21,13 +23,22 @@
   top: 0.75rem;
   right: 0.75rem;
   line-height: 1;
-  margin-left: auto;
-  padding: 0.25rem 0.75rem;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
   border: none;
-  background: transparent;
+  border-radius: 50%;
+  background: #f2f2f2;
   color: inherit;
   font-size: 2rem;
   cursor: pointer;
+  transition: background 150ms ease;
+}
+
+#siff-modal-close:hover {
+  background: #dedede;
 }
 
 #siff-modal-close:focus-visible {
@@ -36,25 +47,28 @@
 }
 
 #siff-modal-title {
-  font-size: 2rem;
-  line-height: 1.2;
-  margin-top: 0;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  line-height: 1.15;
+  margin: 0 0 1.25rem;
 }
 
 #siff-modal-content p {
-  line-height: 1.6;
+  max-width: 65ch;
+  margin: 0.75rem 0 0;
+  line-height: 1.75;
   overflow-wrap: anywhere;
 }
 
 .siff-modal-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-  gap: 1.25rem;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 2rem;
 }
 
 .siff-modal-image {
-  height: 24rem;
-  background: transparent;
+  height: 22rem;
+  border-radius: 0.75rem;
+  background: #f4f4f4;
   overflow: hidden;
 }
 
@@ -71,7 +85,11 @@
 }
 
 #siff-modal-meta p {
-  margin: 1rem 0;
+  margin: 0;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e5e5e5;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 #siff-modal-person {
@@ -83,6 +101,8 @@
 
 .siff-modal-description {
   grid-column: 1 / -1;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e5e5;
 }
 
 .siff-modal-description h3 {
@@ -252,4 +272,64 @@ form.siff-event-search {
 
 .siff-guests-less-controls[hidden] {
   display: none !important;
+}
+/* Loader component -> css-loaders.com/square*/
+.siff-modal-loader {
+  width: 55px;
+  aspect-ratio: 1;
+  margin: 1rem auto;
+  --g1: conic-gradient(from 90deg at 3px 3px, #0000 90deg, currentColor 0);
+  --g2: conic-gradient(from -90deg at 22px 22px, #0000 90deg, currentColor 0);
+  background: var(--g1), var(--g1), var(--g1),
+              var(--g2), var(--g2), var(--g2);
+  background-size: 25px 25px;
+  background-repeat: no-repeat;
+  animation: siff-loader 1.5s infinite;
+}
+
+@keyframes siff-loader {
+  0%   { background-position: 0 0, 0 100%, 100% 100%; }
+  25%  { background-position: 100% 0, 0 100%, 100% 100%; }
+  50%  { background-position: 100% 0, 0 0, 100% 100%; }
+  75%  { background-position: 100% 0, 0 0, 0 100%; }
+  100% { background-position: 100% 100%, 0 0, 0 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .siff-modal-loader {
+    animation: none;
+  }
+}
+/* Show only the loader while event details are loading. */
+#siff-event-modal:has(.siff-modal-loader) .siff-modal-image,
+#siff-event-modal:has(.siff-modal-loader) .siff-modal-info,
+#siff-event-modal:has(.siff-modal-loader) #siff-modal-description-title {
+  display: none;
+}
+
+#siff-event-modal:has(.siff-modal-loader) .siff-modal-layout {
+  height: 100%;
+  grid-template-columns: 1fr;
+  align-items: center;
+}
+
+#siff-event-modal:has(.siff-modal-loader) .siff-modal-description {
+  padding: 0;
+  border: 0;
+}
+
+@media (max-width: 600px) {
+  #siff-event-modal {
+    padding: 3.5rem 1.25rem 1.25rem;
+    border-radius: 0.75rem;
+  }
+
+  .siff-modal-layout {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .siff-modal-image {
+    height: 15rem;
+  }
 }
