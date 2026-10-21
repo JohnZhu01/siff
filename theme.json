@@ -376,6 +376,14 @@
 				}
 			}
 		},
+		"spacing": {
+			"padding": {
+				"bottom": "0px",
+				"left": "0px",
+				"right": "0px",
+				"top": "0px"
+			}
+		},
 		"typography": {
 			"fontFamily": "var(--wp--preset--font-family--merriweather-sans)",
 			"fontSize": "var(--wp--preset--font-size--medium)",
