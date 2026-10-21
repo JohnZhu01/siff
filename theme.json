@@ -386,6 +386,11 @@
 	},
 	"templateParts": [
 		{
+			"area": "uncategorized",
+			"name": "ticket-actions",
+			"title": "Buy Tickets and Cart"
+		},
+		{
 			"area": "header",
 			"name": "header"
 		},
