@@ -32,6 +32,38 @@
 			"wideSize": "85rem"
 		},
 		"spacing": {
+			"spacingSizes": [
+				{
+					"slug": "20",
+					"name": "XS",
+					"size": "0.5rem"
+				},
+				{
+					"slug": "30",
+					"name": "Small",
+					"size": "1rem"
+				},
+				{
+					"slug": "40",
+					"name": "Medium",
+					"size": "1.5rem"
+				},
+				{
+					"slug": "50",
+					"name": "Large",
+					"size": "2rem"
+				},
+				{
+					"slug": "60",
+					"name": "XL",
+					"size": "3rem"
+				},
+				{
+					"slug": "70",
+					"name": "Section",
+					"size": "clamp(3rem, 6vw, 5rem)"
+				}
+			],
 			"units": [
 				"%",
 				"px",
@@ -303,7 +335,33 @@
 					"slug": "merriweather-sans"
 				}
 			],
-			"fontSizes": []
+			"fontSizes": [
+				{
+					"slug": "small",
+					"name": "Small",
+					"size": "0.875rem"
+				},
+				{
+					"slug": "medium",
+					"name": "Medium",
+					"size": "1rem"
+				},
+				{
+					"slug": "large",
+					"name": "Large",
+					"size": "1.5rem"
+				},
+				{
+					"slug": "x-large",
+					"name": "Extra Large",
+					"size": "2rem"
+				},
+				{
+					"slug": "xx-large",
+					"name": "Display",
+					"size": "clamp(2rem, 1.5rem + 2vw, 3rem)"
+				}
+			]
 		},
 		"useRootPaddingAwareAlignments": true
 	},
@@ -313,6 +371,17 @@
 			"text": "var:preset|color|custom-text"
 		},
 		"blocks": {
+			"core/separator": {
+				"color": {
+					"text": "var:preset|color|custom-deep-blue"
+				},
+				"spacing": {
+					"margin": {
+						"top": "var:preset|spacing|50",
+						"bottom": "var:preset|spacing|50"
+					}
+				}
+			},
 			"core/button": {
 				"border": {
 					"radius": {
@@ -330,6 +399,7 @@
 						"top": "var(--wp--preset--spacing--30)"
 					}
 				},
+				
 				"typography": {
 					"fontSize": "1rem"
 				}
@@ -337,6 +407,9 @@
 		},
 		"elements": {
 			"heading": {
+				"color": {
+					"text": "var:preset|color|custom-accents"
+				},
 				"typography": {
 					"fontFamily": "var:preset|font-family|montserrat",
 					"fontWeight": "700",
@@ -344,6 +417,14 @@
 				}
 			},
 			"link": {
+				":focus-visible": {
+					"outline": {
+						"color": "var:preset|color|custom-accents",
+						"offset": "3px",
+						"style": "solid",
+						"width": "2px"
+					}
+				},
 				"color": {
 					"text": "var:preset|color|custom-accents"
 				},
@@ -415,6 +496,7 @@
 			}
 		},
 		"spacing": {
+			"blockGap": "var:preset|spacing|40",
 			"padding": {
 				"bottom": "0px",
 				"left": "0px",
