@@ -12,13 +12,14 @@ function siff_render_event_modal() {
 
     ?>
     <dialog id="siff-event-modal" aria-labelledby="siff-modal-title">
-        <button type="button" id="siff-modal-close" aria-label="Close event details">
-            &times;
-        </button>
+        <header class="siff-modal-header">
+            <h2 id="siff-modal-title">Event details</h2>
+            <button type="button" id="siff-modal-close" aria-label="Close event details">
+                &times;
+            </button>
+        </header>
 
         <div class="siff-modal-layout">
-            <h2 id="siff-modal-title">Event details</h2>
-
             <div class="siff-modal-image">
                 <img id="siff-modal-image" alt="" hidden>
             </div>
