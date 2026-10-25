@@ -1,5 +1,6 @@
-function showEventLoader(container){
-  container.innerHTML =`
+// Loading spinner.
+function showEventLoader(container) {
+  container.innerHTML = `
         <div role="status">
             <div class="siff-modal-loader" aria-hidden="true"></div>
             <span class="screen-reader-text">Loading event details…</span>
@@ -7,7 +8,42 @@ function showEventLoader(container){
     `;
 }
 
+// Build detail rows.
+function addEventDetail(container, label, value, startsCredit = false) {
+  if (!value) return;
+  const paragraph = document.createElement("p");
 
+  if (startsCredit) {
+    paragraph.classList.add("siff-modal-credit-start");
+  }
+  if (label) {
+    const labelText = document.createElement("strong");
+    labelText.textContent = label + ":";
+    const detailText = document.createElement("span");
+    const dateParts =
+      label === "Date and time"
+        ? String(value).match(
+            /^(\d{1,2}\/\d{1,2}\/\d{4}|\d{4}-\d{2}-\d{2})[,\sT]*(\d{1,2}:\d{2}(?::\d{2})?\s*(?:am|pm)?)$/i,
+          )
+        : null;
+
+    if (dateParts) {
+      detailText.append(
+        dateParts[1],
+        document.createElement("br"),
+        dateParts[2],
+      );
+    } else {
+      detailText.textContent = value;
+    }
+    paragraph.append(labelText, " ", detailText);
+  } else {
+    paragraph.textContent = value;
+  }
+  container.append(paragraph);
+}
+
+// Event modal.
 function initEventModal() {
   const modal = document.querySelector("#siff-event-modal");
   const closeButton = document.querySelector("#siff-modal-close");
@@ -25,7 +61,7 @@ function initEventModal() {
   const eventCache = new Map(Object.entries(siffModal.events || {}));
 
   document.addEventListener("click", async (event) => {
-    // Leave links and controls inside the dialog alone.
+    // Ignore clicks inside the modal.
     if (modal.contains(event.target)) return;
 
     if (!(event.target instanceof Element)) return;
@@ -47,12 +83,13 @@ function initEventModal() {
     const request = new AbortController();
     activeRequest = request;
 
+    // Reset details before loading.
     const eventId = trigger.dataset.eventId;
     const loadingStarted = performance.now();
     const minimumLoadingTime = 500;
     title.textContent = "Event details";
     if (descriptionTitle) descriptionTitle.textContent = "Description";
-   showEventLoader(content);
+    showEventLoader(content);
     meta.replaceChildren();
     image.hidden = true;
     image.removeAttribute("src");
@@ -61,6 +98,7 @@ function initEventModal() {
     try {
       let details = eventCache.get(eventId);
 
+      // Fetch details not already cached.
       if (!details) {
         const url = new URL(encodeURIComponent(eventId), siffModal.restUrl);
 
@@ -100,55 +138,19 @@ function initEventModal() {
       }
       content.replaceChildren();
 
-      function addDetail(container, label, value) {
-        if (!value) return;
-        const paragraph = document.createElement("p");
-        const startsCredit =
-          label === "Instructor" ||
-          label === "Speaker" ||
-          label === "Filmmaker" ||
-          (label === "Director" && !details.filmmaker);
-
-        if (startsCredit) {
-          paragraph.classList.add("siff-modal-credit-start");
-        }
-        if (label) {
-          const labelText = document.createElement("strong");
-          labelText.textContent = label + ":";
-          const detailText = document.createElement("span");
-          const dateParts = label === "Date and time"
-            ? String(value).match(/^(\d{1,2}\/\d{1,2}\/\d{4}|\d{4}-\d{2}-\d{2})[,\sT]*(\d{1,2}:\d{2}(?::\d{2})?\s*(?:am|pm)?)$/i)
-            : null;
-
-          if (dateParts) {
-            detailText.append(
-              dateParts[1],
-              document.createElement("br"),
-              dateParts[2]
-            );
-          } else {
-            detailText.textContent = value;
-          }
-          paragraph.append(labelText, " ", detailText);
-        } else {
-          paragraph.textContent = value;
-        }
-        container.append(paragraph);
-      }
-
-      addDetail(content, "", details.description);
-      addDetail(meta, "Date and time", details.date);
-      addDetail(meta, "Venue", details.venue);
-      addDetail(meta, "Duration", details.duration);
+      addEventDetail(content, "", details.description);
+      addEventDetail(meta, "Date and time", details.date);
+      addEventDetail(meta, "Venue", details.venue);
+      addEventDetail(meta, "Duration", details.duration);
       if (types.includes("film")) {
-        addDetail(meta, "Filmmaker", details.filmmaker);
-        addDetail(meta, "Director", details.director);
+        addEventDetail(meta, "Filmmaker", details.filmmaker, true);
+        addEventDetail(meta, "Director", details.director, !details.filmmaker);
       } else if (types.includes("workshop")) {
-        addDetail(meta, "Instructor", details.instructor);
-        addDetail(meta, "Profession", details.instructor_profession);
+        addEventDetail(meta, "Instructor", details.instructor, true);
+        addEventDetail(meta, "Profession", details.instructor_profession);
       } else if (types.includes("panel")) {
-        addDetail(meta, "Speaker", details.speaker);
-        addDetail(meta, "Profession", details.speaker_profession);
+        addEventDetail(meta, "Speaker", details.speaker, true);
+        addEventDetail(meta, "Profession", details.speaker_profession);
       }
     } catch (error) {
       if (!request.signal.aborted) {
@@ -157,16 +159,17 @@ function initEventModal() {
     }
   });
 
+  // Close button and backdrop clicks.
   closeButton.addEventListener("click", () => modal.close());
   modal.addEventListener("click", (event) => {
     const bounds = modal.getBoundingClientRect();
-  
+
     const clickedOutside =
       event.clientX < bounds.left ||
       event.clientX > bounds.right ||
       event.clientY < bounds.top ||
       event.clientY > bounds.bottom;
-  
+
     if (event.target === modal && clickedOutside) {
       modal.close();
     }
@@ -177,132 +180,254 @@ function initEventModal() {
   });
 }
 
-initEventModal();
+// Event filters and search.
+function initEventFilters() {
+  document.querySelectorAll(".siff-event-filters").forEach((filters) => {
+    const query = filters.closest(".wp-block-query");
+    const grid = query?.querySelector(".wp-block-post-template");
+    if (!grid) return;
+    const searchForm = query.querySelector(".siff-event-search");
+    const searchInput = searchForm?.querySelector('input[type="search"]');
+    let activeType = "all";
 
-document.querySelectorAll(".siff-event-filters").forEach((filters) => {
-  const query = filters.closest(".wp-block-query");
-  const grid = query?.querySelector(".wp-block-post-template");
-  if (!grid) return;
-  const searchForm=query.querySelector(".siff-event-search");
-const searchInput = searchForm?.querySelector('input[type="search"]');
-  let activeType="all"
-
-  const cards = [...grid.children].filter((card) =>
-    card.classList.contains("wp-block-post"),
-  );
-
-  const types = ["all", "film", "workshop", "panel"];
-  const controls = [];
-
-  types.forEach((type) => {
-    const link = filters.querySelector(
-      `.siff-filter-${type} .wp-block-button__link`,
+    const cards = [...grid.children].filter((card) =>
+      card.classList.contains("wp-block-post"),
     );
-    if (!link) return;
 
-    // Use a real button for keyboard-accessible filtering.
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = link.className;
-    button.textContent = link.textContent;
-    link.replaceWith(button);
+    const types = ["all", "film", "workshop", "panel"];
+    const controls = [];
 
-    controls.push({ type, button });
-  });
-
-  const status = document.createElement("p");
-  status.setAttribute("role", "status");
-  grid.before(status);
-
-  function applyFilter(type) {
-    activeType = type;
-    const searchText = (searchInput?.value || "").trim().toLowerCase();
-    let count = 0;
-
-    cards.forEach((card) => {
-      const title = (
-        card.querySelector(".wp-block-post-title")?.textContent || ""
-      ).toLowerCase();
-
-      const matchesType =
-        type === "all" || card.classList.contains(`siff-event-types-${type}`);
-
-      const matches = matchesType && title.includes(searchText);
-
-      card.hidden = !matches;
-      if (matches) count++;
-    });
-
-    controls.forEach((control) => {
-      control.button.setAttribute(
-        "aria-pressed",
-        String(control.type === type),
+    types.forEach((type) => {
+      const link = filters.querySelector(
+        `.siff-filter-${type} .wp-block-button__link`,
       );
+      if (!link) return;
+
+      // Replace filter links with buttons.
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = link.className;
+      button.textContent = link.textContent;
+      link.replaceWith(button);
+
+      controls.push({ type, button });
     });
 
-    status.textContent = count
-      ? `${count} event${count === 1 ? "" : "s"} shown`
-      : "No matching events.";
-  }
+    // Results count and card wrapper.
+    const status = document.createElement("p");
+    status.setAttribute("role", "status");
+    status.className = "siff-event-results";
+    const resultsSection = document.createElement("div");
+    resultsSection.className = "siff-event-results-section";
+    grid.before(resultsSection);
+    resultsSection.append(status, grid);
 
-  controls.forEach(({ type, button }) => {
-    button.addEventListener("click", () => applyFilter(type));
-  });
-searchInput?.addEventListener("input", () => {
-  applyFilter(activeType);
-});
+    // Card animations.
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const cardAnimations = new Map();
 
-searchForm?.addEventListener("submit", (event) => {
-  event.preventDefault();
-  applyFilter(activeType);
-});
-  applyFilter("all");
-});
+    function clearCardAnimations() {
+      cardAnimations.forEach((animation) => animation.cancel());
+      cardAnimations.clear();
+    }
 
-document.querySelectorAll(".siff-guests").forEach((query) => {
-  const grid = query.querySelector(".wp-block-post-template");
-  const more = query.querySelector(".wp-load-more__button");
-  const pagination = more?.closest(".wp-block-buttons");
+    reducedMotion.addEventListener("change", clearCardAnimations);
 
-  if (!grid || !pagination) return;
+    // Match cards by category and search text.
+    function applyFilter(type, animate = false) {
+      clearCardAnimations();
+      activeType = type;
+      const searchText = (searchInput?.value || "").trim().toLowerCase();
+      let count = 0;
 
-  const originalCards = grid.innerHTML;
-  const originalPagination = pagination.cloneNode(true);
-  const initialCount = grid.children.length;
+      cards.forEach((card) => {
+        const title = (
+          card.querySelector(".wp-block-post-title")?.textContent || ""
+        ).toLowerCase();
 
-  const less = document.createElement("button");
-  less.type = "button";
-  less.className = more.className;
-  less.classList.remove("wp-load-more__button", "loading");
-  less.classList.add("siff-guests-less");
-  less.style.cssText = more.style.cssText;
-  less.textContent = "See less";
+        const matchesType =
+          type === "all" || card.classList.contains(`siff-event-types-${type}`);
 
-  const lessPagination = originalPagination.cloneNode(true);
-  lessPagination.classList.add("siff-guests-less-controls");
-  lessPagination.querySelector(".wp-load-more__button").replaceWith(less);
-  lessPagination.hidden = true;
-  query.append(lessPagination);
+        const matches = matchesType && title.includes(searchText);
 
-  document.addEventListener("qllmLoadStart", () => {
-    less.disabled = true;
-  });
+        card.hidden = !matches;
+        if (matches) {
+          count++;
+          if (animate && !reducedMotion.matches) {
+            const animation = card.animate(
+              [
+                { opacity: 0, transform: "translateY(8px)" },
+                { opacity: 1, transform: "translateY(0)" },
+              ],
+              {
+                duration: 300,
+                delay: Math.min((count - 1) * 30, 150),
+                easing: "ease-out",
+                fill: "backwards",
+              },
+            );
+            cardAnimations.set(card, animation);
+            animation.onfinish = () => cardAnimations.delete(card);
+          }
+        }
+      });
 
-  document.addEventListener("qllmLoadEnd", () => {
-    less.disabled = false;
-    lessPagination.hidden = grid.children.length <= initialCount;
-  });
+      controls.forEach((control) => {
+        control.button.setAttribute(
+          "aria-pressed",
+          String(control.type === type),
+        );
+      });
 
-  less.addEventListener("click", () => {
-    grid.innerHTML = originalCards;
+      status.textContent = count
+        ? `${count} event${count === 1 ? "" : "s"} shown`
+        : "No matching events.";
+    }
 
-    query.querySelectorAll(".wp-load-more__button").forEach((button) => {
-      button.closest(".wp-block-buttons")?.remove();
+    // Filter and search controls.
+    controls.forEach(({ type, button }) => {
+      button.addEventListener("click", () => applyFilter(type, true));
+    });
+    searchInput?.addEventListener("input", () => {
+      applyFilter(activeType);
     });
 
-    const restoredPagination = originalPagination.cloneNode(true);
-    lessPagination.before(restoredPagination);
+    searchForm?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      applyFilter(activeType);
+    });
+    applyFilter("all");
+  });
+}
+
+// Guest expand and collapse.
+function initGuestControls() {
+  document.querySelectorAll(".siff-guests").forEach((query) => {
+    const grid = query.querySelector(".wp-block-post-template");
+    const more = query.querySelector(".wp-load-more__button");
+    const pagination = more?.closest(".wp-block-buttons");
+
+    if (!grid || !pagination) return;
+
+    more.setAttribute("aria-expanded", "false");
+    const originalPagination = pagination.cloneNode(true);
+    const initialCount = grid.children.length;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let heightAnimation = null;
+    let loadingGuests = false;
+    let restoreFocusAfterLoad = false;
+
+    // Hold the grid height while guests load.
+    function freezeGuestGrid() {
+      const height = grid.getBoundingClientRect().height;
+      heightAnimation?.cancel();
+      heightAnimation = null;
+      grid.style.height = `${height}px`;
+      grid.style.overflow = "hidden";
+      return height;
+    }
+
+    // Animate the height change.
+    function animateGuestGrid(fromHeight) {
+      grid.style.height = "auto";
+      const toHeight = grid.getBoundingClientRect().height;
+
+      function clearHeight() {
+        grid.style.removeProperty("height");
+        grid.style.removeProperty("overflow");
+        heightAnimation = null;
+      }
+
+      if (reducedMotion.matches || Math.abs(toHeight - fromHeight) < 1) {
+        clearHeight();
+        return toHeight;
+      }
+
+      grid.style.height = `${toHeight}px`;
+      heightAnimation = grid.animate(
+        [{ height: `${fromHeight}px` }, { height: `${toHeight}px` }],
+        { duration: 400, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
+      );
+      heightAnimation.onfinish = clearHeight;
+      return toHeight;
+    }
+
+    // Collapse button.
+    const less = document.createElement("button");
+    less.type = "button";
+    less.className = more.className;
+    less.classList.remove("wp-load-more__button", "loading");
+    less.classList.add("siff-guests-less");
+    less.textContent = "See less guests";
+    less.setAttribute("aria-expanded", "true");
+
+    const lessPagination = originalPagination.cloneNode(true);
+    lessPagination.classList.add("siff-guests-less-controls");
+    lessPagination.querySelector(".wp-load-more__button").replaceWith(less);
     lessPagination.hidden = true;
-    restoredPagination.querySelector(".wp-load-more__button")?.focus();
+    query.append(lessPagination);
+
+    // Guest loading hooks.
+    document.addEventListener("qllmLoadStart", () => {
+      const loadingButton = query.querySelector(".wp-load-more__button.loading");
+      if (!loadingButton) return;
+      loadingGuests = true;
+      restoreFocusAfterLoad = loadingButton.contains(document.activeElement);
+      freezeGuestGrid();
+      less.disabled = true;
+    });
+
+    document.addEventListener("qllmLoadEnd", () => {
+      if (!loadingGuests) return;
+      loadingGuests = false;
+      const fromHeight = grid.getBoundingClientRect().height;
+      less.disabled = false;
+      const expanded = grid.children.length > initialCount;
+
+      query.querySelectorAll(".wp-load-more__button").forEach((button) => {
+        const controls = button.closest(".wp-block-buttons");
+        if (!controls) return;
+        controls.hidden = expanded;
+      });
+
+      lessPagination.hidden = !expanded;
+      animateGuestGrid(fromHeight);
+      if (expanded && restoreFocusAfterLoad) less.focus({ preventScroll: true });
+    });
+
+    // Restore the initial guests and controls.
+    less.addEventListener("click", () => {
+      const fromHeight = freezeGuestGrid();
+      // Keep the original portraits.
+      [...grid.children].slice(initialCount).forEach((card) => card.remove());
+
+      query.querySelectorAll(".wp-load-more__button").forEach((button) => {
+        button.closest(".wp-block-buttons")?.remove();
+      });
+
+      const restoredPagination = originalPagination.cloneNode(true);
+      lessPagination.before(restoredPagination);
+      lessPagination.hidden = true;
+      const collapsedHeight = animateGuestGrid(fromHeight);
+      restoredPagination
+        .querySelector(".wp-load-more__button")
+        ?.focus({ preventScroll: true });
+
+      const headerHeight =
+        document.querySelector(".wp-site-blocks > header")?.getBoundingClientRect().height || 0;
+      if (grid.getBoundingClientRect().top + collapsedHeight < headerHeight + 24) {
+        window.scrollTo({
+          top: Math.max(
+            0,
+            window.scrollY + query.getBoundingClientRect().top - headerHeight - 24,
+          ),
+          behavior: reducedMotion.matches ? "instant" : "smooth",
+        });
+      }
+    });
   });
-});
+}
+
+initEventModal();
+initEventFilters();
+initGuestControls();
