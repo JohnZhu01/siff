@@ -4,6 +4,22 @@ function siff_page_uses_event_modal() {
     return is_page(array('events', 'schedule'));
 }
 
+// Apply the section wrapper to existing event queries saved in the editor too.
+function siff_add_events_section_class($block_content) {
+    if (strpos($block_content, 'siff-event-filters') === false) {
+        return $block_content;
+    }
+
+    $html = new WP_HTML_Tag_Processor($block_content);
+    if ($html->next_tag(array('class_name' => 'wp-block-query'))) {
+        $html->add_class('siff-events-section');
+    }
+
+    return $html->get_updated_html();
+}
+
+add_filter('render_block_core/query', 'siff_add_events_section_class');
+
 // Event modal.
 function siff_render_event_modal() {
     if (!siff_page_uses_event_modal()) {

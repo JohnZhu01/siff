@@ -10,8 +10,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 ?>
-<!-- wp:query {"queryId":2,"query":{"perPage":50,"pages":0,"offset":0,"postType":"siff-event","order":"desc","orderBy":"date","inherit":false,"excludeCurrent":null},"metadata":{"categories":["featured"],"patternName":"siff-theme/events-grid","name":"Events Grid"}} -->
-<div class="wp-block-query"><!-- wp:group {"className":"siff-event-filters","layout":{"type":"flex","flexWrap":"wrap"}} -->
+<!-- wp:query {"queryId":2,"query":{"perPage":50,"pages":0,"offset":0,"postType":"siff-event","order":"desc","orderBy":"date","inherit":false,"excludeCurrent":null},"className":"siff-events-section","metadata":{"categories":["featured"],"patternName":"siff-theme/events-grid","name":"Events Grid"}} -->
+<div class="wp-block-query siff-events-section"><!-- wp:group {"className":"siff-event-filters","layout":{"type":"flex","flexWrap":"wrap"}} -->
 <div class="wp-block-group siff-event-filters"><!-- wp:buttons -->
 <div class="wp-block-buttons"><!-- wp:button {"className":"siff-filter-all"} -->
 <div class="wp-block-button siff-filter-all"><a class="wp-block-button__link wp-element-button">All</a></div>
