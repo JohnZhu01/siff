@@ -4,6 +4,16 @@ function siff_page_uses_event_modal() {
     return is_page(array('events', 'schedule'));
 }
 
+// Give the Events page a class for page-specific styles.
+function siff_event_page_classes($classes) {
+    if (is_page('events')) {
+        $classes[] = 'siff-events-page';
+    }
+    return $classes;
+}
+
+add_filter('body_class', 'siff_event_page_classes');
+
 // Apply the section wrapper to existing event queries saved in the editor too.
 function siff_add_events_section_class($block_content) {
     if (strpos($block_content, 'siff-event-filters') === false) {
@@ -35,21 +45,53 @@ function siff_render_event_modal() {
             </button>
         </header>
 
-        <div class="siff-modal-layout">
-            <div class="siff-modal-image">
-                <img id="siff-modal-image" alt="" hidden>
-            </div>
+        <div class="siff-modal-scroll">
+            <div class="siff-modal-layout">
+                <div class="siff-modal-image">
+                    <img id="siff-modal-image" alt="" hidden>
+                </div>
 
-            <div class="siff-modal-info">
-                <div id="siff-modal-meta"></div>
+                <div class="siff-modal-info">
+                    <div id="siff-modal-meta"></div>
+                </div>
 
-                <p id="siff-modal-person" hidden></p>
-            </div>
+                <div class="siff-modal-description siff-modal-tabs">
+                    <div role="tablist" aria-label="Event information">
+                        <button
+                            type="button"
+                            id="siff-tab-overview"
+                            role="tab"
+                            aria-selected="true"
+                            aria-controls="siff-panel-overview"
+                        >Synopsis</button>
+                        <button
+                            type="button"
+                            id="siff-tab-details"
+                            role="tab"
+                            aria-selected="false"
+                            aria-controls="siff-panel-details"
+                            tabindex="-1"
+                        >Details</button>
+                    </div>
 
-            <div class="siff-modal-description">
-                <h3 id="siff-modal-description-title">Description</h3>
-
-                <div id="siff-modal-content"></div>
+                    <div
+                        id="siff-panel-overview"
+                        role="tabpanel"
+                        aria-labelledby="siff-tab-overview"
+                        tabindex="0"
+                    >
+                        <div id="siff-modal-content"></div>
+                    </div>
+                    <div
+                        id="siff-panel-details"
+                        role="tabpanel"
+                        aria-labelledby="siff-tab-details"
+                        tabindex="0"
+                        hidden
+                    >
+                        <div id="siff-modal-credits"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </dialog>
@@ -91,20 +133,19 @@ function siff_localize_event_modal()
     $events = array();
 
     if (is_page('events')) {
-        $event_ids = get_posts(array(
+        $event_posts = get_posts(array(
             'post_type' => 'siff-event',
             'post_status' => 'publish',
             'numberposts' => 50,
             'orderby' => 'date',
             'order' => 'DESC',
-            'fields' => 'ids',
         ));
 
-        foreach ($event_ids as $event_id) {
-            $details = siff_event_details_data($event_id);
+        foreach ($event_posts as $event_post) {
+            $details = siff_event_details_data($event_post->ID);
 
             if ($details) {
-                $events[$event_id] = $details;
+                $events[$event_post->ID] = $details;
             }
         }
     }
@@ -166,17 +207,10 @@ function siff_event_details_data($event_id) {
         return null;
     }
 
-    $event_types = wp_get_post_terms(
-        $event_id,
-        'siff-event-types',
-        array('fields' => 'slugs')
-    );
+    $event_types = get_the_terms($event_id, 'siff-event-types');
 
-    if (is_wp_error($event_types)) {
-        $event_types = array();
-    }
     return array(
-        'types' => $event_types,
+        'types' => is_array($event_types) ? wp_list_pluck($event_types, 'slug') : array(),
         'instructor' => get_field('instructor', $event_id),
         'instructor_profession' => get_field('instructor_profession', $event_id),
         'speaker' => get_field('speaker', $event_id),

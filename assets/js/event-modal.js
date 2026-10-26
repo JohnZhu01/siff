@@ -1,41 +1,70 @@
+/*
+Contents
+  Loading spinner
+  Detail rows
+  Event modal
+  Event filters and search
+  Guest expand and collapse
+  Setup
+*/
+
 // Loading spinner.
 function showEventLoader(container) {
   container.innerHTML = `
-        <div role="status">
-            <div class="siff-modal-loader" aria-hidden="true"></div>
-            <span class="screen-reader-text">Loading event details…</span>
-        </div>
-    `;
+    <div role="status">
+      <div class="siff-modal-loader" aria-hidden="true"></div>
+      <span class="screen-reader-text">Loading event details…</span>
+    </div>
+  `;
 }
 
-// Build detail rows.
-function addEventDetail(container, label, value, startsCredit = false) {
+// Detail rows.
+function addEventDetail(container, label, value) {
   if (!value) return;
+
+  // Split the event date and time into separate rows.
+  if (label === "Date and time") {
+    const parts = String(value).match(
+      /^(\d{1,2}\/\d{1,2}\/\d{4}|\d{4}-\d{2}-\d{2})[,\sT]*(\d{1,2}:\d{2}(?::\d{2})?\s*(?:am|pm)?)$/i,
+    );
+
+    if (parts) {
+      let year;
+      let month;
+      let day;
+
+      if (parts[1].includes("/")) {
+        const dateParts = parts[1].split("/");
+        day = Number(dateParts[0]);
+        month = Number(dateParts[1]);
+        year = Number(dateParts[2]);
+      } else {
+        const dateParts = parts[1].split("-");
+        year = Number(dateParts[0]);
+        month = Number(dateParts[1]);
+        day = Number(dateParts[2]);
+      }
+      const date = new Date(Date.UTC(year, month - 1, day));
+      const displayDate = date.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        timeZone: "UTC",
+      });
+
+      addEventDetail(container, "Date", displayDate);
+      addEventDetail(container, "Time", parts[2].toUpperCase());
+      return;
+    }
+  }
+
   const paragraph = document.createElement("p");
 
-  if (startsCredit) {
-    paragraph.classList.add("siff-modal-credit-start");
-  }
   if (label) {
     const labelText = document.createElement("strong");
     labelText.textContent = label + ":";
     const detailText = document.createElement("span");
-    const dateParts =
-      label === "Date and time"
-        ? String(value).match(
-            /^(\d{1,2}\/\d{1,2}\/\d{4}|\d{4}-\d{2}-\d{2})[,\sT]*(\d{1,2}:\d{2}(?::\d{2})?\s*(?:am|pm)?)$/i,
-          )
-        : null;
-
-    if (dateParts) {
-      detailText.append(
-        dateParts[1],
-        document.createElement("br"),
-        dateParts[2],
-      );
-    } else {
-      detailText.textContent = value;
-    }
+    detailText.textContent = value;
     paragraph.append(labelText, " ", detailText);
   } else {
     paragraph.textContent = value;
@@ -46,19 +75,119 @@ function addEventDetail(container, label, value, startsCredit = false) {
 // Event modal.
 function initEventModal() {
   const modal = document.querySelector("#siff-event-modal");
+  const modalBody = document.querySelector("#siff-event-modal .siff-modal-scroll");
   const closeButton = document.querySelector("#siff-modal-close");
   const title = document.querySelector("#siff-modal-title");
   const content = document.querySelector("#siff-modal-content");
   const meta = document.querySelector("#siff-modal-meta");
-  const descriptionTitle = document.querySelector(
-    "#siff-modal-description-title",
-  );
+  const overviewTab = document.querySelector("#siff-tab-overview");
+  const detailsTab = document.querySelector("#siff-tab-details");
+  const credits = document.querySelector("#siff-modal-credits");
+
+  const tabs = [overviewTab, detailsTab];
+  const panels = [
+    document.querySelector("#siff-panel-overview"),
+    document.querySelector("#siff-panel-details"),
+  ];
   const image = document.querySelector("#siff-modal-image");
 
-  if (!modal || !closeButton || !title || !content || !image || !meta) return;
-  let activeRequest;
+  if (
+    !modal ||
+    !modalBody ||
+    !closeButton ||
+    !title ||
+    !content ||
+    !image ||
+    !meta ||
+    !credits ||
+    tabs.some((tab) => !tab) ||
+    panels.some((panel) => !panel)
+  )
+    return;
+
+  // Modal tabs.
+  function selectTab(index, moveFocus = false) {
+    tabs.forEach((tab, tabIndex) => {
+      const selected = tabIndex === index;
+
+      tab.setAttribute("aria-selected", String(selected));
+      if (selected) {
+        tab.tabIndex = 0;
+      } else {
+        tab.tabIndex = -1;
+      }
+      panels[tabIndex].hidden = !selected;
+    });
+
+    if (moveFocus) {
+      tabs[index].focus({ preventScroll: true });
+    }
+  }
+
+  tabs.forEach((tab, index) => {
+    tab.addEventListener("click", () => selectTab(index));
+
+    tab.addEventListener("keydown", (event) => {
+      let next;
+
+      switch (event.key) {
+        case "ArrowRight":
+          next = (index + 1) % tabs.length;
+          break;
+        case "ArrowLeft":
+          next = (index - 1 + tabs.length) % tabs.length;
+          break;
+        case "Home":
+          next = 0;
+          break;
+        case "End":
+          next = tabs.length - 1;
+          break;
+        default:
+          return;
+      }
+
+      event.preventDefault();
+      selectTab(next, true);
+    });
+  });
+
+  let requestNumber = 0;
   let activeTrigger;
-  const eventCache = new Map(Object.entries(siffModal.events || {}));
+  const eventCache = siffModal.events || {};
+
+  function renderDetails(details) {
+    const types = details.types || [];
+    modal.classList.remove("is-loading");
+    title.textContent = details.title;
+    if (types.includes("film")) {
+      overviewTab.textContent = "Synopsis";
+    } else {
+      overviewTab.textContent = "Overview";
+    }
+    if (details.image) {
+      image.src = details.image;
+      image.alt = "";
+      image.hidden = false;
+    }
+
+    content.replaceChildren();
+    addEventDetail(content, "", details.description);
+    addEventDetail(meta, "Date and time", details.date);
+    addEventDetail(meta, "Venue", details.venue);
+    addEventDetail(credits, "Duration", details.duration);
+
+    if (types.includes("film")) {
+      addEventDetail(credits, "Filmmaker", details.filmmaker);
+      addEventDetail(credits, "Director", details.director);
+    } else if (types.includes("workshop")) {
+      addEventDetail(credits, "Instructor", details.instructor);
+      addEventDetail(credits, "Profession", details.instructor_profession);
+    } else if (types.includes("panel")) {
+      addEventDetail(credits, "Speaker", details.speaker);
+      addEventDetail(credits, "Profession", details.speaker_profession);
+    }
+  }
 
   document.addEventListener("click", async (event) => {
     // Ignore clicks inside the modal.
@@ -79,32 +208,34 @@ function initEventModal() {
 
     event.preventDefault();
     activeTrigger = trigger;
-    activeRequest?.abort();
-    const request = new AbortController();
-    activeRequest = request;
+    requestNumber++;
+    const currentRequest = requestNumber;
 
     // Reset details before loading.
     const eventId = trigger.dataset.eventId;
     const loadingStarted = performance.now();
     const minimumLoadingTime = 500;
     title.textContent = "Event details";
-    if (descriptionTitle) descriptionTitle.textContent = "Description";
+    overviewTab.textContent = "Overview";
+    selectTab(0);
+
+    modal.classList.add("is-loading");
     showEventLoader(content);
     meta.replaceChildren();
+    credits.replaceChildren();
     image.hidden = true;
     image.removeAttribute("src");
     if (!modal.open) modal.showModal();
+    modalBody.scrollTop = 0;
 
     try {
-      let details = eventCache.get(eventId);
+      let details = eventCache[eventId];
 
       // Fetch details not already cached.
       if (!details) {
         const url = new URL(encodeURIComponent(eventId), siffModal.restUrl);
 
-        const response = await fetch(url, {
-          signal: request.signal,
-        });
+        const response = await fetch(url);
 
         const result = await response.json();
 
@@ -112,48 +243,22 @@ function initEventModal() {
           throw new Error(result.message || "Unable to load this event.");
         }
 
-        if (request.signal.aborted) return;
+        if (currentRequest !== requestNumber) return;
 
         details = result;
-        eventCache.set(eventId, details);
+        eventCache[eventId] = details;
       }
       const remaining =
         minimumLoadingTime - (performance.now() - loadingStarted);
       if (remaining > 0) {
         await new Promise((resolve) => setTimeout(resolve, remaining));
       }
-      if (request.signal.aborted || !modal.open) return;
+      if (currentRequest !== requestNumber || !modal.open) return;
 
-      title.textContent = details.title;
-      const types = details.types || [];
-      if (descriptionTitle) {
-        descriptionTitle.textContent = types.includes("film")
-          ? "Synopsis"
-          : "Description";
-      }
-      if (details.image) {
-        image.src = details.image;
-        image.alt = "";
-        image.hidden = false;
-      }
-      content.replaceChildren();
-
-      addEventDetail(content, "", details.description);
-      addEventDetail(meta, "Date and time", details.date);
-      addEventDetail(meta, "Venue", details.venue);
-      addEventDetail(meta, "Duration", details.duration);
-      if (types.includes("film")) {
-        addEventDetail(meta, "Filmmaker", details.filmmaker, true);
-        addEventDetail(meta, "Director", details.director, !details.filmmaker);
-      } else if (types.includes("workshop")) {
-        addEventDetail(meta, "Instructor", details.instructor, true);
-        addEventDetail(meta, "Profession", details.instructor_profession);
-      } else if (types.includes("panel")) {
-        addEventDetail(meta, "Speaker", details.speaker, true);
-        addEventDetail(meta, "Profession", details.speaker_profession);
-      }
+      renderDetails(details);
     } catch (error) {
-      if (!request.signal.aborted) {
+      if (currentRequest === requestNumber && modal.open) {
+        modal.classList.remove("is-loading");
         content.textContent = "Unable to load event details. Please try again.";
       }
     }
@@ -175,14 +280,33 @@ function initEventModal() {
     }
   });
   modal.addEventListener("close", () => {
-    activeRequest?.abort();
+    requestNumber++;
+    modal.classList.remove("is-loading");
     activeTrigger?.focus();
   });
 }
 
 // Event filters and search.
 function initEventFilters() {
-  document.querySelectorAll(".siff-event-filters").forEach((filters) => {
+  const filterGroups = document.querySelectorAll(".siff-event-filters");
+  if (!filterGroups.length) return;
+
+  const header = document.querySelector(".wp-site-blocks > header.wp-block-template-part");
+
+  // Update the sticky offset on page load and resize.
+  if (header) {
+    function updateFilterOffset() {
+      const headerTop = parseFloat(getComputedStyle(header).top) || 0;
+      const offset = header.getBoundingClientRect().height + headerTop;
+      document.documentElement.style.setProperty("--siff-event-filters-top", `${offset}px`);
+    }
+
+    window.addEventListener("load", updateFilterOffset);
+    window.addEventListener("resize", updateFilterOffset);
+    updateFilterOffset();
+  }
+
+  filterGroups.forEach((filters) => {
     const query = filters.closest(".wp-block-query");
     const grid = query?.querySelector(".wp-block-post-template");
     if (!grid) return;
@@ -190,9 +314,13 @@ function initEventFilters() {
     const searchInput = searchForm?.querySelector('input[type="search"]');
     let activeType = "all";
 
-    const cards = [...grid.children].filter((card) =>
-      card.classList.contains("wp-block-post"),
-    );
+    const cards = [...grid.children]
+      .filter((card) => card.classList.contains("wp-block-post"))
+      .map((element) => ({
+        element,
+        title: (element.querySelector(".wp-block-post-title")?.textContent || "").toLowerCase(),
+        link: element.querySelector(".wp-block-post-title a"),
+      }));
 
     const types = ["all", "film", "workshop", "panel"];
     const controls = [];
@@ -213,6 +341,20 @@ function initEventFilters() {
       controls.push({ type, button });
     });
 
+    // Mobile filter.
+    const mobileFilter = document.createElement("label");
+    mobileFilter.className = "siff-mobile-filter";
+    mobileFilter.textContent = "Event type";
+
+    const select = document.createElement("select");
+
+    controls.forEach(({ type, button }) => {
+      select.add(new Option(button.textContent, type));
+    });
+
+    mobileFilter.append(select);
+    filters.prepend(mobileFilter);
+
     // Results count and card wrapper.
     const status = document.createElement("p");
     status.setAttribute("role", "status");
@@ -222,52 +364,66 @@ function initEventFilters() {
     grid.before(resultsSection);
     resultsSection.append(status, grid);
 
+    // Show six matching events at a time.
+    const batchSize = 6;
+    let visibleCards = [];
+    const loadMore = document.createElement("button");
+    loadMore.type = "button";
+    loadMore.className = "siff-event-load-more";
+    loadMore.textContent = "Load more events";
+    resultsSection.append(loadMore);
+
     // Card animations.
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const cardAnimations = new Map();
+    let cardAnimations = [];
 
     function clearCardAnimations() {
       cardAnimations.forEach((animation) => animation.cancel());
-      cardAnimations.clear();
+      cardAnimations = [];
     }
 
     reducedMotion.addEventListener("change", clearCardAnimations);
 
     // Match cards by category and search text.
-    function applyFilter(type, animate = false) {
+    function applyFilter(type, animate = false, limit = batchSize) {
       clearCardAnimations();
       activeType = type;
+      select.value = type;
       const searchText = (searchInput?.value || "").trim().toLowerCase();
       let count = 0;
+      let animationIndex = 0;
+      visibleCards = [];
 
       cards.forEach((card) => {
-        const title = (
-          card.querySelector(".wp-block-post-title")?.textContent || ""
-        ).toLowerCase();
-
+        const { element, title } = card;
         const matchesType =
-          type === "all" || card.classList.contains(`siff-event-types-${type}`);
+          type === "all" || element.classList.contains(`siff-event-types-${type}`);
 
         const matches = matchesType && title.includes(searchText);
 
-        card.hidden = !matches;
-        if (matches) {
-          count++;
-          if (animate && !reducedMotion.matches) {
-            const animation = card.animate(
+        if (matches) count++;
+        const wasHidden = element.hidden;
+        element.hidden = !matches || count > limit;
+        if (!element.hidden) {
+          visibleCards.push(card);
+          if (animate && !reducedMotion.matches && (limit === batchSize || wasHidden)) {
+            const animation = element.animate(
               [
                 { opacity: 0, transform: "translateY(8px)" },
                 { opacity: 1, transform: "translateY(0)" },
               ],
               {
                 duration: 300,
-                delay: Math.min((count - 1) * 30, 150),
+                delay: Math.min(animationIndex++ * 30, 150),
                 easing: "ease-out",
                 fill: "backwards",
               },
             );
-            cardAnimations.set(card, animation);
-            animation.onfinish = () => cardAnimations.delete(card);
+            cardAnimations.push(animation);
+            animation.onfinish = () => {
+              const index = cardAnimations.indexOf(animation);
+              if (index !== -1) cardAnimations.splice(index, 1);
+            };
           }
         }
       });
@@ -279,15 +435,47 @@ function initEventFilters() {
         );
       });
 
+      const shown = visibleCards.length;
+      loadMore.hidden = shown >= count;
       status.textContent = count
-        ? `${count} event${count === 1 ? "" : "s"} shown`
+        ? `Showing ${shown} of ${count} event${count === 1 ? "" : "s"}`
         : "No matching events.";
     }
 
+    // Bring the first results below the sticky controls.
+    function changeEventType(type) {
+      applyFilter(type, true);
+
+      requestAnimationFrame(() => {
+        const headerTop = header ? parseFloat(getComputedStyle(header).top) || 0 : 0;
+        const headerOffset = header ? header.getBoundingClientRect().height + headerTop : 0;
+        const filterStyles = getComputedStyle(filters);
+        const offset = filterStyles.position === "sticky"
+          ? (parseFloat(filterStyles.top) || 0) + filters.getBoundingClientRect().height
+          : headerOffset;
+
+        window.scrollTo({
+          top: Math.max(0, window.scrollY + resultsSection.getBoundingClientRect().top - offset - 12),
+          behavior: reducedMotion.matches ? "instant" : "smooth",
+        });
+      });
+    }
+
     // Filter and search controls.
-    controls.forEach(({ type, button }) => {
-      button.addEventListener("click", () => applyFilter(type, true));
+    loadMore.addEventListener("click", () => {
+      const previousCount = visibleCards.length;
+      applyFilter(activeType, true, previousCount + batchSize);
+      visibleCards[previousCount]?.link?.focus({ preventScroll: true });
     });
+
+    select.addEventListener("change", () => {
+      changeEventType(select.value);
+    });
+
+    controls.forEach(({ type, button }) => {
+      button.addEventListener("click", () => changeEventType(type));
+    });
+
     searchInput?.addEventListener("input", () => {
       applyFilter(activeType);
     });
@@ -428,6 +616,7 @@ function initGuestControls() {
   });
 }
 
+// Setup.
 initEventModal();
 initEventFilters();
 initGuestControls();

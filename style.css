@@ -191,3 +191,10 @@ body.page-id-3 .wp-block-heading[id] {
     z-index: 100;
     background-color: var(--wp--preset--color--custom-background);
 }
+
+/* The mobile admin toolbar scrolls away with the page. */
+@media (max-width: 600px) {
+    .wp-site-blocks > header.wp-block-template-part {
+        top: 0;
+    }
+}
