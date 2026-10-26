@@ -1,0 +1,13 @@
+{
+  "apiVersion": 3,
+  "name": "siff/event-date",
+  "title": "Event Date",
+  "category": "theme",
+  "icon": "calendar-alt",
+  "usesContext": ["postId", "postType"],
+  "supports": {
+    "html": false
+  },
+  "editorScript": "siff-event-date-editor",
+  "render": "file:./render.php"
+}
