@@ -55,7 +55,7 @@ add_action('enqueue_block_assets', 'siff_enqueue_theme_styles');
 // Load the policy navigation on the policy page.
 function siff_enqueue_policy_navigation()
 {
-    if (!is_page('privacy-policy')) {
+    if (!is_page(array('policy', 'privacy-policy')) && !is_privacy_policy()) {
         return;
     }
 
@@ -133,7 +133,7 @@ function siff_event_type_labels($html, $parsed_block)
 
 add_filter('render_block_core/post-terms', 'siff_event_type_labels', 10, 2);
 
-//load leaflet css and js   
+//load leaflet css and js
 function siff_enqueue_leaflet_assets()
 {
     wp_enqueue_style(

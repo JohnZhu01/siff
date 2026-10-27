@@ -1,11 +1,17 @@
-const policyLinks = document.querySelectorAll(".siff-policy-nav a");
+// Jump to the selected policy section.
+const policyDropdown = document.querySelector(".siff-policy-select");
 
-policyLinks.forEach(function (link) {
-    link.addEventListener("click", function () {
-        policyLinks.forEach(function (item) {
-            item.classList.remove("is-active");
-        });
+if (policyDropdown) {
+  policyDropdown.addEventListener("change", function () {
+    const hash = policyDropdown.value;
+    const heading = document.getElementById(hash.substring(1));
 
-        link.classList.add("is-active");
-    });
-});
+    if (heading) {
+      window.location.hash = hash;
+      heading.scrollIntoView();
+    }
+
+    // Reset same section
+    policyDropdown.value = "";
+  });
+}
