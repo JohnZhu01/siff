@@ -49,34 +49,34 @@
     "spacing": {
       "spacingSizes": [
         {
-          "slug": "20",
           "name": "XS",
-          "size": "0.5rem"
+          "size": "0.5rem",
+          "slug": "20"
         },
         {
-          "slug": "30",
           "name": "Small",
-          "size": "1rem"
+          "size": "1rem",
+          "slug": "30"
         },
         {
-          "slug": "40",
           "name": "Medium",
-          "size": "1.5rem"
+          "size": "1.5rem",
+          "slug": "40"
         },
         {
-          "slug": "50",
           "name": "Large",
-          "size": "2rem"
+          "size": "2rem",
+          "slug": "50"
         },
         {
-          "slug": "60",
           "name": "XL",
-          "size": "3rem"
+          "size": "3rem",
+          "slug": "60"
         },
         {
-          "slug": "70",
           "name": "Section",
-          "size": "clamp(3rem, 6vw, 5rem)"
+          "size": "clamp(3rem, 6vw, 5rem)",
+          "slug": "70"
         }
       ],
       "units": ["vh", "vw", "rem", "%"]
@@ -345,119 +345,109 @@
       ],
       "fontSizes": [
         {
-          "slug": "small",
           "name": "Small",
-          "size": "0.875rem"
+          "size": "0.875rem",
+          "slug": "small"
         },
         {
-          "slug": "medium",
           "name": "Medium",
-          "size": "1rem"
+          "size": "1rem",
+          "slug": "medium"
         },
         {
-          "slug": "large",
           "name": "Large",
-          "size": "1.5rem"
+          "size": "1.5rem",
+          "slug": "large"
         },
         {
-          "slug": "x-large",
           "name": "Extra Large",
-          "size": "2rem"
+          "size": "2rem",
+          "slug": "x-large"
         },
         {
-          "slug": "xx-large",
           "name": "Display",
-          "size": "clamp(2rem, 1.5rem + 2vw, 3rem)"
+          "size": "clamp(2rem, 1.5rem + 2vw, 3rem)",
+          "slug": "xx-large"
         }
       ]
     },
     "useRootPaddingAwareAlignments": true
   },
   "styles": {
-    "color": {
-      "background": "var:preset|color|custom-background",
-      "text": "var:preset|color|custom-text"
-    },
     "blocks": {
-      "core/separator": {
-        "color": {
-          "text": "var:preset|color|custom-deep-blue"
-        },
-        "spacing": {
-          "margin": {
-            "top": "var:preset|spacing|50",
-            "bottom": "var:preset|spacing|50"
-          }
-        }
-      },
       "core/button": {
         "border": {
           "radius": {
-            "bottomLeft": "0.25rem",
-            "bottomRight": "0.25rem",
-            "topLeft": "0.25rem",
-            "topRight": "0.25rem"
+            "bottomLeft": "4px",
+            "bottomRight": "4px",
+            "topLeft": "4px",
+            "topRight": "4px"
+          }
+        },
+        "spacing": {
+          "padding": {
+            "bottom": "var(--wp--preset--spacing--30)",
+            "left": "var(--wp--preset--spacing--40)",
+            "right": "var(--wp--preset--spacing--40)",
+            "top": "var(--wp--preset--spacing--30)"
+          }
+        },
+        "typography": {
+          "fontSize": "var(--wp--preset--font-size--small)"
+        }
+      },
+      "core/paragraph": {
+        "spacing": {
+          "margin": {
+            "bottom": "0",
+            "top": "0"
+          },
+          "padding": {
+            "bottom": "var(--wp--preset--spacing--50)",
+            "left": "var(--wp--preset--spacing--50)",
+            "right": "var(--wp--preset--spacing--50)",
+            "top": "var(--wp--preset--spacing--50)"
+          }
+        },
+        "typography": {
+          "textIndent": "1px"
+        }
+      },
+      "core/separator": {
+        "color": {
+          "text": "var(--wp--preset--color--custom-deep-blue)"
+        },
+        "spacing": {
+          "margin": {
+            "bottom": "var(--wp--preset--spacing--50)",
+            "top": "var(--wp--preset--spacing--50)"
           }
         }
       }
     },
+    "color": {
+      "background": "var(--wp--preset--color--custom-background)",
+      "text": "var(--wp--preset--color--custom-text)"
+    },
     "elements": {
-      "heading": {
-        "color": {
-          "text": "var:preset|color|custom-text"
-        },
-        "typography": {
-          "fontFamily": "var:preset|font-family|montserrat",
-          "fontWeight": "700",
-          "lineHeight": "1.2"
-        }
-      },
-      "link": {
-        ":focus-visible": {
-          "outline": {
-            "color": "var:preset|color|custom-accents",
-            "offset": "0.1875rem",
-            "style": "solid",
-            "width": "0.125rem"
-          }
-        },
-        "color": {
-          "text": "var:preset|color|custom-accents"
-        },
-        "typography": {
-          "textDecoration": "underline"
-        },
-        ":hover": {
-          "color": {
-            "text": "var:preset|color|custom-text"
-          }
-        }
-      },
       "button": {
-        ":hover": {
-          "color": {
-            "background": "var:preset|color|custom-text",
-            "text": "var:preset|color|custom-background"
-          }
-        },
         ":focus-visible": {
           "outline": {
-            "color": "var:preset|color|custom-accents",
+            "color": "var(--wp--preset--color--custom-accents)",
             "offset": "0.1875rem",
             "style": "solid",
             "width": "0.125rem"
+          }
+        },
+        ":hover": {
+          "color": {
+            "background": "var(--wp--preset--color--custom-text)",
+            "text": "var(--wp--preset--color--custom-background)"
           }
         },
         "color": {
           "background": "var(--wp--preset--color--custom-accents)",
           "text": "var(--wp--preset--color--custom-background)"
-        },
-        "typography": {
-          "fontFamily": "var(--wp--preset--font-family--montserrat)",
-          "fontSize": "1rem",
-          "fontStyle": "normal",
-          "fontWeight": "600",
-          "lineHeight": "1.25"
         },
         "spacing": {
           "padding": {
@@ -466,6 +456,13 @@
             "right": "1.25em",
             "top": "0.75em"
           }
+        },
+        "typography": {
+          "fontFamily": "var(--wp--preset--font-family--montserrat)",
+          "fontSize": "1rem",
+          "fontStyle": "normal",
+          "fontWeight": "600",
+          "lineHeight": "1.25"
         }
       },
       "h1": {
@@ -498,15 +495,46 @@
         "typography": {
           "fontSize": "1rem"
         }
+      },
+      "heading": {
+        "color": {
+          "text": "var(--wp--preset--color--custom-text)"
+        },
+        "typography": {
+          "fontFamily": "var(--wp--preset--font-family--montserrat)",
+          "fontWeight": "700",
+          "lineHeight": "1.2"
+        }
+      },
+      "link": {
+        ":focus-visible": {
+          "outline": {
+            "color": "var(--wp--preset--color--custom-accents)",
+            "offset": "0.1875rem",
+            "style": "solid",
+            "width": "0.125rem"
+          }
+        },
+        ":hover": {
+          "color": {
+            "text": "var(--wp--preset--color--custom-text)"
+          }
+        },
+        "color": {
+          "text": "var(--wp--preset--color--custom-accents)"
+        },
+        "typography": {
+          "textDecoration": "underline"
+        }
       }
     },
     "spacing": {
-      "blockGap": "var:preset|spacing|40",
+      "blockGap": "var(--wp--preset--spacing--40)",
       "padding": {
-        "bottom": "0",
-        "left": "0",
-        "right": "0",
-        "top": "0"
+        "bottom": "30px",
+        "left": "30px",
+        "right": "30px",
+        "top": "30px"
       }
     },
     "typography": {
