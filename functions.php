@@ -111,8 +111,8 @@ function siff_enqueue_policy_navigation()
     }
 
     wp_enqueue_script(
-        'siff-policy-navigation',
-        get_theme_file_uri('/assets/js/policy-navigation.js'),
+        'siff-vendor-directory',
+        get_theme_file_uri('assets/js/vendor-directory.js'),
         array(),
         filemtime(get_theme_file_path('/assets/js/policy-navigation.js')),
         true
@@ -128,22 +128,23 @@ function siff_enqueue_vendor_directory_assets()
         return;
     }
 
-	wp_enqueue_script(
-		'siff-vendor-directory',
-		get_theme_file_uri( 'assets/js/vendor-directory.js' ),
-		array(),
-		filemtime( get_theme_file_path( 'assets/js/vendor-directory.js' ) ),
-		true
-	);
+    wp_enqueue_script(
+        'siff-vendor-directory',
+        get_theme_file_uri('assets/js/vendor-directory.js'),
+        array(),
+        filemtime(get_theme_file_path('assets/js/vendor-directory.js')),
+        true
+    );
 }
 
-add_action( 'wp_enqueue_scripts', 'siff_enqueue_vendor_directory_assets' );
+add_action('wp_enqueue_scripts', 'siff_enqueue_vendor_directory_assets');
 
-function siff_enqueue_vendor_directory_styles() {
-	$post = get_post();
-	if ( ! is_page( 'vendors' ) && ! ( is_admin() && $post && 'page' === $post->post_type && 'vendors' === $post->post_name ) ) {
-		return;
-	}
+function siff_enqueue_vendor_directory_styles()
+{
+    $post = get_post();
+    if (! is_page('vendors') && ! (is_admin() && $post && 'page' === $post->post_type && 'vendors' === $post->post_name)) {
+        return;
+    }
 
     wp_enqueue_style(
         'siff-vendor-directory',
@@ -153,7 +154,7 @@ function siff_enqueue_vendor_directory_styles() {
     );
 }
 
-add_action( 'enqueue_block_assets', 'siff_enqueue_vendor_directory_styles' );
+add_action('enqueue_block_assets', 'siff_enqueue_vendor_directory_styles');
 
 function siff_register_event_date_block()
 {
@@ -183,6 +184,29 @@ function siff_event_type_labels($html, $parsed_block)
 }
 
 add_filter('render_block_core/post-terms', 'siff_event_type_labels', 10, 2);
+
+// Connect event titles to the modal.
+add_filter('render_block_core/post-title', function ($html, $parsed_block, $block) {
+    $classes = preg_split('/\s+/', trim($parsed_block['attrs']['className'] ?? ''));
+    $event_id = absint($block->context['postId'] ?? 0);
+
+    if (
+        !in_array('siff-event-trigger', $classes, true)
+        || get_post_type($event_id) !== 'siff-event'
+    ) {
+        return $html;
+    }
+
+    $processor = new WP_HTML_Tag_Processor($html);
+    if ($processor->next_tag('A')) {
+        $processor->set_attribute('data-event-id', $event_id);
+        $processor->set_attribute('aria-haspopup', 'dialog');
+        $processor->set_attribute('aria-controls', 'siff-event-modal');
+    }
+
+    return $processor->get_updated_html();
+}, 10, 3);
+
 
 //load leaflet css and js
 function siff_enqueue_leaflet_assets()
@@ -295,4 +319,68 @@ function custom_box_office_add_to_cart_text($text, $product)
         return __('Buy Ticket', 'siff-theme');
     }
     return $text;
+}
+
+// Registering custom ACF block
+
+function siff_register_festival_highlights_block()
+{
+    if (function_exists('acf_register_block_type')) {
+        acf_register_block_type(array(
+            'name'            => 'festival-highlights',
+            'title'           => 'Festival Highlights Slider',
+            'description'     => 'A featured slider for SIFF festival highlights.',
+            'render_template' => 'blocks/festival-highlights/render.php',
+            'category'        => 'design',
+            'icon'            => 'format-gallery',
+            'keywords'        => array(
+                'festival',
+                'highlights',
+                'slider'
+            ),
+            'mode'            => 'preview',
+            'supports'        => array(
+                'align' => array('wide', 'full'),
+                'anchor' => true
+            ),
+            'enqueue_assets'  => 'siff_enqueue_festival_highlights_assets'
+        ));
+    }
+}
+add_action('acf/init', 'siff_register_festival_highlights_block');
+
+
+function siff_enqueue_festival_highlights_assets()
+{
+    $theme_uri = get_template_directory_uri();
+
+    wp_enqueue_style(
+        'siff-swiper',
+        'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
+        array(),
+        '11'
+    );
+
+    wp_enqueue_style(
+        'siff-festival-highlights',
+        $theme_uri . '/assets/css/festival-highlights.css',
+        array('siff-swiper'),
+        filemtime(get_theme_file_path('/assets/css/festival-highlights.css'))
+    );
+
+    wp_enqueue_script(
+        'siff-swiper',
+        'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
+        array(),
+        '11',
+        true
+    );
+
+    wp_enqueue_script(
+        'siff-festival-highlights',
+        $theme_uri . '/assets/js/festival-highlights.js',
+        array('siff-swiper'),
+        '1.0',
+        true
+    );
 }

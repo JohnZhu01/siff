@@ -1,4 +1,4 @@
-/* Schedule pattern, event rows and page-scoped styles. */
+/* These selectors belong only to the Schedule pattern and its dynamic row. */
 .siff-schedule-day,
 .siff-schedule-page #friday,
 .siff-schedule-page #saturday,
@@ -84,7 +84,7 @@
 	outline-offset: 4px;
 }
 
-/* Keep the focus outline visible against dark day sections. */
+/* A light outline stays visible outside the accent button on the dark days. */
 .siff-schedule-row .siff-schedule-row__view:focus-visible {
 	outline-color: var(--wp--preset--color--custom-text);
 	box-shadow: 0 0 0 2px var(--wp--preset--color--custom-background);
@@ -101,7 +101,12 @@
 	}
 
 	/*
-	 * Schedule-only overrides prevent modal titles and images overflowing on phones.
+	 * Temporary Schedule-only accommodation: the shared two-column modal clipped
+	 * titles and overflowed at phone widths. Use one column, less padding and a
+	 * shorter image here; desktop layout, REST loading and focus logic are unchanged.
+	 * TODO (coordinate with Johnny): move an agreed mobile fix into event-modal.css,
+	 * verify Events and other modal consumers, then remove these local overrides.
+	 * Until then, other pages retain Johnny's existing modal presentation.
 	 */
 	.siff-schedule-page #siff-event-modal {
 		padding: 3.5rem 1rem 1rem;

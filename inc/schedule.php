@@ -5,13 +5,21 @@
  * The editor uses the existing CPT REST collection; visitors use WP_Query.
  * Both paths opt into the same narrowly scoped SQL through a private query flag.
  *
- * Each saved Query Loop displays at most 100 events per day without pagination.
- * Events beyond the first 100 per day are not displayed. Changing the limit
- * requires updating the pattern, editor variations and existing page content.
+ * Programme limit: each saved Query Loop requests at most 100 events per day.
+ * There is no pagination, so events 101 onward are not displayed. This is enough
+ * for the current 2/9/5 programme. Before exceeding it, add native pagination to
+ * the pattern, editor variations AND existing page content, then test both views.
  *
- * Patterns use WordPress's native /patterns discovery.
+ * Patterns use WordPress's native /patterns discovery. For local theme work,
+ * WP_DEVELOPMENT_MODE = 'theme' in the local wp-config.php bypasses the pattern
+ * cache; WP_ENVIRONMENT_TYPE = 'local' alone does not. Keep that setting out of
+ * LIVE and the theme repository. This theme does not change either setting.
+ * If a newly added pattern is missing while caching is enabled, clear
+ * wp_get_theme()->delete_pattern_cache() once and reload. Do not clear that
+ * cache or manually register this pattern on every request.
  * @see https://developer.wordpress.org/block-editor/how-to-guides/block-tutorial/extending-the-query-loop-block/
  * @see https://developer.wordpress.org/themes/patterns/registering-patterns/
+ * @see https://make.wordpress.org/core/2023/07/14/configuring-development-mode-in-6-3/
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -27,12 +35,12 @@ function siff_schedule_days() {
 	);
 }
 
-/** Only configured festival dates are accepted, including in REST requests. */
+/** Only the three assignment dates are accepted, including in REST requests. */
 function siff_schedule_valid_day( $day ) {
 	return is_string( $day ) && in_array( $day, array_column( siff_schedule_days(), 'date' ), true );
 }
 
-/** Register the dynamic Schedule row and its stylesheet. */
+/** Register the row using the same PHP-only convention as the vendor card. */
 function siff_register_schedule() {
 	wp_register_style(
 		'siff-schedule',
@@ -71,7 +79,7 @@ function siff_enqueue_schedule_styles() {
 }
 add_action( 'enqueue_block_assets', 'siff_enqueue_schedule_styles' );
 
-/** Variations label the day loops and hide unrelated query controls. */
+/** Variations label the three loops and hide unrelated query controls. */
 function siff_enqueue_schedule_editor() {
 	wp_enqueue_script(
 		'siff-schedule-editor',
@@ -84,7 +92,7 @@ function siff_enqueue_schedule_editor() {
 }
 add_action( 'enqueue_block_editor_assets', 'siff_enqueue_schedule_editor' );
 
-/** Scope filtering to marked, non-inherited event loops and their No Results queries. */
+/** Mark only our explicit Schedule loops, including their No Results queries. */
 function siff_schedule_query_vars( $args, $block ) {
 	$query = $block->context['query'] ?? array();
 	if ( 'festival-2027' !== ( $query['siffSchedule'] ?? '' )
@@ -109,7 +117,7 @@ function siff_schedule_query_args( $args, $day ) {
 	return $args;
 }
 
-/** Validate the Schedule marker and date on the existing event collection endpoint. */
+/** Validate our two extra parameters on the existing event collection endpoint. */
 function siff_schedule_rest_params( $params ) {
 	$params['siffSchedule'] = array(
 		'description' => 'Opt into the SIFF festival Schedule query.',
@@ -135,11 +143,10 @@ function siff_schedule_rest_query( $args, $request ) {
 add_filter( 'rest_siff-event_query', 'siff_schedule_rest_query', 10, 2 );
 
 /**
- * ACF stores screening_date_and_time and date_and_time as Y-m-d H:i:s in local time.
- * Prefer the screening start, falling back to the other event start, so films
- * and other events sort together. Filter from the day's midnight (inclusive)
- * to the next midnight (exclusive). SQL changes require the private Schedule
- * date flag and the event post type.
+ * ACF stores both date-time pickers as Y-m-d H:i:s (local wall-clock time).
+ * One effective start combines films and other events in chronological order.
+ * Sorting two separate meta clauses would incorrectly group by field instead.
+ * No SQL changes are made without our private flag AND the event post type.
  */
 function siff_schedule_query_clauses( $clauses, $query ) {
 	$day = $query->get( 'siff_schedule_day' );
@@ -175,7 +182,7 @@ function siff_schedule_event_start( $event_id ) {
 	return $start && $start->format( 'Y-m-d H:i:s' ) === $raw ? $start : null;
 }
 
-/** Render the published event supplied by the Post Template's postId context. */
+/** The Post Template supplies postId, so no IDs or event details are hard-coded. */
 function siff_render_schedule_event( $attributes, $content, $block ) {
 	$event_id = absint( $block->context['postId'] ?? 0 );
 	if ( ! $event_id || 'siff-event' !== get_post_type( $event_id ) || 'publish' !== get_post_status( $event_id ) ) {

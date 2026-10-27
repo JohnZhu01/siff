@@ -9,5 +9,4 @@
   "usesContext": ["postId", "postType"],
   "supports": {"html": false, "autoRegister": true},
   "style": "file:./style.css"
-  
 }

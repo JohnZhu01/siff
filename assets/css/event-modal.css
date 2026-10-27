@@ -25,7 +25,7 @@ Contents
 #siff-event-modal {
   --siff-modal-padding: clamp(1.25rem, 3vw, 2rem);
   box-sizing: border-box;
-  width: min(56rem, calc(100% - 2rem));
+  width: min(48rem, calc(100% - 2rem));
   height: min(44rem, 85vh);
   max-height: 85vh;
   margin: auto;
@@ -82,25 +82,17 @@ Contents
 }
 
 #siff-modal-close {
-  flex: 0 0 auto;
-  margin-left: auto;
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
   line-height: 1;
-  display: grid;
-  place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  padding: 0;
+  margin-left: auto;
+  padding: 0.25rem 0.75rem;
   border: none;
-  border-radius: 50%;
-  background: #222;
-  color: #f4f4f4;
+  background: transparent;
+  color: inherit;
   font-size: 2rem;
   cursor: pointer;
-  transition: background 150ms ease;
-}
-
-#siff-modal-close:hover {
-  background: #444;
 }
 
 #siff-modal-close:focus-visible {
@@ -265,10 +257,17 @@ Contents
   width: 3.4375rem;
   aspect-ratio: 1;
   margin: 1rem auto;
-  --g1: conic-gradient(from 90deg at 0.1875rem 0.1875rem, #0000 90deg, currentColor 0);
-  --g2: conic-gradient(from -90deg at 1.375rem 1.375rem, #0000 90deg, currentColor 0);
-  background: var(--g1), var(--g1), var(--g1),
-              var(--g2), var(--g2), var(--g2);
+  --g1: conic-gradient(
+    from 90deg at 0.1875rem 0.1875rem,
+    #0000 90deg,
+    currentColor 0
+  );
+  --g2: conic-gradient(
+    from -90deg at 1.375rem 1.375rem,
+    #0000 90deg,
+    currentColor 0
+  );
+  background: var(--g1), var(--g1), var(--g1), var(--g2), var(--g2), var(--g2);
   background-size: 1.5625rem 1.5625rem;
   background-repeat: no-repeat;
   animation: siff-loader 1.5s infinite;
@@ -276,19 +275,34 @@ Contents
 
 @keyframes siff-loader {
   0% {
-    background-position: 0 0, 0 100%, 100% 100%;
+    background-position:
+      0 0,
+      0 100%,
+      100% 100%;
   }
   25% {
-    background-position: 100% 0, 0 100%, 100% 100%;
+    background-position:
+      100% 0,
+      0 100%,
+      100% 100%;
   }
   50% {
-    background-position: 100% 0, 0 0, 100% 100%;
+    background-position:
+      100% 0,
+      0 0,
+      100% 100%;
   }
   75% {
-    background-position: 100% 0, 0 0, 0 100%;
+    background-position:
+      100% 0,
+      0 0,
+      0 100%;
   }
   100% {
-    background-position: 100% 100%, 0 0, 0 100%;
+    background-position:
+      100% 100%,
+      0 0,
+      0 100%;
   }
 }
 
@@ -404,7 +418,6 @@ Contents
   display: none;
 }
 
-/* Event cards */
 .siff-event-card {
   height: 100%;
   box-sizing: border-box;
@@ -418,7 +431,6 @@ Contents
   color: #f4f4f4;
   box-shadow: 0 0.1875rem 0.75rem rgb(0 0 0 / 4%);
   cursor: pointer;
-  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
 
 .siff-event-card > * {
@@ -449,8 +461,7 @@ Contents
 .siff-event-card .wp-block-post-featured-image {
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  border-radius: 0.625rem;
-  background: #202020;
+  background: #f2f2f2;
 }
 
 .siff-event-card .wp-block-post-featured-image img {
@@ -474,10 +485,6 @@ Contents
 }
 
 .siff-event-card .taxonomy-siff-event-types {
-  align-self: flex-start;
-  width: fit-content;
-  max-width: 100%;
-  box-sizing: border-box;
   margin-top: auto;
   padding: 0.45rem 0.9rem;
   border-radius: 62.4375rem;
@@ -591,11 +598,9 @@ Contents
 
 /* Search */
 form.siff-event-search {
-  flex: 1 1 20rem;
   width: 100%;
   max-width: 36rem;
-  margin: 0;
-  margin-inline-start: auto;
+  margin: 0 auto 1.5rem;
 }
 
 .siff-event-search .wp-block-search__label {
@@ -717,7 +722,6 @@ form.siff-event-search {
   text-align: center;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
 }
 
 .siff-guests .siff-guests-less {

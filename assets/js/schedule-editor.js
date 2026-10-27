@@ -1,4 +1,4 @@
-/* Core sends these custom query properties to the existing event REST collection endpoint. */
+/* Core sends these custom query properties to the existing event REST route. */
 wp.domReady(function () {
 	Object.entries(siffScheduleDays).forEach(function ([slug, day]) {
 		const namespace = "siff/schedule-" + slug;
@@ -14,7 +14,7 @@ wp.domReady(function () {
 				namespace: namespace,
 				className: "siff-schedule-query",
 				query: {
-					// Match the pattern's 100-event daily limit; no pagination.
+					// Match the pattern: 100 per day, no pagination; later events are hidden.
 					perPage: 100,
 					pages: 0,
 					offset: 0,

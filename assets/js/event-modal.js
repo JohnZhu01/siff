@@ -199,7 +199,7 @@ function initEventModal() {
   }
 
   document.addEventListener("click", async (event) => {
-    // Ignore clicks inside the modal.
+    // Leave links and controls inside the dialog alone.
     if (modal.contains(event.target)) return;
 
     if (!(event.target instanceof Element)) return;
@@ -220,7 +220,6 @@ function initEventModal() {
     requestNumber++;
     const currentRequest = requestNumber;
 
-    // Reset details before loading.
     const eventId = trigger.dataset.eventId;
     const loadingStarted = performance.now();
     const minimumLoadingTime = 500;
@@ -240,7 +239,6 @@ function initEventModal() {
     try {
       let details = eventCache[eventId];
 
-      // Fetch details not already cached.
       if (!details) {
         const url = new URL(encodeURIComponent(eventId), siffModal.restUrl);
 
@@ -273,21 +271,7 @@ function initEventModal() {
     }
   });
 
-  // Close button and backdrop clicks.
   closeButton.addEventListener("click", () => modal.close());
-  modal.addEventListener("click", (event) => {
-    const bounds = modal.getBoundingClientRect();
-
-    const clickedOutside =
-      event.clientX < bounds.left ||
-      event.clientX > bounds.right ||
-      event.clientY < bounds.top ||
-      event.clientY > bounds.bottom;
-
-    if (event.target === modal && clickedOutside) {
-      modal.close();
-    }
-  });
   modal.addEventListener("close", () => {
     requestNumber++;
     modal.classList.remove("is-loading");
@@ -336,21 +320,21 @@ function initEventFilters() {
         link: element.querySelector(".wp-block-post-title a"),
       }));
 
-    const types = ["all", "film", "workshop", "panel"];
-    const controls = [];
+  const types = ["all", "film", "workshop", "panel"];
+  const controls = [];
 
-    types.forEach((type) => {
-      const link = filters.querySelector(
-        `.siff-filter-${type} .wp-block-button__link`,
-      );
-      if (!link) return;
+  types.forEach((type) => {
+    const link = filters.querySelector(
+      `.siff-filter-${type} .wp-block-button__link`,
+    );
+    if (!link) return;
 
-      // Replace filter links with buttons.
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = link.className;
-      button.textContent = link.textContent;
-      link.replaceWith(button);
+    // Use a real button for keyboard-accessible filtering.
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = link.className;
+    button.textContent = link.textContent;
+    link.replaceWith(button);
 
       controls.push({ type, button });
     });
@@ -413,7 +397,7 @@ function initEventFilters() {
         const matchesType =
           type === "all" || element.classList.contains(`siff-event-types-${type}`);
 
-        const matches = matchesType && title.includes(searchText);
+      const matches = matchesType && title.includes(searchText);
 
         if (matches) count++;
         const wasHidden = element.hidden;
@@ -446,12 +430,12 @@ function initEventFilters() {
         }
       });
 
-      controls.forEach((control) => {
-        control.button.setAttribute(
-          "aria-pressed",
-          String(control.type === type),
-        );
-      });
+    controls.forEach((control) => {
+      control.button.setAttribute(
+        "aria-pressed",
+        String(control.type === type),
+      );
+    });
 
       const shown = visibleCards.length;
       loadMore.hidden = shown >= count;
@@ -501,22 +485,19 @@ function initEventFilters() {
       applyFilter(activeType);
     });
 
-    searchForm?.addEventListener("submit", (event) => {
-      event.preventDefault();
-      applyFilter(activeType);
-    });
-    applyFilter("all");
-  });
-}
+searchForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  applyFilter(activeType);
+});
+  applyFilter("all");
+});
 
-// Guest expand and collapse.
-function initGuestControls() {
-  document.querySelectorAll(".siff-guests").forEach((query) => {
-    const grid = query.querySelector(".wp-block-post-template");
-    const more = query.querySelector(".wp-load-more__button");
-    const pagination = more?.closest(".wp-block-buttons");
+document.querySelectorAll(".siff-guests").forEach((query) => {
+  const grid = query.querySelector(".wp-block-post-template");
+  const more = query.querySelector(".wp-load-more__button");
+  const pagination = more?.closest(".wp-block-buttons");
 
-    if (!grid || !pagination) return;
+  if (!grid || !pagination) return;
 
     more.setAttribute("aria-expanded", "false");
     const originalPagination = pagination.cloneNode(true);
@@ -570,49 +551,27 @@ function initGuestControls() {
     less.textContent = "See less guests";
     less.setAttribute("aria-expanded", "true");
 
-    const lessPagination = originalPagination.cloneNode(true);
-    lessPagination.classList.add("siff-guests-less-controls");
-    lessPagination.querySelector(".wp-load-more__button").replaceWith(less);
-    lessPagination.hidden = true;
-    query.append(lessPagination);
+  const lessPagination = originalPagination.cloneNode(true);
+  lessPagination.classList.add("siff-guests-less-controls");
+  lessPagination.querySelector(".wp-load-more__button").replaceWith(less);
+  lessPagination.hidden = true;
+  query.append(lessPagination);
 
-    // Guest loading hooks.
-    document.addEventListener("qllmLoadStart", () => {
-      const loadingButton = query.querySelector(".wp-load-more__button.loading");
-      if (!loadingButton) return;
-      loadingGuests = true;
-      restoreFocusAfterLoad = loadingButton.contains(document.activeElement);
-      freezeGuestGrid();
-      less.disabled = true;
+  document.addEventListener("qllmLoadStart", () => {
+    less.disabled = true;
+  });
+
+  document.addEventListener("qllmLoadEnd", () => {
+    less.disabled = false;
+    lessPagination.hidden = grid.children.length <= initialCount;
+  });
+
+  less.addEventListener("click", () => {
+    grid.innerHTML = originalCards;
+
+    query.querySelectorAll(".wp-load-more__button").forEach((button) => {
+      button.closest(".wp-block-buttons")?.remove();
     });
-
-    document.addEventListener("qllmLoadEnd", () => {
-      if (!loadingGuests) return;
-      loadingGuests = false;
-      const fromHeight = grid.getBoundingClientRect().height;
-      less.disabled = false;
-      const expanded = grid.children.length > initialCount;
-
-      query.querySelectorAll(".wp-load-more__button").forEach((button) => {
-        const controls = button.closest(".wp-block-buttons");
-        if (!controls) return;
-        controls.hidden = expanded;
-      });
-
-      lessPagination.hidden = !expanded;
-      animateGuestGrid(fromHeight);
-      if (expanded && restoreFocusAfterLoad) less.focus({ preventScroll: true });
-    });
-
-    // Restore the initial guests and controls.
-    less.addEventListener("click", () => {
-      const fromHeight = freezeGuestGrid();
-      // Keep the original portraits.
-      [...grid.children].slice(initialCount).forEach((card) => card.remove());
-
-      query.querySelectorAll(".wp-load-more__button").forEach((button) => {
-        button.closest(".wp-block-buttons")?.remove();
-      });
 
       const restoredPagination = originalPagination.cloneNode(true);
       lessPagination.before(restoredPagination);
