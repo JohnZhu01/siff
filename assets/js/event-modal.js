@@ -75,7 +75,9 @@ function addEventDetail(container, label, value) {
 // Event modal.
 function initEventModal() {
   const modal = document.querySelector("#siff-event-modal");
-  const modalBody = document.querySelector("#siff-event-modal .siff-modal-scroll");
+  const modalBody = document.querySelector(
+    "#siff-event-modal .siff-modal-scroll",
+  );
   const closeButton = document.querySelector("#siff-modal-close");
   const title = document.querySelector("#siff-modal-title");
   const content = document.querySelector("#siff-modal-content");
@@ -291,14 +293,19 @@ function initEventFilters() {
   const filterGroups = document.querySelectorAll(".siff-event-filters");
   if (!filterGroups.length) return;
 
-  const header = document.querySelector(".wp-site-blocks > header.wp-block-template-part");
+  const header = document.querySelector(
+    ".wp-site-blocks > header.wp-block-template-part",
+  );
 
   // Update the sticky offset on page load and resize.
   if (header) {
     function updateFilterOffset() {
       const headerTop = parseFloat(getComputedStyle(header).top) || 0;
       const offset = header.getBoundingClientRect().height + headerTop;
-      document.documentElement.style.setProperty("--siff-event-filters-top", `${offset}px`);
+      document.documentElement.style.setProperty(
+        "--siff-event-filters-top",
+        `${offset}px`,
+      );
     }
 
     window.addEventListener("load", updateFilterOffset);
@@ -406,7 +413,11 @@ function initEventFilters() {
         element.hidden = !matches || count > limit;
         if (!element.hidden) {
           visibleCards.push(card);
-          if (animate && !reducedMotion.matches && (limit === batchSize || wasHidden)) {
+          if (
+            animate &&
+            !reducedMotion.matches &&
+            (limit === batchSize || wasHidden)
+          ) {
             const animation = element.animate(
               [
                 { opacity: 0, transform: "translateY(8px)" },
@@ -455,7 +466,10 @@ function initEventFilters() {
           : headerOffset;
 
         window.scrollTo({
-          top: Math.max(0, window.scrollY + resultsSection.getBoundingClientRect().top - offset - 12),
+          top: Math.max(
+            0,
+            window.scrollY + resultsSection.getBoundingClientRect().top - offset - 12,
+          ),
           behavior: reducedMotion.matches ? "instant" : "smooth",
         });
       });

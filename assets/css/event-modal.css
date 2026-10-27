@@ -271,11 +271,21 @@ Contents
 }
 
 @keyframes siff-loader {
-  0%   { background-position: 0 0, 0 100%, 100% 100%; }
-  25%  { background-position: 100% 0, 0 100%, 100% 100%; }
-  50%  { background-position: 100% 0, 0 0, 100% 100%; }
-  75%  { background-position: 100% 0, 0 0, 0 100%; }
-  100% { background-position: 100% 100%, 0 0, 0 100%; }
+  0% {
+    background-position: 0 0, 0 100%, 100% 100%;
+  }
+  25% {
+    background-position: 100% 0, 0 100%, 100% 100%;
+  }
+  50% {
+    background-position: 100% 0, 0 0, 100% 100%;
+  }
+  75% {
+    background-position: 100% 0, 0 0, 0 100%;
+  }
+  100% {
+    background-position: 100% 100%, 0 0, 0 100%;
+  }
 }
 
 #siff-event-modal.is-loading [role="tablist"],
@@ -795,7 +805,6 @@ form.siff-event-search {
   .siff-modal-layout {
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
   }
-
 }
 
 @media (max-width: 639px) {
@@ -935,7 +944,6 @@ form.siff-event-search {
     color: #555;
     font-size: 0.75rem;
   }
-
 }
 
 /* Short screens */
