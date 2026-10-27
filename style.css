@@ -599,3 +599,17 @@ body.page-id-3 .wp-block-heading[id] {
         transition: none;
     }
 }
+
+
+
+
+.wc-block-product{
+    border: 1px solid var(--wp--preset--color--custom-accents, #05c7f2);
+    padding: 2rem;
+    height: fit-content;
+}
+
+.wc-block-product-template li:nth-child(3) {
+  /* Your styles here */
+  background-color: #151515;
+}
