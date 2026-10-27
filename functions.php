@@ -469,7 +469,7 @@ function siff_enqueue_festival_highlights_assets()
         'siff-festival-highlights',
         $theme_uri . '/assets/css/festival-highlights.css',
         array('siff-swiper'),
-        '1.0'
+        filemtime(get_theme_file_path('/assets/css/festival-highlights.css'))
     );
 
     wp_enqueue_script(
