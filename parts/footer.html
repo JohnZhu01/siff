@@ -1,49 +1,70 @@
-<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"}}},"layout":{"inherit":true,"type":"constrained"}} -->
-<div class="wp-block-group" style="padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)"><!-- wp:columns -->
-<div class="wp-block-columns"><!-- wp:column {"metadata":{"name":"company-contact"},"style":{"spacing":{"padding":{"top":"0","bottom":"0","left":"0","right":"var:preset|spacing|80"}}}} -->
-<div class="wp-block-column" style="padding-top:0;padding-right:var(--wp--preset--spacing--80);padding-bottom:0;padding-left:0"><!-- wp:group -->
-<div class="wp-block-group"><!-- wp:site-logo {"width":180} /-->
-
-<!-- wp:paragraph -->
-<p>Celebrating independent cinema, emerging filmmakers, and creative storytelling on British Columbia’s Sunshine Coast.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph -->
-<p><strong>June 11–13, 2027 | Gibsons, BC</strong></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"}} -->
-<div class="wp-block-group"><!-- wp:paragraph -->
-<p>info@siff.ca</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph -->
-<p>contact number</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group --></div>
-<!-- /wp:group --></div>
-<!-- /wp:column -->
-
-<!-- wp:column {"style":{"spacing":{"padding":{"top":"var:preset|spacing|80","bottom":"var:preset|spacing|80","left":"var:preset|spacing|60","right":"var:preset|spacing|60"}}}} -->
-<div class="wp-block-column" style="padding-top:var(--wp--preset--spacing--80);padding-right:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--80);padding-left:var(--wp--preset--spacing--60)"><!-- wp:navigation {"ref":251,"style":{"spacing":{"blockGap":"var:preset|spacing|50"}},"fontSize":"medium","layout":{"type":"flex","orientation":"vertical","justifyContent":"left"}} /--></div>
-<!-- /wp:column -->
-
-<!-- wp:column {"metadata":{"name":"Subscribe"},"style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}}} -->
-<div class="wp-block-column" style="padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)"><!-- wp:heading {"level":4} -->
-<h4 class="wp-block-heading">Get Latest News and Update</h4>
-<!-- /wp:heading -->
-
-<!-- wp:jetpack/contact-form {"jetpackCRM":false,"salesforceData":{"organizationId":"","sendToSalesforce":false},"mailpoet":{"listId":null,"listName":null,"enabledForForm":false},"layout":{"type":"flex","flexWrap":"nowrap","orientation":"vertical","justifyContent":"left","verticalAlignment":"top"}} -->
-<div class="wp-block-jetpack-contact-form"><!-- wp:jetpack/field-email {"required":true} -->
-<div><!-- wp:jetpack/label {"label":"Email"} /-->
-
-<!-- wp:jetpack/input {"type":"email"} /--></div>
-<!-- /wp:jetpack/field-email -->
-
-<!-- wp:button {"tagName":"button","type":"submit","lock":{"move":false,"remove":false},"style":{"typography":{"textAlign":"center"},"border":{"width":"0px","style":"none"},"dimensions":{"width":"var:preset|dimension|50"},"spacing":{"padding":{"left":"0","right":"0","top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"fontSize":"large"} -->
-<div class="wp-block-button"><button type="submit" class="wp-block-button__link has-text-align-center has-large-font-size has-custom-font-size wp-element-button" style="border-style:none;border-width:0px;padding-top:var(--wp--preset--spacing--30);padding-right:0;padding-bottom:var(--wp--preset--spacing--30);padding-left:0">Subscribe</button></div>
-<!-- /wp:button --></div>
-<!-- /wp:jetpack/contact-form --></div>
-<!-- /wp:column --></div>
-<!-- /wp:columns --></div>
+<!-- wp:group {"className":"siff-footer","layout":{"type":"constrained"}} -->
+<div class="wp-block-group siff-footer">
+    <!-- wp:columns {"className":"siff-footer-columns"} -->
+    <div class="wp-block-columns siff-footer-columns">
+        <!-- wp:column {"className":"siff-footer-about","metadata":{"name":"company-contact"}} -->
+        <div class="wp-block-column siff-footer-about">
+            <!-- wp:group -->
+            <div class="wp-block-group">
+                <!-- wp:site-logo {"width":180} /-->
+                <!-- wp:paragraph -->
+                <p>Celebrating independent cinema, emerging filmmakers, and creative storytelling on British Columbia’s Sunshine Coast.</p>
+                <!-- /wp:paragraph -->
+                <!-- wp:paragraph -->
+                <p><strong>June 11–13, 2027 | Gibsons, BC</strong></p>
+                <!-- /wp:paragraph -->
+                <!-- wp:group {"className":"siff-footer-contact","layout":{"type":"flex","orientation":"vertical","justifyContent":"left"}} -->
+                <div class="wp-block-group siff-footer-contact">
+                    <!-- wp:paragraph -->
+                    <p><a href="mailto:info@siff.ca">info@siff.ca</a></p>
+                    <!-- /wp:paragraph -->
+                    <!-- wp:paragraph -->
+                    <p><a href="tel:+16045550147">(604) 555-0147</a></p>
+                    <!-- /wp:paragraph -->
+                </div>
+                <!-- /wp:group -->
+            </div>
+            <!-- /wp:group -->
+        </div>
+        <!-- /wp:column -->
+        <!-- wp:column {"className":"siff-footer-nav"} -->
+        <div class="wp-block-column siff-footer-nav">
+            <!-- wp:heading {"level":4} -->
+            <h4 class="wp-block-heading">Explore</h4>
+            <!-- /wp:heading -->
+            <!-- wp:navigation {"ref":251,"overlayMenu":"never","style":{"spacing":{"blockGap":"0"}},"fontSize":"small","layout":{"type":"flex","orientation":"vertical","justifyContent":"left"}} /-->
+        </div>
+        <!-- /wp:column -->
+        <!-- wp:column {"className":"siff-footer-signup","metadata":{"name":"Subscribe"}} -->
+        <div class="wp-block-column siff-footer-signup">
+            <!-- wp:heading {"level":4} -->
+            <h4 class="wp-block-heading">Festival news and updates</h4>
+            <!-- /wp:heading -->
+            <!-- wp:jetpack/contact-form {"jetpackCRM":false,"salesforceData":{"organizationId":"","sendToSalesforce":false},"mailpoet":{"listId":null,"listName":null,"enabledForForm":false},"layout":{"type":"flex","flexWrap":"nowrap","orientation":"vertical","justifyContent":"left","verticalAlignment":"top"}} -->
+            <div class="wp-block-jetpack-contact-form">
+                <!-- wp:jetpack/field-email {"required":true} -->
+                <div>
+                    <!-- wp:jetpack/label {"label":"Email"} /-->
+                    <!-- wp:jetpack/input {"type":"email"} /-->
+                </div>
+                <!-- /wp:jetpack/field-email -->
+                <!-- wp:button {"tagName":"button","type":"submit","className":"siff-footer-submit"} -->
+                <div class="wp-block-button siff-footer-submit">
+                    <button type="submit" class="wp-block-button__link wp-element-button">Subscribe</button>
+                </div>
+                <!-- /wp:button -->
+            </div>
+            <!-- /wp:jetpack/contact-form -->
+        </div>
+        <!-- /wp:column -->
+    </div>
+    <!-- /wp:columns -->
+    <!-- wp:group {"className":"siff-footer-bottom","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
+    <div class="wp-block-group siff-footer-bottom">
+        <!-- wp:paragraph -->
+        <p>© SIFF. All rights reserved.</p>
+        <!-- /wp:paragraph -->
+    </div>
+    <!-- /wp:group -->
+</div>
 <!-- /wp:group -->

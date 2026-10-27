@@ -6,9 +6,13 @@ require_once get_theme_file_path('/inc/schedule.php');
 // Enable ACF field bindings in the editor.
 add_filter('acf/settings/enable_datastore', '__return_true');
 
+// Allow guest roles to appear in bound paragraph blocks.
+function siff_enable_guest_role_binding($field) {
+    $field['allow_in_bindings'] = 1;
+    return $field;
+}
 
-
-
+add_filter('acf/load_field/key=field_6acf0ec10816f', 'siff_enable_guest_role_binding');
 
 // Register the vendor card block.
 function siff_register_vendor_card() {

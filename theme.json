@@ -65,12 +65,10 @@
 				}
 			],
 			"units": [
-				"%",
-				"px",
-				"em",
-				"rem",
 				"vh",
-				"vw"
+				"vw",
+				"rem",
+				"%"
 			]
 		},
 		"typography": {
@@ -385,10 +383,10 @@
 			"core/button": {
 				"border": {
 					"radius": {
-						"bottomLeft": "4px",
-						"bottomRight": "4px",
-						"topLeft": "4px",
-						"topRight": "4px"
+						"bottomLeft": "0.25rem",
+						"bottomRight": "0.25rem",
+						"topLeft": "0.25rem",
+						"topRight": "0.25rem"
 					}
 				},
 				"spacing": {
@@ -420,9 +418,9 @@
 				":focus-visible": {
 					"outline": {
 						"color": "var:preset|color|custom-accents",
-						"offset": "3px",
+						"offset": "0.1875rem",
 						"style": "solid",
-						"width": "2px"
+						"width": "0.125rem"
 					}
 				},
 				"color": {
@@ -447,9 +445,9 @@
 				":focus-visible": {
 					"outline": {
 						"color": "var:preset|color|custom-accents",
-						"offset": "3px",
+						"offset": "0.1875rem",
 						"style": "solid",
-						"width": "2px"
+						"width": "0.125rem"
 					}
 				},
 				"color": {
@@ -498,10 +496,10 @@
 		"spacing": {
 			"blockGap": "var:preset|spacing|40",
 			"padding": {
-				"bottom": "0px",
-				"left": "0px",
-				"right": "0px",
-				"top": "0px"
+				"bottom": "0",
+				"left": "0",
+				"right": "0",
+				"top": "0"
 			}
 		},
 		"typography": {
