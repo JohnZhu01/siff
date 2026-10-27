@@ -1,10 +1,49 @@
 <?php
 
+/*
+Contents
+  Page helpers
+  Events wrapper
+  Modal markup
+  Assets
+  Event data
+  REST route
+  Event links
+*/
+
+// Page helpers.
 function siff_page_uses_event_modal() {
     return is_page(array('events', 'schedule'));
 }
 
-// Event modal.
+// Give the Events page a class for page-specific styles.
+function siff_event_page_classes($classes) {
+    if (is_page('events')) {
+        $classes[] = 'siff-events-page';
+    }
+    return $classes;
+}
+
+add_filter('body_class', 'siff_event_page_classes');
+
+// Events wrapper.
+function siff_add_events_section_class($block_content) {
+    if (strpos($block_content, 'siff-event-filters') === false) {
+        return $block_content;
+    }
+
+    $html = new WP_HTML_Tag_Processor($block_content);
+    if ($html->next_tag(array('class_name' => 'wp-block-query'))) {
+        $html->add_class('siff-events-section');
+        $html->add_class('alignfull');
+    }
+
+    return $html->get_updated_html();
+}
+
+add_filter('render_block_core/query', 'siff_add_events_section_class');
+
+// Modal markup.
 function siff_render_event_modal() {
     if (!siff_page_uses_event_modal()) {
         return;
@@ -12,27 +51,60 @@ function siff_render_event_modal() {
 
     ?>
     <dialog id="siff-event-modal" aria-labelledby="siff-modal-title">
-        <button type="button" id="siff-modal-close" aria-label="Close event details">
-            &times;
-        </button>
-
-        <div class="siff-modal-layout">
+        <header class="siff-modal-header">
             <h2 id="siff-modal-title">Event details</h2>
+            <button type="button" id="siff-modal-close" aria-label="Close event details">
+                &times;
+            </button>
+        </header>
 
-            <div class="siff-modal-image">
-                <img id="siff-modal-image" alt="" hidden>
-            </div>
+        <div class="siff-modal-scroll">
+            <div class="siff-modal-layout">
+                <div class="siff-modal-image">
+                    <img id="siff-modal-image" alt="" hidden>
+                </div>
 
-            <div class="siff-modal-info">
-                <div id="siff-modal-meta"></div>
+                <div class="siff-modal-info">
+                    <div id="siff-modal-meta"></div>
+                </div>
 
-                <p id="siff-modal-person" hidden></p>
-            </div>
+                <div class="siff-modal-description siff-modal-tabs">
+                    <div role="tablist" aria-label="Event information">
+                        <button
+                            type="button"
+                            id="siff-tab-overview"
+                            role="tab"
+                            aria-selected="true"
+                            aria-controls="siff-panel-overview"
+                        >Synopsis</button>
+                        <button
+                            type="button"
+                            id="siff-tab-details"
+                            role="tab"
+                            aria-selected="false"
+                            aria-controls="siff-panel-details"
+                            tabindex="-1"
+                        >Details</button>
+                    </div>
 
-            <div class="siff-modal-description">
-                <h3 id="siff-modal-description-title">Description</h3>
-
-                <div id="siff-modal-content"></div>
+                    <div
+                        id="siff-panel-overview"
+                        role="tabpanel"
+                        aria-labelledby="siff-tab-overview"
+                        tabindex="0"
+                    >
+                        <div id="siff-modal-content"></div>
+                    </div>
+                    <div
+                        id="siff-panel-details"
+                        role="tabpanel"
+                        aria-labelledby="siff-tab-details"
+                        tabindex="0"
+                        hidden
+                    >
+                        <div id="siff-modal-credits"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </dialog>
@@ -41,6 +113,7 @@ function siff_render_event_modal() {
 
 add_action('wp_footer', 'siff_render_event_modal');
 
+// Assets.
 function siff_enqueue_event_modal_assets() {
     if (!siff_page_uses_event_modal()) {
         return;
@@ -65,74 +138,7 @@ function siff_enqueue_event_modal_assets() {
 
 add_action('wp_enqueue_scripts', 'siff_enqueue_event_modal_assets');
 
-function siff_localize_event_modal()
-{
-    if (!siff_page_uses_event_modal()) {
-        return;
-    }
-
-    $events = array();
-
-    if (is_page('events')) {
-        $event_ids = get_posts(array(
-            'post_type' => 'siff-event',
-            'post_status' => 'publish',
-            'numberposts' => 50,
-            'orderby' => 'date',
-            'order' => 'DESC',
-            'fields' => 'ids',
-        ));
-
-        foreach ($event_ids as $event_id) {
-            $details = siff_event_details_data($event_id);
-
-            if ($details) {
-                $events[$event_id] = $details;
-            }
-        }
-    }
-
-    wp_localize_script('siff-event-modal', 'siffModal', array(
-        'restUrl' => rest_url('siff/v1/events/'),
-        'events' => $events,
-    ));
-}
-
-function siff_register_event_routes()
-{
-    register_rest_route('siff/v1', '/events/(?P<id>[1-9]\d*)', array(
-        'methods' => WP_REST_Server::READABLE,
-        'callback' => 'siff_rest_event_details',
-        'permission_callback' => '__return_true',
-    ));
-}
-
-add_action('rest_api_init', 'siff_register_event_routes');
-
-function siff_rest_event_details($request)
-{
-    if (!function_exists('get_field')) {
-        return new WP_Error(
-            'siff_fields_unavailable',
-            'Event fields are unavailable.',
-            array('status' => 503)
-        );
-    }
-
-    $event_id = absint($request['id']);
-    $details = siff_event_details_data($event_id);
-
-    if (!$details) {
-        return new WP_Error(
-            'siff_event_not_found',
-            'Event not found.',
-            array('status' => 404)
-        );
-    }
-
-    return rest_ensure_response($details);
-}
-
+// Event data.
 function siff_event_details_data($event_id) {
     $event = get_post($event_id);
 
@@ -149,17 +155,10 @@ function siff_event_details_data($event_id) {
         return null;
     }
 
-    $event_types = wp_get_post_terms(
-        $event_id,
-        'siff-event-types',
-        array('fields' => 'slugs')
-    );
+    $event_types = get_the_terms($event_id, 'siff-event-types');
 
-    if (is_wp_error($event_types)) {
-        $event_types = array();
-    }
     return array(
-        'types' => $event_types,
+        'types' => is_array($event_types) ? wp_list_pluck($event_types, 'slug') : array(),
         'instructor' => get_field('instructor', $event_id),
         'instructor_profession' => get_field('instructor_profession', $event_id),
         'speaker' => get_field('speaker', $event_id),
@@ -182,7 +181,72 @@ function siff_event_details_data($event_id) {
     );
 }
 
-// Connect event titles to the modal.
+function siff_localize_event_modal() {
+    if (!siff_page_uses_event_modal()) {
+        return;
+    }
+
+    $events = array();
+
+    if (is_page('events')) {
+        $event_posts = get_posts(array(
+            'post_type' => 'siff-event',
+            'post_status' => 'publish',
+            'numberposts' => 50,
+            'orderby' => 'date',
+            'order' => 'DESC',
+        ));
+
+        foreach ($event_posts as $event_post) {
+            $details = siff_event_details_data($event_post->ID);
+
+            if ($details) {
+                $events[$event_post->ID] = $details;
+            }
+        }
+    }
+
+    wp_localize_script('siff-event-modal', 'siffModal', array(
+        'restUrl' => rest_url('siff/v1/events/'),
+        'events' => $events,
+    ));
+}
+
+// REST route.
+function siff_register_event_routes() {
+    register_rest_route('siff/v1', '/events/(?P<id>[1-9]\d*)', array(
+        'methods' => WP_REST_Server::READABLE,
+        'callback' => 'siff_rest_event_details',
+        'permission_callback' => '__return_true',
+    ));
+}
+
+add_action('rest_api_init', 'siff_register_event_routes');
+
+function siff_rest_event_details($request) {
+    if (!function_exists('get_field')) {
+        return new WP_Error(
+            'siff_fields_unavailable',
+            'Event fields are unavailable.',
+            array('status' => 503)
+        );
+    }
+
+    $event_id = absint($request['id']);
+    $details = siff_event_details_data($event_id);
+
+    if (!$details) {
+        return new WP_Error(
+            'siff_event_not_found',
+            'Event not found.',
+            array('status' => 404)
+        );
+    }
+
+    return rest_ensure_response($details);
+}
+
+// Event links.
 add_filter('render_block_core/post-title', function ($html, $parsed_block, $block) {
     $classes = preg_split('/\s+/', trim($parsed_block['attrs']['className'] ?? ''));
     $event_id = absint($block->context['postId'] ?? 0);
@@ -201,5 +265,3 @@ add_filter('render_block_core/post-title', function ($html, $parsed_block, $bloc
 
     return $processor->get_updated_html();
 }, 10, 3);
-
-
