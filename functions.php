@@ -56,6 +56,17 @@ function siff_enqueue_theme_styles()
 add_action('enqueue_block_assets', 'siff_enqueue_theme_styles');
 
 // Load the policy navigation on the policy page.
+function siff_policy_page_class($classes)
+{
+    if (is_page('policy') || is_privacy_policy()) {
+        $classes[] = 'siff-policy-page';
+    }
+    return $classes;
+}
+
+add_filter('body_class', 'siff_policy_page_class');
+
+// Load the policy dropdown script.
 function siff_enqueue_policy_navigation()
 {
     if (!is_page(array('policy', 'privacy-policy')) && !is_privacy_policy()) {
