@@ -549,6 +549,52 @@ body .wp-site-blocks {
     }
 }
 
+/* Error page */
+.siff-error-page .siff-page-main > .wp-block-post-title {
+    margin: 3rem auto 1.5rem;
+    padding-inline: 1rem;
+    color: var(--wp--preset--color--custom-accents, #05c7f2);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    text-align: center;
+}
+
+.siff-error-message {
+    box-sizing: border-box;
+    max-width: 44rem;
+    margin-inline: auto;
+    padding-inline: 1rem;
+    text-align: center;
+}
+
+.siff-error-message p {
+    margin-bottom: 1rem;
+    padding: 0;
+    line-height: 1.7;
+}
+
+.siff-error-news {
+    margin-top: 4rem;
+    margin-bottom: 3rem;
+}
+
+.siff-error-grid > li {
+    min-width: 0;
+    padding: 1rem;
+    border: 0.0625rem solid #333;
+    border-radius: 0.5rem;
+    background: #151515;
+}
+
+.siff-error-grid .wp-block-post-title {
+    font-size: 1.25rem;
+    line-height: 1.35;
+}
+
+.siff-error-grid p {
+    padding: 0;
+    line-height: 1.6;
+}
+
 /* About text */
 .siff-about-page .wp-block-media-text__content p {
     max-width: 40rem;

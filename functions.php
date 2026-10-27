@@ -3,6 +3,43 @@
 require_once get_theme_file_path('/inc/event-modal.php');
 require_once get_theme_file_path('/inc/schedule.php');
 
+// Allow the error page to use the numeric slug 404.
+function siff_allow_404_slug($override, $slug, $post_id, $status, $post_type)
+{
+    if ($post_type === 'page' && $slug === '404') {
+        $page = get_page_by_path('404');
+        if (!$page || $page->ID === $post_id) {
+            return '404';
+        }
+    }
+    return $override;
+}
+add_filter('pre_wp_unique_post_slug', 'siff_allow_404_slug', 10, 5);
+
+// Show the editable 404 page through the default page template.
+function siff_404_page_template($template)
+{
+    $page = get_page_by_path('404');
+    if (!$page || $page->post_status !== 'publish') {
+        return $template;
+    }
+    global $post;
+    $post = $page;
+    setup_postdata($post);
+    return get_page_template();
+}
+add_filter('404_template', 'siff_404_page_template');
+
+// Style the error page and missing URLs the same way.
+function siff_error_page_class($classes)
+{
+    if (is_404() || is_page('404')) {
+        $classes[] = 'siff-error-page';
+    }
+    return $classes;
+}
+add_filter('body_class', 'siff_error_page_class');
+
 // Enable ACF field bindings in the editor.
 add_filter('acf/settings/enable_datastore', '__return_true');
 
