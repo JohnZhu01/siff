@@ -35,6 +35,7 @@ function siff_add_events_section_class($block_content) {
     $html = new WP_HTML_Tag_Processor($block_content);
     if ($html->next_tag(array('class_name' => 'wp-block-query'))) {
         $html->add_class('siff-events-section');
+        $html->add_class('alignfull');
     }
 
     return $html->get_updated_html();
