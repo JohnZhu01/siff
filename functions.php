@@ -1,213 +1,56 @@
 <?php
-// Schedule Query Loops and the reusable event row.
-require_once get_theme_file_path('inc/schedule.php');
 
-// Give role paragraphs the current post ID from their Query Loop.
-add_filter('register_block_type_args', function ($args, $name) {
-    if ($name === 'core/paragraph') {
-        $args['uses_context'] = array_unique(array_merge(
-            $args['uses_context'] ?? array(),
-            array('postId')
-        ));
-    }
+require_once get_theme_file_path('/inc/event-modal.php');
+require_once get_theme_file_path('/inc/schedule.php');
 
-    return $args;
-}, 10, 2);
-
-function siff_render_guest_role($html, $parsed_block, $block)
+// Allow the error page to use the numeric slug 404.
+function siff_allow_404_slug($override, $slug, $post_id, $status, $post_type)
 {
-    $classes = preg_split('/\s+/', trim($parsed_block['attrs']['className'] ?? ''));
-    $guest_id = absint($block->context['postId'] ?? 0);
-
-    if (
-        !in_array('siff-guest-role', $classes, true)
-        || !$guest_id || get_post_type($guest_id) !== 'guest'
-        || !function_exists('get_field')
-    ) {
-        return $html;
-    }
-
-    $role = get_field('role', $guest_id);
-    if (!$role) {
-        return '';
-    }
-
-    return preg_replace_callback('/(<p\b[^>]*>).*?(<\/p>)/s', function ($match) use ($role) {
-        return $match[1] . esc_html($role) . $match[2];
-    }, $html, 1);
-}
-
-add_filter('render_block_core/paragraph', 'siff_render_guest_role', 10, 3);
-
-// Event modal.
-function siff_render_event_modal()
-{
-?>
-    <dialog id="siff-event-modal" aria-labelledby="siff-modal-title">
-        <button type="button" id="siff-modal-close" aria-label="Close event details">
-            &times;
-        </button>
-
-        <div class="siff-modal-layout">
-            <div class="siff-modal-image">
-                <img id="siff-modal-image" alt="" hidden>
-            </div>
-
-            <div class="siff-modal-info">
-                <h2 id="siff-modal-title">Event details</h2>
-
-                <div id="siff-modal-meta"></div>
-
-                <p id="siff-modal-person" hidden></p>
-            </div>
-
-            <div class="siff-modal-description">
-                <h3 id="siff-modal-description-title">Description</h3>
-
-                <div id="siff-modal-content"></div>
-            </div>
-        </div>
-    </dialog>
-<?php
-}
-
-add_action('wp_footer', 'siff_render_event_modal');
-
-function siff_enqueue_event_modal_assets()
-{
-    wp_enqueue_style(
-        'siff-event-modal',
-        get_theme_file_uri('/assets/css/event-modal.css'),
-        array(),
-        filemtime(get_theme_file_path('/assets/css/event-modal.css'))
-    );
-
-    wp_enqueue_script(
-        'siff-event-modal',
-        get_theme_file_uri('/assets/js/event-modal.js'),
-        array(),
-        filemtime(get_theme_file_path('/assets/js/event-modal.js')),
-        true
-    );
-}
-
-add_action('wp_enqueue_scripts', 'siff_enqueue_event_modal_assets');
-
-function siff_localize_event_modal()
-{
-    $events = array();
-
-    if (is_page('events')) {
-        $event_ids = get_posts(array(
-            'post_type' => 'siff-event',
-            'post_status' => 'publish',
-            'numberposts' => 50,
-            'orderby' => 'date',
-            'order' => 'DESC',
-            'fields' => 'ids',
-        ));
-
-        foreach ($event_ids as $event_id) {
-            $details = siff_event_details_data($event_id);
-
-            if ($details) {
-                $events[$event_id] = $details;
-            }
+    if ($post_type === 'page' && $slug === '404') {
+        $page = get_page_by_path('404');
+        if (!$page || $page->ID === $post_id) {
+            return '404';
         }
     }
-
-    wp_localize_script('siff-event-modal', 'siffModal', array(
-        'restUrl' => rest_url('siff/v1/events/'),
-        'events' => $events,
-    ));
+    return $override;
 }
+add_filter('pre_wp_unique_post_slug', 'siff_allow_404_slug', 10, 5);
 
-add_action('wp_enqueue_scripts', 'siff_localize_event_modal', 20);
-
-function siff_register_event_routes()
+// Show the editable 404 page through the default page template.
+function siff_404_page_template($template)
 {
-    register_rest_route('siff/v1', '/events/(?P<id>[1-9]\d*)', array(
-        'methods' => WP_REST_Server::READABLE,
-        'callback' => 'siff_rest_event_details',
-        'permission_callback' => '__return_true',
-    ));
+    $page = get_page_by_path('404');
+    if (!$page || $page->post_status !== 'publish') {
+        return $template;
+    }
+    global $post;
+    $post = $page;
+    setup_postdata($post);
+    return get_page_template();
 }
+add_filter('404_template', 'siff_404_page_template');
 
-add_action('rest_api_init', 'siff_register_event_routes');
-
-function siff_rest_event_details($request)
+// Style the error page and missing URLs the same way.
+function siff_error_page_class($classes)
 {
-    if (!function_exists('get_field')) {
-        return new WP_Error(
-            'siff_fields_unavailable',
-            'Event fields are unavailable.',
-            array('status' => 503)
-        );
+    if (is_404() || is_page('404')) {
+        $classes[] = 'siff-error-page';
     }
-
-    $event_id = absint($request['id']);
-    $details = siff_event_details_data($event_id);
-
-    if (!$details) {
-        return new WP_Error(
-            'siff_event_not_found',
-            'Event not found.',
-            array('status' => 404)
-        );
-    }
-
-    return rest_ensure_response($details);
+    return $classes;
 }
+add_filter('body_class', 'siff_error_page_class');
 
-function siff_event_details_data($event_id)
+// Enable ACF field bindings in the editor.
+add_filter('acf/settings/enable_datastore', '__return_true');
+
+// Allow guest roles to appear in bound paragraph blocks.
+function siff_enable_guest_role_binding($field)
 {
-    $event = get_post($event_id);
-
-    // Only expose published event posts.
-    if (
-        !$event ||
-        $event->post_type !== 'siff-event' ||
-        $event->post_status !== 'publish'
-    ) {
-        return null;
-    }
-
-    if (!function_exists('get_field')) {
-        return null;
-    }
-
-    $event_types = wp_get_post_terms(
-        $event_id,
-        'siff-event-types',
-        array('fields' => 'slugs')
-    );
-
-    if (is_wp_error($event_types)) {
-        $event_types = array();
-    }
-    return array(
-        'types' => $event_types,
-        'instructor' => get_field('instructor', $event_id),
-        'instructor_profession' => get_field('instructor_profession', $event_id),
-        'speaker' => get_field('speaker', $event_id),
-        'speaker_profession' => get_field('speaker_profession', $event_id),
-        'image' => get_the_post_thumbnail_url($event_id, 'large') ?: '',
-        'title' => html_entity_decode(
-            get_the_title($event_id),
-            ENT_QUOTES,
-            get_bloginfo('charset')
-        ),
-        'description' => get_field('synopsis', $event_id)
-            ?: get_field('short_description', $event_id),
-        'date' => get_field('screening_date_and_time', $event_id)
-            ?: get_field('date_and_time', $event_id),
-        'filmmaker' => get_field('filmmaker', $event_id),
-        'director' => get_field('director', $event_id),
-        'venue' => get_field('venue', $event_id),
-        'duration' => get_field('runtime', $event_id)
-            ?: get_field('duration', $event_id),
-    );
+    $field['allow_in_bindings'] = 1;
+    return $field;
 }
+
+add_filter('acf/load_field/key=field_6acf0ec10816f', 'siff_enable_guest_role_binding');
 
 // Register the vendor card block.
 function siff_register_vendor_card()
@@ -236,21 +79,47 @@ function siff_render_vendor_card($attributes, $content, $block)
     return ob_get_clean();
 }
 
-// Load featured vendor styles in the editor and front end.
-function siff_register_featured_vendors_style()
+// Load the theme stylesheet in front-end and block editor content.
+function siff_enqueue_theme_styles()
 {
-    wp_enqueue_block_style(
-        'core/group',
-        array(
-            'handle' => 'siff-featured-vendors',
-            'src'    => get_theme_file_uri('assets/css/featured-vendors.css'),
-            'path'   => get_theme_file_path('assets/css/featured-vendors.css'),
-            'ver'    => filemtime(get_theme_file_path('assets/css/featured-vendors.css')),
-        )
+    wp_enqueue_style(
+        'siff-theme',
+        get_stylesheet_uri(),
+        array(),
+        filemtime(get_stylesheet_directory() . '/style.css')
     );
 }
 
-add_action('init', 'siff_register_featured_vendors_style');
+add_action('enqueue_block_assets', 'siff_enqueue_theme_styles');
+
+// Load the policy navigation on the policy page.
+function siff_policy_page_class($classes)
+{
+    if (is_page('policy') || is_privacy_policy()) {
+        $classes[] = 'siff-policy-page';
+    }
+    return $classes;
+}
+
+add_filter('body_class', 'siff_policy_page_class');
+
+// Load the policy dropdown script.
+function siff_enqueue_policy_navigation()
+{
+    if (!is_page(array('policy', 'privacy-policy')) && !is_privacy_policy()) {
+        return;
+    }
+
+    wp_enqueue_script(
+        'siff-vendor-directory',
+        get_theme_file_uri('assets/js/vendor-directory.js'),
+        array(),
+        filemtime(get_theme_file_path('/assets/js/policy-navigation.js')),
+        true
+    );
+}
+
+add_action('wp_enqueue_scripts', 'siff_enqueue_policy_navigation');
 
 // Load type filtering on the Vendors page.
 function siff_enqueue_vendor_directory_assets()
@@ -266,6 +135,16 @@ function siff_enqueue_vendor_directory_assets()
         filemtime(get_theme_file_path('assets/js/vendor-directory.js')),
         true
     );
+}
+
+add_action('wp_enqueue_scripts', 'siff_enqueue_vendor_directory_assets');
+
+function siff_enqueue_vendor_directory_styles()
+{
+    $post = get_post();
+    if (! is_page('vendors') && ! (is_admin() && $post && 'page' === $post->post_type && 'vendors' === $post->post_name)) {
+        return;
+    }
 
     wp_enqueue_style(
         'siff-vendor-directory',
@@ -275,32 +154,24 @@ function siff_enqueue_vendor_directory_assets()
     );
 }
 
-add_action('wp_enqueue_scripts', 'siff_enqueue_vendor_directory_assets');
+add_action('enqueue_block_assets', 'siff_enqueue_vendor_directory_styles');
 
-// Replace the marked Post Date block with the event's ACF date and time.
-add_filter('render_block_core/post-date', function ($html, $attributes, $block) {
-    $classes = preg_split('/\s+/', trim($attributes['attrs']['className'] ?? ''));
-    $event_id = absint($block->context['postId'] ?? 0);
+function siff_register_event_date_block()
+{
+    wp_register_script(
+        'siff-event-date-editor',
+        get_theme_file_uri('/blocks/event-date/editor.js'),
+        array('wp-blocks', 'wp-element', 'wp-block-editor'),
+        filemtime(get_theme_file_path('/blocks/event-date/editor.js')),
+        true
+    );
 
-    if (
-        !in_array('siff-event-date', $classes, true)
-        || get_post_type($event_id) !== 'siff-event'
-        || !function_exists('get_field')
-    ) {
-        return $html;
-    }
+    register_block_type(
+        get_theme_file_path('/blocks/event-date')
+    );
+}
 
-    $date = get_field('screening_date_and_time', $event_id)
-        ?: get_field('date_and_time', $event_id);
-
-    // Never fall back to the publication date for an event card.
-    if (!$date) {
-        return '';
-    }
-
-    return '<div class="' . esc_attr('wp-block-post-date ' . implode(' ', $classes))
-        . '">' . esc_html($date) . '</div>';
-}, 10, 3);
+add_action('init', 'siff_register_event_date_block');
 
 // Event type labels inside cards.
 function siff_event_type_labels($html, $parsed_block)
@@ -368,6 +239,31 @@ function siff_enqueue_leaflet_assets()
     );
 }
 add_action('wp_enqueue_scripts', 'siff_enqueue_leaflet_assets');
+
+// Register the Event Map Locator Block.
+function siff_register_event_locator()
+{
+    register_block_type(
+        'siff/event-locator',
+        [
+            'title' => 'Event Locator Map',
+            'category' => 'theme',
+            'icon' => 'location-alt',
+            'description' => 'Display a location of the event in the map.',
+            'render_callback' => function () {
+                return sprintf(
+                    '<div id="siff-event-locator"></div>'
+                );
+            },
+            'supports' => [
+                'autoRegister' => true,
+            ]
+        ]
+    );
+}
+
+add_action('init', 'siff_register_event_locator');
+
 
 // Keep the Events patterns available after file-based deployments.
 function siff_register_events_grid_pattern()
