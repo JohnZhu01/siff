@@ -545,6 +545,42 @@ body .wp-site-blocks {
     }
 }
 
+/* About text */
+.siff-about-page .wp-block-media-text__content p {
+    max-width: 40rem;
+    margin-top: 0;
+    margin-bottom: 1.25rem;
+    padding: 0;
+    line-height: 1.7;
+    text-indent: 0;
+}
+
+.siff-about-page .wp-block-media-text__content h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--wp--preset--color--custom-accents, #05c7f2);
+    line-height: 1.25;
+}
+
+/* Stack images above text on tablets and phones. */
+@media (max-width: 75rem) {
+    .siff-about-page .wp-block-media-text.is-stacked-on-mobile {
+        grid-template-columns: 100%;
+        gap: 1.5rem;
+    }
+
+    .siff-about-page .wp-block-media-text.is-stacked-on-mobile > .wp-block-media-text__media {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .siff-about-page .wp-block-media-text.is-stacked-on-mobile > .wp-block-media-text__content {
+        grid-column: 1;
+        grid-row: 2;
+        padding: 0;
+    }
+}
+
 /* Policy page */
 .siff-policy-page {
     /* Match the full-width bar to this page's padding. */
