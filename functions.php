@@ -77,13 +77,22 @@ function siff_enqueue_vendor_directory_assets()
         return;
     }
 
-    wp_enqueue_script(
-        'siff-vendor-directory',
-        get_theme_file_uri('assets/js/vendor-directory.js'),
-        array(),
-        filemtime(get_theme_file_path('assets/js/vendor-directory.js')),
-        true
-    );
+	wp_enqueue_script(
+		'siff-vendor-directory',
+		get_theme_file_uri( 'assets/js/vendor-directory.js' ),
+		array(),
+		filemtime( get_theme_file_path( 'assets/js/vendor-directory.js' ) ),
+		true
+	);
+}
+
+add_action( 'wp_enqueue_scripts', 'siff_enqueue_vendor_directory_assets' );
+
+function siff_enqueue_vendor_directory_styles() {
+	$post = get_post();
+	if ( ! is_page( 'vendors' ) && ! ( is_admin() && $post && 'page' === $post->post_type && 'vendors' === $post->post_name ) ) {
+		return;
+	}
 
     wp_enqueue_style(
         'siff-vendor-directory',
@@ -93,7 +102,7 @@ function siff_enqueue_vendor_directory_assets()
     );
 }
 
-add_action('wp_enqueue_scripts', 'siff_enqueue_vendor_directory_assets');
+add_action( 'enqueue_block_assets', 'siff_enqueue_vendor_directory_styles' );
 
 function siff_register_event_date_block()
 {
