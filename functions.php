@@ -50,7 +50,7 @@ add_action( 'enqueue_block_assets', 'siff_enqueue_theme_styles' );
 
 // Load the policy navigation on the policy page.
 function siff_enqueue_policy_navigation() {
-    if (!is_page('privacy-policy')) {
+    if (!is_page(array('policy', 'privacy-policy')) && !is_privacy_policy()) {
         return;
     }
 
