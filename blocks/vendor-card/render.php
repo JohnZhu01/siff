@@ -43,10 +43,10 @@ if ( function_exists( 'get_field' ) ) {
 			<p><?php echo nl2br( esc_html( $description ) ); ?></p>
 		<?php endif; ?>
 		<?php if ( $location ) : ?>
-			<p><?php echo esc_html( $location ); ?></p>
+			<p class="siff-vendor-card__location"><?php echo esc_html( $location ); ?></p>
 		<?php endif; ?>
 		<?php if ( $availability ) : ?>
-			<p><?php echo nl2br( esc_html( $availability ) ); ?></p>
+			<p class="siff-vendor-card__availability"><?php echo nl2br( esc_html( $availability ) ); ?></p>
 		<?php endif; ?>
 		<?php if ( $website && esc_url( $website ) ) : ?>
 			<a href="<?php echo esc_url( $website ); ?>"><?php

@@ -686,3 +686,122 @@ body .wp-site-blocks {
   /* Your styles here */
   background-color: #151515;
 }
+
+:is(.wp-element-button, .wp-block-button__link, .woocommerce a.button, .woocommerce button.button, .woocommerce input.button, .wc-block-components-button) {
+    box-sizing: border-box;
+    min-height: 2.75rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+/* Match WooCommerce controls to the theme.json button styles. */
+:is(.woocommerce a.button, .woocommerce button.button, .woocommerce input.button, .wc-block-components-button) {
+    padding: 0.75em 1.25em;
+    font-family: var(--wp--preset--font-family--montserrat);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.25;
+}
+:is(.woocommerce a.button, .woocommerce button.button, .woocommerce input.button, .wc-block-components-button):hover {
+    background-color: var(--wp--preset--color--custom-text);
+    color: var(--wp--preset--color--custom-background);
+}
+:is(.woocommerce a.button, .woocommerce button.button, .woocommerce input.button, .wc-block-components-button):focus-visible {
+    outline: 2px solid var(--wp--preset--color--custom-accents);
+    outline-offset: 3px;
+}
+
+/* Apply the narrower layout to pages with the saved content wrapper. */
+main:has(.siff-page-content) {
+    box-sizing: border-box;
+    width: calc(100% - 2.5rem);
+    max-width: 75rem;
+    padding-inline: 0;
+    margin-inline: auto;
+}
+.siff-page-content {
+    --wp--style--global--content-size: 75rem;
+    --wp--style--global--wide-size: 75rem;
+    --siff-section-gap: 2.5rem;
+    --siff-card-padding: 1.25rem;
+    max-width: 75rem;
+    overflow-wrap: anywhere;
+}
+.editor-styles-wrapper .is-root-container > .siff-page-content { max-width: 75rem; }
+.siff-page-content p { max-width: 65ch; }
+.siff-page-content .siff-intro { padding: 0; font-size: 1.25rem; }
+.siff-page-content :is(.siff-venue-card, .siff-package-card, .siff-visit-panel, .siff-visit-details, .siff-visit-cta, .siff-schedule-day) p {
+    padding: 0;
+}
+.siff-page-content :is(h2, h3) + :is(.wp-block-paragraph, .wp-block-columns, .wp-block-query) {
+    margin-block-start: 1rem;
+}
+.siff-page-content > h2,
+.siff-vendors-content > .wp-block-group > h2,
+.siff-vendor-directory > section {
+    margin-block-start: var(--siff-section-gap);
+}
+.siff-page-content .wp-block-columns { column-gap: 1.5rem; }
+.siff-page-content :is(.siff-venue-card, .siff-visit-panel, .siff-package-card),
+.siff-visit-content .wp-block-details {
+    box-sizing: border-box;
+    padding: var(--siff-card-padding);
+    border: 1px solid var(--wp--preset--color--custom-border);
+    border-radius: 0.5rem;
+    background: var(--wp--preset--color--custom-panel);
+    color: var(--wp--preset--color--custom-text);
+}
+.siff-visit-content .siff-visit-cta {
+    padding: var(--siff-card-padding);
+    border-radius: .5rem;
+    background: var(--wp--preset--color--custom-panel);
+}
+.siff-visit-cta > .wp-block-buttons { max-width: 100%; }
+.siff-market-copy { flex: 1; min-width: 0; }
+.siff-wave-edge img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 0;
+}
+/* Keep Salmonberry's dark logo legible on the charcoal banner. */
+.siff-featured-vendors-banner img[src*="/salmonberry-smokehouse"] {
+    background-color: #e8e1d5;
+}
+.siff-venue-card p, .siff-package-card p { margin-block-start: 0.75rem; }
+.siff-venue-card + .siff-venue-card { margin-block-start: 1.5rem; }
+.siff-content-photo img {
+    width: 100%;
+    height: auto;
+}
+.siff-visit-content .wp-block-details { margin-block-start: 0.75rem; }
+.siff-visit-content summary {
+    min-height: 1.75rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.siff-visit-content summary:focus-visible {
+    outline: 2px solid var(--wp--preset--color--custom-accents);
+    outline-offset: 4px;
+}
+.siff-visit-content .wp-block-details p { margin-block-start: 1rem; }
+.siff-page-content .siff-package-card { border-top: 3px solid var(--siff-tier-color); }
+.siff-package-platinum { --siff-tier-color: #d5d8dc; }
+.siff-package-gold { --siff-tier-color: #d8bb78; }
+.siff-package-silver { --siff-tier-color: #b8c4ce; }
+.siff-package-bronze { --siff-tier-color: #c79d7d; }
+@media (min-width: 782px) {
+    .siff-page-content {
+        --siff-section-gap: 4rem;
+        --siff-card-padding: 1.5rem;
+    }
+    main:has(.siff-page-content) {
+        width: calc(100% - 4rem);
+    }
+}
+@media (max-width: 781px) {
+    /* Stack page Columns in the editor's mobile preview. */
+    .editor-styles-wrapper .siff-page-content .wp-block-columns {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

@@ -26,9 +26,8 @@
 	align-items: center;
 	gap: var(--wp--preset--spacing--30, 1rem);
 	padding: var(--wp--preset--spacing--30, 1rem);
-	border: 1px solid currentColor;
-	border-color: color-mix(in srgb, currentColor 35%, transparent);
-	border-radius: 4px;
+	border: 1px solid var(--wp--preset--color--custom-border);
+	border-radius: 0.5rem;
 	color: inherit;
 	font-family: inherit;
 	font-size: 1rem;
@@ -48,32 +47,33 @@
 	line-height: 1.4;
 }
 
-.siff-schedule-row__type {
+.siff-schedule-row .siff-schedule-row__type {
 	margin: 0.25rem 0 0;
 	font-size: 0.875rem;
 }
 
 .siff-schedule-row__date {
 	display: block;
-	font-size: 0.75rem;
+	font-size: 0.875rem;
 }
 
 .siff-schedule-row .siff-schedule-row__view {
 	min-height: 44px;
-	padding: 0.625rem 0.875rem;
+	padding: 0.75em 1.25em;
 	border: 1px solid transparent;
 	border-radius: 4px;
 	background: var(--wp--preset--color--custom-accents);
 	color: var(--wp--preset--color--custom-background);
 	font-family: var(--wp--preset--font-family--montserrat, inherit);
-	font-size: 0.875rem;
+	font-size: 1rem;
+	line-height: 1.25;
 	font-weight: 600;
-	white-space: nowrap;
+	white-space: normal;
 	cursor: pointer;
 }
 
 .siff-schedule-row .siff-schedule-row__view:hover {
-	text-decoration: underline;
+	background: var(--wp--preset--color--custom-text);
 }
 
 .siff-schedule-row .siff-schedule-row__view:focus-visible,
@@ -125,3 +125,18 @@
 		overflow-wrap: anywhere;
 	}
 }
+
+.siff-page-content .siff-schedule-day {
+    padding: var(--siff-card-padding, 1.5rem);
+    border: 1px solid var(--wp--preset--color--custom-border);
+    border-radius: 0.5rem;
+    background: var(--wp--preset--color--custom-panel);
+}
+.siff-schedule-day + .siff-schedule-day {
+    margin-block-start: var(--siff-section-gap, 4rem);
+}
+.siff-schedule-day > h2 { color: var(--wp--preset--color--custom-accents); }
+.siff-schedule-row__time { font-weight: 600; }
+.siff-schedule-row__type,
+.siff-schedule-row__date,
+.siff-schedule-row__venue { color: var(--wp--preset--color--custom-muted); }
