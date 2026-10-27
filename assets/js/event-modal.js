@@ -1,5 +1,6 @@
 /*
 Contents
+  Measurements
   Loading spinner
   Detail rows
   Event modal
@@ -7,6 +8,12 @@ Contents
   Guest expand and collapse
   Setup
 */
+
+// Measurements.
+function toRem(value) {
+  const rootSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+  return value / rootSize + "rem";
+}
 
 // Loading spinner.
 function showEventLoader(container) {
@@ -304,7 +311,7 @@ function initEventFilters() {
       const offset = header.getBoundingClientRect().height + headerTop;
       document.documentElement.style.setProperty(
         "--siff-event-filters-top",
-        `${offset}px`,
+        toRem(offset),
       );
     }
 
@@ -420,7 +427,7 @@ function initEventFilters() {
           ) {
             const animation = element.animate(
               [
-                { opacity: 0, transform: "translateY(8px)" },
+                { opacity: 0, transform: "translateY(0.5rem)" },
                 { opacity: 1, transform: "translateY(0)" },
               ],
               {
@@ -524,7 +531,7 @@ function initGuestControls() {
       const height = grid.getBoundingClientRect().height;
       heightAnimation?.cancel();
       heightAnimation = null;
-      grid.style.height = `${height}px`;
+      grid.style.height = toRem(height);
       grid.style.overflow = "hidden";
       return height;
     }
@@ -545,9 +552,9 @@ function initGuestControls() {
         return toHeight;
       }
 
-      grid.style.height = `${toHeight}px`;
+      grid.style.height = toRem(toHeight);
       heightAnimation = grid.animate(
-        [{ height: `${fromHeight}px` }, { height: `${toHeight}px` }],
+        [{ height: toRem(fromHeight) }, { height: toRem(toHeight) }],
         { duration: 400, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
       );
       heightAnimation.onfinish = clearHeight;
