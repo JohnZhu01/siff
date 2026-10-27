@@ -19,7 +19,10 @@ add_filter('acf/load_field/key=field_6acf0ec10816f', 'siff_enable_guest_role_bin
 function siff_register_vendor_card()
 {
     register_block_type(
-        get_theme_file_path('blocks/vendor-card')
+        get_theme_file_path('blocks/vendor-card'),
+        array(
+            'render_callback' => 'siff_render_vendor_card',
+        )
     );
 }
 
