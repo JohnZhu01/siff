@@ -1,8 +1,8 @@
-import { LeafletMap, TileLayer, Marker, Circle, Polygon, Popup } from "leaflet";
+import { LeafletMap, TileLayer, Marker} from "leaflet";
 
 // Add a div with an id of wp-custom-map to show it in the front end
 document.addEventListener("DOMContentLoaded", function () {
-  const map = new LeafletMap("wp-custom-map").setView([49.39, -123.502055], 14);
+  const map = new LeafletMap("siff-event-locator").setView([49.39, -123.502055], 14);
   new TileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
     attribution:
