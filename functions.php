@@ -124,7 +124,7 @@ function siff_event_type_labels($html, $parsed_block)
 
 add_filter('render_block_core/post-terms', 'siff_event_type_labels', 10, 2);
 
-//load leaflet css and js
+//load leaflet css and js   
 function siff_enqueue_leaflet_assets()
 {
     wp_enqueue_style(
@@ -163,7 +163,7 @@ function siff_register_event_locator()
         'siff/event-locator',
         [
             'title' => 'Event Locator Map',
-            'category' => 'widgets',
+            'category' => 'theme',
             'icon' => 'location-alt',
             'description' => 'Display a location of the event in the map.',
             'render_callback' => function () {
