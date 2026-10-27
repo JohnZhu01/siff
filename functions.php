@@ -6,13 +6,14 @@ require_once get_theme_file_path('/inc/schedule.php');
 // Enable ACF field bindings in the editor.
 add_filter('acf/settings/enable_datastore', '__return_true');
 
+
+
+
+
 // Register the vendor card block.
 function siff_register_vendor_card() {
 	register_block_type(
-		get_theme_file_path( 'blocks/vendor-card' ),
-		array(
-			'render_callback' => 'siff_render_vendor_card',
-		)
+		get_theme_file_path( 'blocks/vendor-card' )
 	);
 }
 
@@ -143,6 +144,16 @@ function siff_enqueue_leaflet_assets(){
 
 }
 add_action( 'wp_enqueue_scripts', 'siff_enqueue_leaflet_assets' );
+
+// Register the Event Map Locator Block.
+function siff_register_event_locator() {
+	register_block_type(
+		get_theme_file_path( 'blocks/event-locator' )
+	);
+}
+
+add_action( 'init', 'siff_register_event_locator' );
+
 
 // Keep the Events patterns available after file-based deployments.
 function siff_register_events_grid_pattern() {
