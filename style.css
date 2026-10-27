@@ -356,6 +356,10 @@ Contents
 }
 
 /* Footer layout */
+.siff-page-main {
+    padding-bottom: 4rem;
+}
+
 body .wp-site-blocks {
     padding-bottom: 0;
 }
@@ -582,7 +586,7 @@ body .wp-site-blocks {
 }
 
 /* Policy page */
-.siff-policy-page {
+.siff-policy-page .siff-page-main {
     /* Match the full-width bar to this page's padding. */
     --wp--style--root--padding-left: 0;
     --wp--style--root--padding-right: 0;
@@ -591,6 +595,10 @@ body .wp-site-blocks {
     --siff-policy-nav-height: 4.375rem;
     margin-block-start: 0;
     padding: 0 0 4rem;
+}
+
+.siff-policy-page .siff-page-main > .wp-block-post-content {
+    max-width: none;
 }
 
 .siff-policy-nav {
@@ -679,7 +687,7 @@ body .wp-site-blocks {
     margin-top: 0;
 }
 
-.siff-policy-title {
+.siff-policy-page .siff-page-main > .wp-block-post-title {
     box-sizing: border-box;
     width: 100%;
     max-width: 100%;
@@ -697,7 +705,7 @@ body .wp-site-blocks {
 
 /* Phone spacing */
 @media (max-width: 37.4375rem) {
-    .siff-policy-page {
+    .siff-policy-page .siff-page-main {
         --siff-header-height: 4.25rem;
     }
 }

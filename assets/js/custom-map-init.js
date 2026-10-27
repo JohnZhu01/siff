@@ -1,8 +1,12 @@
 import { LeafletMap, TileLayer, Marker} from "leaflet";
 
-// Add a div with an id of wp-custom-map to show it in the front end
+// Show the map in a page block or the event locator block.
 document.addEventListener("DOMContentLoaded", function () {
-  const map = new LeafletMap("siff-event-locator").setView([49.39, -123.502055], 14);
+  const container = document.getElementById("siff-event-locator") || document.getElementById("wp-custom-map");
+  if (!container) {
+    return;
+  }
+  const map = new LeafletMap(container).setView([49.39, -123.502055], 14);
 // new TileLayer("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png", {
 //   maxZoom: 19,
 //   attribution:
