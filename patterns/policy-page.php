@@ -15,39 +15,21 @@ if (!defined('ABSPATH')) {
 <h1 class="wp-block-heading siff-policy-title">Policy and Conditions</h1>
 <!-- /wp:heading -->
 
-<!-- wp:group {"metadata":{"name":"Policy Jump Nav"},"className":"siff-policy-nav","layout":{"type":"flex","flexWrap":"wrap"},"align":"full"} -->
-<div class="wp-block-group alignfull siff-policy-nav"><!-- wp:paragraph {"metadata":{"name":"General Admission"}} -->
-<p><a href="#general-admission">General Admission</a></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph {"metadata":{"name":"Ticket Purchases"}} -->
-<p><a href="#ticket-purchase">Ticket Purchases</a></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph {"metadata":{"name":"Refunds"}} -->
-<p><a href="#refund">Refunds &amp; Cancellations</a></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph {"metadata":{"name":"Festival Schedule/Programming"}} -->
-<p><a href="#festival-schedule">Festival Schedule/Programming</a></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph {"metadata":{"name":"Code of Conduct"}} -->
-<p><a href="#code-of-conduct">Code of Conduct</a></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph {"metadata":{"name":"Film Screening/Content Policy"}} -->
-<p><a href="#film-content-policy">Film Screening/Content Policy</a></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph {"metadata":{"name":"Workshop/Panel Policy"}} -->
-<p><a href="#workshop-panel-policy">Workshop/Panel Policy</a></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph {"metadata":{"name":"Accessibility Policy"}} -->
-<p><a href="#accessibility-policy">Accessibility Policy</a></p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
+<!-- wp:html -->
+<nav class="siff-policy-nav alignfull" aria-label="Policy sections">
+    <select class="siff-policy-select" aria-label="Jump to a policy section">
+        <option value="" disabled selected>Jump to a section</option>
+        <option value="#general-admission">General Admission</option>
+        <option value="#ticket-purchase">Ticket Purchases</option>
+        <option value="#refund">Refunds &amp; Cancellations</option>
+        <option value="#festival-schedule">Festival Schedule/Programming</option>
+        <option value="#code-of-conduct">Code of Conduct</option>
+        <option value="#film-content-policy">Film Screening/Content Policy</option>
+        <option value="#workshop-panel-policy">Workshop/Panel Policy</option>
+        <option value="#accessibility-policy">Accessibility Policy</option>
+    </select>
+</nav>
+<!-- /wp:html -->
 
 <!-- wp:group {"metadata":{"name":"Policy Content"},"className":"siff-policy-content","layout":{"type":"default"}} -->
 <div class="wp-block-group siff-policy-content"><!-- wp:group {"metadata":{"name":"Refunds"},"layout":{"type":"constrained"}} -->
