@@ -116,6 +116,23 @@ body .wp-site-blocks {
 }
 
 /* Keyboard focus and menu targets. */
+@media (max-width: 47.9375rem) {
+  .wp-site-blocks > header.wp-block-template-part {
+    position: sticky;
+    top: 0;
+  }
+
+  .admin-bar .wp-site-blocks > header.wp-block-template-part {
+    top: var(--wp-admin--admin-bar--height, 0);
+  }
+}
+
+@media (max-width: 37.5rem) {
+  .admin-bar .wp-site-blocks > header.wp-block-template-part {
+    top: 0;
+  }
+}
+
 .wp-site-blocks > header.wp-block-template-part a:focus-visible,
 .wp-site-blocks > header.wp-block-template-part button:focus-visible {
   outline: 0.1875rem solid var(--wp--preset--color--custom-accents, #05c7f2);
