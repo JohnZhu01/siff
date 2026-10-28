@@ -129,6 +129,11 @@
   object-position: center;
 }
 
+#siff-modal-image[hidden],
+.siff-modal-image[hidden] {
+  display: none;
+}
+
 .siff-modal-info {
   display: block;
   min-width: 0;
@@ -323,6 +328,10 @@
 /* Modal animation */
 #siff-event-modal[open]::backdrop {
   animation: backdrop-enter 400ms ease-out;
+}
+
+html:has(#siff-event-modal[open]) {
+  overflow: hidden;
 }
 
 @keyframes modal-enter {

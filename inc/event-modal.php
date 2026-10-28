@@ -175,7 +175,7 @@ function siff_event_details_data($event_id)
         'speaker' => get_field('speaker', $event_id),
         'speaker_profession' => get_field('speaker_profession', $event_id),
         'image' => wp_get_attachment_image_url(
-            get_field('modal_image', $event_id),
+            get_field('modal_image', $event_id, false),
             'large'
         ) ?: get_the_post_thumbnail_url($event_id, 'large') ?: '',
         'title' => html_entity_decode(

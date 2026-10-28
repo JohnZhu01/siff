@@ -84,8 +84,10 @@ function initEventModal() {
   const mobileModal = window.matchMedia("(max-width: 47.9375rem)");
 
   const image = document.querySelector("#siff-modal-image");
+  const imageArea = image?.closest(".siff-modal-image");
 
-  if (!modal) return;
+  if (!modal || !modalBody || !closeButton || !title || !content || !meta
+      || !credits || !detailsSection || !descriptionTitle || !imageArea) return;
 
   function resetDetails() {
     detailsSection.open = !mobileModal.matches;
@@ -102,6 +104,10 @@ function initEventModal() {
   let activeTrigger;
   const eventCache = siffModal.events || {};
 
+  image.addEventListener("error", () => {
+    imageArea.hidden = true;
+  });
+
   function renderDetails(details) {
     const types = details.types || [];
     modal.classList.remove("is-loading");
@@ -111,6 +117,7 @@ function initEventModal() {
     } else {
       descriptionTitle.textContent = "Overview";
     }
+    imageArea.hidden = !details.image;
     if (details.image) {
       image.src = details.image;
       image.alt = "";
@@ -166,6 +173,7 @@ function initEventModal() {
     meta.replaceChildren();
     credits.replaceChildren();
     image.hidden = true;
+    imageArea.hidden = true;
     image.removeAttribute("src");
     if (!modal.open) modal.showModal();
     modalBody.scrollTop = 0;
@@ -214,7 +222,7 @@ function initEventModal() {
   }
 
   modal.addEventListener("pointerdown", (event) => {
-    pointerStartedOutside = event.target === modal && isOutsideModal(event);
+    pointerStartedOutside = event.button === 0 && event.target === modal && isOutsideModal(event);
   });
 
   modal.addEventListener("click", (event) => {
@@ -451,7 +459,10 @@ searchForm?.addEventListener("submit", (event) => {
 });
   applyFilter("all");
 });
+}
 
+// Guest controls.
+function initGuestControls() {
 document.querySelectorAll(".siff-guests").forEach((query) => {
   const grid = query.querySelector(".wp-block-post-template");
   const more = query.querySelector(".wp-load-more__button");
@@ -461,11 +472,12 @@ document.querySelectorAll(".siff-guests").forEach((query) => {
 
     more.setAttribute("aria-expanded", "false");
     const originalPagination = pagination.cloneNode(true);
+    const originalCards = grid.innerHTML;
     const initialCount = grid.children.length;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let heightAnimation = null;
     let loadingGuests = false;
-    let restoreFocusAfterLoad = false;
+    let loadingHeight = 0;
 
     // Keep the grid steady while loading.
     function freezeGuestGrid() {
@@ -518,15 +530,28 @@ document.querySelectorAll(".siff-guests").forEach((query) => {
   query.append(lessPagination);
 
   document.addEventListener("qllmLoadStart", () => {
+    if (!query.querySelector(".wp-load-more__button.loading")) return;
+    if (loadingGuests) return;
+    loadingGuests = true;
+    loadingHeight = freezeGuestGrid();
+    grid.setAttribute("aria-busy", "true");
     less.disabled = true;
   });
 
   document.addEventListener("qllmLoadEnd", () => {
+    if (!loadingGuests || query.querySelector(".wp-load-more__button.loading")) return;
+    loadingGuests = false;
+    grid.setAttribute("aria-busy", "false");
+    animateGuestGrid(loadingHeight);
     less.disabled = false;
     lessPagination.hidden = grid.children.length <= initialCount;
+    query.querySelector(".wp-load-more__button")?.setAttribute(
+      "aria-expanded", String(grid.children.length > initialCount),
+    );
   });
 
   less.addEventListener("click", () => {
+    const fromHeight = freezeGuestGrid();
     grid.innerHTML = originalCards;
 
     query.querySelectorAll(".wp-load-more__button").forEach((button) => {
@@ -541,8 +566,11 @@ document.querySelectorAll(".siff-guests").forEach((query) => {
         .querySelector(".wp-load-more__button")
         ?.focus({ preventScroll: true });
 
-      const headerHeight =
-        document.querySelector(".wp-site-blocks > header")?.getBoundingClientRect().height || 0;
+      const header = document.querySelector(".wp-site-blocks > header");
+      const headerStyles = header ? getComputedStyle(header) : null;
+      const headerHeight = headerStyles && ["sticky", "fixed"].includes(headerStyles.position)
+        ? header.getBoundingClientRect().height + (parseFloat(headerStyles.top) || 0)
+        : 0;
       if (grid.getBoundingClientRect().top + collapsedHeight < headerHeight + 24) {
         window.scrollTo({
           top: Math.max(
