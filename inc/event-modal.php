@@ -12,6 +12,15 @@ Contents
 */
 
 // Page helpers.
+// Keep the Synopsis heading out of automatic event excerpts.
+function siff_clean_event_excerpt($excerpt, $post) {
+    if ($post->post_type === 'siff-event' && $post->post_excerpt === '') {
+        return preg_replace('/^Synopsis\s+/i', '', $excerpt);
+    }
+    return $excerpt;
+}
+add_filter('get_the_excerpt', 'siff_clean_event_excerpt', 10, 2);
+
 function siff_page_uses_event_modal() {
     return is_page(array('events', 'schedule'));
 }
