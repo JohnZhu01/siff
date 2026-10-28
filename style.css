@@ -101,8 +101,6 @@ Contents
 
 /* Header */
 .wp-site-blocks > header.wp-block-template-part {
-  position: sticky;
-  top: var(--wp-admin--admin-bar--height, 0);
   z-index: 100;
   background-color: var(--wp--preset--color--custom-background);
     border-bottom: 0.125rem solid var(--wp--preset--color--custom-accents, #05c7f2);
