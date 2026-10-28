@@ -109,11 +109,51 @@ body .wp-site-blocks {
   top: var(--wp-admin--admin-bar--height, 0);
   z-index: 100;
   background-color: var(--wp--preset--color--custom-background);
-  margin-block: 0;
+  border-bottom: 0.125rem solid
+    var(--wp--preset--color--custom-accents, #05c7f2);
 }
 
-.wp-site-blocks > header.wp-block-template-part + * {
-  margin-block-start: 0;
+/* Keyboard focus and menu targets. */
+.wp-site-blocks > header.wp-block-template-part a:focus-visible,
+.wp-site-blocks > header.wp-block-template-part button:focus-visible {
+  outline: 0.1875rem solid var(--wp--preset--color--custom-accents, #05c7f2);
+  outline-offset: 0.1875rem;
+}
+
+.siff-header-row .wp-block-navigation-item__content {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+}
+
+.siff-header-row .wp-block-navigation-submenu__toggle {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+}
+
+.siff-header-row .wp-block-navigation .wp-block-navigation-submenu__toggle svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.siff-header-row .wp-block-navigation-item__content[aria-current="page"] {
+  text-decoration: underline;
+  text-decoration-color: var(--wp--preset--color--custom-accents, #05c7f2);
+  text-decoration-thickness: 0.125rem;
+  text-underline-offset: 0.25rem;
+}
+
+@media (hover: hover) {
+  .siff-header-row .wp-block-navigation-item__content:hover {
+    color: var(--wp--preset--color--custom-accents, #05c7f2);
+    text-decoration: underline;
+    text-decoration-thickness: 0.125rem;
+    text-underline-offset: 0.25rem;
+  }
+
+  .siff-header-row .wp-block-navigation-submenu__toggle:hover {
+    color: var(--wp--preset--color--custom-accents, #05c7f2);
+  }
 }
 
 /* Header ticket button */
@@ -705,7 +745,7 @@ body .wp-site-blocks {
   --wp--style--root--padding-left: 0;
   --wp--style--root--padding-right: 0;
   /* Match the header and jump bar heights. */
-  --siff-header-height: 8.35rem;
+  --siff-header-height: 8.475rem;
   --siff-policy-nav-height: 4.375rem;
   margin-block-start: 0;
   padding: 0 0 4rem;
@@ -818,7 +858,7 @@ body .wp-site-blocks {
 /* Phone spacing */
 @media (max-width: 37.4375rem) {
   .siff-policy-page .siff-page-main {
-    --siff-header-height: 4.25rem;
+    --siff-header-height: 4.375rem;
   }
 }
 

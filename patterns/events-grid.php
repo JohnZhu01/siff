@@ -39,7 +39,7 @@ if (!defined('ABSPATH')) {
             <!-- /wp:button -->
         </div>
         <!-- /wp:buttons -->
-        <!-- wp:search {"label":"Search","width":100,"widthUnit":"%","buttonText":"Search","className":"siff-event-search"} /-->
+        <!-- wp:search {"label":"Search","showLabel":false,"width":100,"widthUnit":"%","buttonText":"Search","className":"siff-event-search"} /-->
     </div>
     <!-- /wp:group -->
     <!-- wp:post-template {"layout":{"type":"grid","columnCount":3}} -->
@@ -47,6 +47,10 @@ if (!defined('ABSPATH')) {
     <div class="wp-block-group siff-event-card">
         <!-- wp:post-title {"isLink":true,"className":"siff-event-trigger"} /-->
         <!-- wp:post-featured-image {"aspectRatio":"16/9","scale":"contain","sizeSlug":"large"} /-->
+        <!-- wp:paragraph {"className":"siff-event-excerpt-label"} -->
+        <p class="siff-event-excerpt-label">Synopsis</p>
+        <!-- /wp:paragraph -->
+        <!-- wp:post-excerpt {"excerptLength":20,"moreText":""} /-->
         <!-- wp:siff/event-date /-->
         <!-- wp:post-terms {"term":"siff-event-types"} /-->
     </div>
