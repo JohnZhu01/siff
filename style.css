@@ -300,7 +300,7 @@ body .wp-site-blocks {
 
 
 
-.wp-block-woocommerce-order-confirmation-billing-wrapper .wc-block-order-confirmation-billing-wrapper .alignwide{
+.wc-block-order-confirmation-billing-wrapper .wp-block-heading{
   margin-block-start: 0.83em;
 }
 
