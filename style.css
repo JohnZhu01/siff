@@ -297,6 +297,13 @@ body .wp-site-blocks {
   }
 }
 
+
+
+
+.wp-block-woocommerce-order-confirmation-billing-wrapper .wc-block-order-confirmation-billing-wrapper .alignwide{
+  margin-block-start: 0.83em;
+}
+
 /* Header mobile */
 @media (max-width: 37.4375rem) {
   .wp-site-blocks > header.wp-block-template-part .wp-block-site-logo img {
