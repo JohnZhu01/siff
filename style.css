@@ -919,17 +919,7 @@ body .wp-site-blocks {
   }
 }
 
-.wc-block-product {
-  border: 1px solid var(--wp--preset--color--custom-accents, #05c7f2);
-  background-color: var(--wp--preset--color--custom-panel);
-  padding: 2rem;
-  height: fit-content;
-}
 
-.wc-block-product-template li:nth-child(3) {
-  /* Your styles here */
-  background-color: var(--wp--preset--color--custom-deep-blue)
-}
 
 :is(
   .wp-element-button,
@@ -1114,4 +1104,28 @@ main:has(.siff-page-content) {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+
+
+
+/* Buy tickets Page Styles */
+.wc-block-product {
+  border: 1px solid var(--wp--preset--color--custom-accents, #05c7f2);
+  background-color: var(--wp--preset--color--custom-panel);
+  padding: 2rem;
+  height: fit-content;
+}
+
+.wc-block-product-template li:nth-child(3) {
+  background-color: var(--wp--preset--color--custom-deep-blue)
+}
+
+.wc-block-product-template__responsive.columns-3 {
+    grid-template-columns: repeat(auto-fill, minmax(max(250px, calc(33.33333% - .83333em)), 1fr));
+}
+
+.wc-block-product-template__responsive.columns-2{
+
+ grid-template-columns: repeat(auto-fill, minmax(max(250px, calc(50% - .625em)), 1fr));
 }
