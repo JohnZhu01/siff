@@ -178,6 +178,33 @@
       "bidirectional": 0,
       "multiple": 0,
       "bidirectional_target": []
+    },
+    {
+      "key": "field_6ae17ae09d912",
+      "label": "Modal Image",
+      "name": "modal_image",
+      "aria-label": "",
+      "type": "image",
+      "menu_order": 8,
+      "instructions": "",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "return_format": "id",
+      "library": "all",
+      "min_width": "",
+      "min_height": "",
+      "min_size": "",
+      "max_width": "",
+      "max_height": "",
+      "max_size": "",
+      "mime_types": "",
+      "allow_in_bindings": 0,
+      "preview_size": "medium"
     }
   ],
   "location": [

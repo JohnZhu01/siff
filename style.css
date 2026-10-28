@@ -151,6 +151,21 @@ body .wp-site-blocks {
   text-underline-offset: 0.25rem;
 }
 
+.siff-header-row .wp-block-navigation .has-child > .wp-block-navigation__submenu-container {
+  background: #151515;
+  color: #f4f4f4;
+  border-color: #444;
+}
+
+.siff-header-row .wp-block-navigation__submenu-container .wp-block-navigation-item__content {
+  color: #f4f4f4;
+}
+
+.siff-header-row .wp-block-navigation__submenu-container .wp-block-navigation-item__content:hover,
+.siff-header-row .wp-block-navigation__submenu-container .wp-block-navigation-item__content:focus-visible {
+  color: var(--wp--preset--color--custom-accents, #05c7f2);
+}
+
 @media (hover: hover) {
   .siff-header-row .wp-block-navigation-item__content:hover {
     color: var(--wp--preset--color--custom-accents, #05c7f2);
