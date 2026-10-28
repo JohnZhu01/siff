@@ -2,7 +2,8 @@
 
 // Page helpers.
 // Card excerpts.
-function siff_clean_event_excerpt($excerpt, $post) {
+function siff_clean_event_excerpt($excerpt, $post)
+{
     if ($post->post_type === 'siff-event' && $post->post_excerpt === '') {
         $is_session = has_term(array('panel', 'workshop'), 'siff-event-types', $post);
         $description = get_post_meta($post->ID, $is_session ? 'short_description' : 'synopsis', true);
@@ -20,7 +21,8 @@ function siff_clean_event_excerpt($excerpt, $post) {
 add_filter('get_the_excerpt', 'siff_clean_event_excerpt', 10, 2);
 
 // Director, speaker or instructor.
-function siff_event_card_presenter($html, $parsed_block, $block) {
+function siff_event_card_presenter($html, $parsed_block, $block)
+{
     $event_id = absint($block->context['postId'] ?? 0);
     if (get_post_type($event_id) !== 'siff-event') {
         return $html;
@@ -46,12 +48,14 @@ function siff_event_card_presenter($html, $parsed_block, $block) {
 }
 add_filter('render_block_core/post-excerpt', 'siff_event_card_presenter', 10, 3);
 
-function siff_page_uses_event_modal() {
+function siff_page_uses_event_modal()
+{
     return is_page(array('events', 'schedule'));
 }
 
 // Events page class.
-function siff_event_page_classes($classes) {
+function siff_event_page_classes($classes)
+{
     if (is_page('events')) {
         $classes[] = 'siff-events-page';
     }
@@ -61,7 +65,8 @@ function siff_event_page_classes($classes) {
 add_filter('body_class', 'siff_event_page_classes');
 
 // Events wrapper.
-function siff_add_events_section_class($block_content) {
+function siff_add_events_section_class($block_content)
+{
     if (strpos($block_content, 'siff-event-filters') === false) {
         return $block_content;
     }
@@ -78,7 +83,8 @@ function siff_add_events_section_class($block_content) {
 add_filter('render_block_core/query', 'siff_add_events_section_class');
 
 // Modal markup.
-function siff_render_event_modal() {
+function siff_render_event_modal()
+{
     if (!siff_page_uses_event_modal()) {
         return;
     }
@@ -117,7 +123,8 @@ function siff_render_event_modal() {
 add_action('wp_footer', 'siff_render_event_modal');
 
 // Assets.
-function siff_enqueue_event_modal_assets() {
+function siff_enqueue_event_modal_assets()
+{
     if (!siff_page_uses_event_modal()) {
         return;
     }
@@ -142,7 +149,8 @@ function siff_enqueue_event_modal_assets() {
 add_action('wp_enqueue_scripts', 'siff_enqueue_event_modal_assets');
 
 // Event data.
-function siff_event_details_data($event_id) {
+function siff_event_details_data($event_id)
+{
     $event = get_post($event_id);
 
     // Published events only.
@@ -187,7 +195,8 @@ function siff_event_details_data($event_id) {
     );
 }
 
-function siff_localize_event_modal() {
+function siff_localize_event_modal()
+{
     if (!siff_page_uses_event_modal()) {
         return;
     }
@@ -219,7 +228,8 @@ function siff_localize_event_modal() {
 }
 
 // REST route.
-function siff_register_event_routes() {
+function siff_register_event_routes()
+{
     register_rest_route('siff/v1', '/events/(?P<id>[1-9]\d*)', array(
         'methods' => WP_REST_Server::READABLE,
         'callback' => 'siff_rest_event_details',
@@ -229,7 +239,8 @@ function siff_register_event_routes() {
 
 add_action('rest_api_init', 'siff_register_event_routes');
 
-function siff_rest_event_details($request) {
+function siff_rest_event_details($request)
+{
     if (!function_exists('get_field')) {
         return new WP_Error(
             'siff_fields_unavailable',
@@ -251,3 +262,25 @@ function siff_rest_event_details($request) {
 
     return rest_ensure_response($details);
 }
+
+// Connect event titles to the modal.
+add_filter('render_block_core/post-title', function ($html, $parsed_block, $block) {
+    $classes = preg_split('/\s+/', trim($parsed_block['attrs']['className'] ?? ''));
+    $event_id = absint($block->context['postId'] ?? 0);
+
+    if (
+        !in_array('siff-event-trigger', $classes, true)
+        || get_post_type($event_id) !== 'siff-event'
+    ) {
+        return $html;
+    }
+
+    $processor = new WP_HTML_Tag_Processor($html);
+    if ($processor->next_tag('A')) {
+        $processor->set_attribute('data-event-id', $event_id);
+        $processor->set_attribute('aria-haspopup', 'dialog');
+        $processor->set_attribute('aria-controls', 'siff-event-modal');
+    }
+
+    return $processor->get_updated_html();
+}, 10, 3);
