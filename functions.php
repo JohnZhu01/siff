@@ -50,7 +50,29 @@ function siff_enable_guest_role_binding($field)
     return $field;
 }
 
-add_filter('acf/load_field/key=field_6acf0ec10816f', 'siff_enable_guest_role_binding');
+add_filter('acf/load_field/name=role', 'siff_enable_guest_role_binding');
+
+// Show guest roles when ACF bindings are unavailable.
+function siff_guest_role_fallback($html, $parsed_block, $block)
+{
+    $classes = explode(' ', $parsed_block['attrs']['className'] ?? '');
+    $guest_id = absint($block->context['postId'] ?? get_the_ID());
+    if (!in_array('siff-guest-role', $classes, true)
+        || get_post_type($guest_id) !== 'guest'
+        || trim(wp_strip_all_tags($html)) !== '') {
+        return $html;
+    }
+
+    $role = get_post_meta($guest_id, 'role', true);
+    if (!is_string($role) || trim($role) === '') {
+        return $html;
+    }
+
+    return preg_replace_callback('/(<p\b[^>]*>).*?(<\/p>)/s', function ($matches) use ($role) {
+        return $matches[1] . esc_html($role) . $matches[2];
+    }, $html, 1);
+}
+add_filter('render_block_core/paragraph', 'siff_guest_role_fallback', 10, 3);
 
 // Register the vendor card block.
 function siff_register_vendor_card()
