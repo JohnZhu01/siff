@@ -113,6 +113,10 @@ body .wp-site-blocks {
     var(--wp--preset--color--custom-accents, #05c7f2);
 }
 
+.wp-site-blocks > header.wp-block-template-part + * {
+  margin-block-start: 0;
+}
+
 /* Keyboard focus and menu targets. */
 .wp-site-blocks > header.wp-block-template-part a:focus-visible,
 .wp-site-blocks > header.wp-block-template-part button:focus-visible {
