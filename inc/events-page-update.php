@@ -1,12 +1,27 @@
 <?php
 
+// Events uses the Pages template, not a saved Events override.
+function siff_events_page_template($templates)
+{
+    if (is_page('events')
+        && get_post_meta(get_queried_object_id(), '_siff_events_blocks_version', true) === '2') {
+        return array('page.php');
+    }
+    return $templates;
+}
+add_filter('page_template_hierarchy', 'siff_events_page_template');
+
 // Read the current guest and event patterns.
 function siff_events_page_patterns()
 {
     $patterns = array();
     foreach (array('guest' => 'special-guests', 'siff-event' => 'events-grid') as $type => $name) {
+        $file = get_theme_file_path('/patterns/' . $name . '.php');
+        if (!is_readable($file)) {
+            return array();
+        }
         ob_start();
-        include get_theme_file_path('/patterns/' . $name . '.php');
+        include $file;
         $blocks = parse_blocks(ob_get_clean());
         foreach ($blocks as $block) {
             if ($block['blockName'] === 'core/query') {
@@ -62,8 +77,9 @@ function siff_update_events_page()
         return;
     }
     $page = get_page_by_path('events');
-    if (!$page || !current_user_can('edit_post', $page->ID)
-        || get_post_meta($page->ID, '_siff_events_blocks_version', true) === '1') {
+    $version = $page ? get_post_meta($page->ID, '_siff_events_blocks_version', true) : '';
+    if (!$page || trim($page->post_content) === '' || !current_user_can('edit_post', $page->ID)
+        || $version === '2') {
         return;
     }
     if (function_exists('wp_check_post_lock') && wp_check_post_lock($page->ID)) {
@@ -74,7 +90,10 @@ function siff_update_events_page()
         return;
     }
     $changed = false;
-    $blocks = siff_update_events_blocks(parse_blocks($page->post_content), $patterns, $changed);
+    $blocks = parse_blocks($page->post_content);
+    if ($version !== '1') {
+        $blocks = siff_update_events_blocks($blocks, $patterns, $changed);
+    }
     if ($changed) {
         if (!metadata_exists('post', $page->ID, '_siff_events_blocks_backup')) {
             update_post_meta($page->ID, '_siff_events_blocks_backup', wp_slash($page->post_content));
@@ -85,6 +104,11 @@ function siff_update_events_page()
             return;
         }
     }
-    update_post_meta($page->ID, '_siff_events_blocks_version', '1');
+    $assigned = get_page_template_slug($page->ID);
+    if ($assigned) {
+        update_post_meta($page->ID, '_siff_events_template_backup', $assigned);
+    }
+    update_post_meta($page->ID, '_wp_page_template', 'default');
+    update_post_meta($page->ID, '_siff_events_blocks_version', '2');
 }
 add_action('admin_init', 'siff_update_events_page');

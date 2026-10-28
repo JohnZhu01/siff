@@ -947,12 +947,12 @@ form.siff-event-search {
     font-size: 1rem;
   }
 
-  .siff-events-page main > .wp-block-paragraph {
+  .siff-events-page .wp-block-post-content > .wp-block-paragraph {
     font-size: 1rem;
     line-height: 1.6;
   }
 
-  .siff-events-page main > .wp-block-paragraph > br:first-child {
+  .siff-events-page .wp-block-post-content > .wp-block-paragraph > br:first-child {
     display: none;
   }
 
