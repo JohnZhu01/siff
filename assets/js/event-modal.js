@@ -1,3 +1,14 @@
+/*
+Contents
+  Measurements
+  Loading spinner
+  Detail rows
+  Event modal
+  Event filters and search
+  Guest expand and collapse
+  Setup
+*/
+
 // Measurements.
 function toRem(value) {
   const rootSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -9,7 +20,7 @@ function showEventLoader(container) {
   container.innerHTML = `
     <div role="status">
       <div class="siff-modal-loader" aria-hidden="true"></div>
-      <span class="screen-reader-text">Loading event details...</span>
+      <span class="screen-reader-text">Loading event details…</span>
     </div>
   `;
 }
@@ -18,7 +29,7 @@ function showEventLoader(container) {
 function addEventDetail(container, label, value) {
   if (!value) return;
 
-  // Separate the date and time.
+  // Split the event date and time into separate rows.
   if (label === "Date and time") {
     const parts = String(value).match(
       /^(\d{1,2}\/\d{1,2}\/\d{4}|\d{4}-\d{2}-\d{2})[,\sT]*(\d{1,2}:\d{2}(?::\d{2})?\s*(?:am|pm)?)$/i,
@@ -78,24 +89,76 @@ function initEventModal() {
   const title = document.querySelector("#siff-modal-title");
   const content = document.querySelector("#siff-modal-content");
   const meta = document.querySelector("#siff-modal-meta");
-  const descriptionTitle = document.querySelector("#siff-modal-description-title");
+  const overviewTab = document.querySelector("#siff-tab-overview");
+  const detailsTab = document.querySelector("#siff-tab-details");
   const credits = document.querySelector("#siff-modal-credits");
-  const detailsSection = document.querySelector(".siff-modal-info");
-  const mobileModal = window.matchMedia("(max-width: 47.9375rem)");
 
+  const tabs = [overviewTab, detailsTab];
+  const panels = [
+    document.querySelector("#siff-panel-overview"),
+    document.querySelector("#siff-panel-details"),
+  ];
   const image = document.querySelector("#siff-modal-image");
 
-  if (!modal) return;
+  if (
+    !modal ||
+    !modalBody ||
+    !closeButton ||
+    !title ||
+    !content ||
+    !image ||
+    !meta ||
+    !credits ||
+    tabs.some((tab) => !tab) ||
+    panels.some((panel) => !panel)
+  )
+    return;
 
-  function resetDetails() {
-    detailsSection.open = !mobileModal.matches;
+  // Modal tabs.
+  function selectTab(index, moveFocus = false) {
+    tabs.forEach((tab, tabIndex) => {
+      const selected = tabIndex === index;
+
+      tab.setAttribute("aria-selected", String(selected));
+      if (selected) {
+        tab.tabIndex = 0;
+      } else {
+        tab.tabIndex = -1;
+      }
+      panels[tabIndex].hidden = !selected;
+    });
+
+    if (moveFocus) {
+      tabs[index].focus({ preventScroll: true });
+    }
   }
 
-  // Collapse details on mobile.
-  resetDetails();
-  mobileModal.addEventListener("change", resetDetails);
-  detailsSection.querySelector("summary").addEventListener("click", (event) => {
-    if (!mobileModal.matches) event.preventDefault();
+  tabs.forEach((tab, index) => {
+    tab.addEventListener("click", () => selectTab(index));
+
+    tab.addEventListener("keydown", (event) => {
+      let next;
+
+      switch (event.key) {
+        case "ArrowRight":
+          next = (index + 1) % tabs.length;
+          break;
+        case "ArrowLeft":
+          next = (index - 1 + tabs.length) % tabs.length;
+          break;
+        case "Home":
+          next = 0;
+          break;
+        case "End":
+          next = tabs.length - 1;
+          break;
+        default:
+          return;
+      }
+
+      event.preventDefault();
+      selectTab(next, true);
+    });
   });
 
   let requestNumber = 0;
@@ -107,9 +170,9 @@ function initEventModal() {
     modal.classList.remove("is-loading");
     title.textContent = details.title;
     if (types.includes("film")) {
-      descriptionTitle.textContent = "Synopsis";
+      overviewTab.textContent = "Synopsis";
     } else {
-      descriptionTitle.textContent = "Overview";
+      overviewTab.textContent = "Overview";
     }
     if (details.image) {
       image.src = details.image;
@@ -136,7 +199,7 @@ function initEventModal() {
   }
 
   document.addEventListener("click", async (event) => {
-    // Ignore clicks inside the modal.
+    // Leave links and controls inside the dialog alone.
     if (modal.contains(event.target)) return;
 
     if (!(event.target instanceof Element)) return;
@@ -158,9 +221,12 @@ function initEventModal() {
     const currentRequest = requestNumber;
 
     const eventId = trigger.dataset.eventId;
+    const loadingStarted = performance.now();
+    const minimumLoadingTime = 500;
     title.textContent = "Event details";
-    resetDetails();
-    descriptionTitle.textContent = "Overview";
+    overviewTab.textContent = "Overview";
+    selectTab(0);
+
     modal.classList.add("is-loading");
     showEventLoader(content);
     meta.replaceChildren();
@@ -189,6 +255,11 @@ function initEventModal() {
         details = result;
         eventCache[eventId] = details;
       }
+      const remaining =
+        minimumLoadingTime - (performance.now() - loadingStarted);
+      if (remaining > 0) {
+        await new Promise((resolve) => setTimeout(resolve, remaining));
+      }
       if (currentRequest !== requestNumber || !modal.open) return;
 
       renderDetails(details);
@@ -201,31 +272,7 @@ function initEventModal() {
   });
 
   closeButton.addEventListener("click", () => modal.close());
-  let pointerStartedOutside = false;
-
-  function isOutsideModal(event) {
-    const bounds = modal.getBoundingClientRect();
-    return (
-      event.clientX < bounds.left ||
-      event.clientX > bounds.right ||
-      event.clientY < bounds.top ||
-      event.clientY > bounds.bottom
-    );
-  }
-
-  modal.addEventListener("pointerdown", (event) => {
-    pointerStartedOutside = event.target === modal && isOutsideModal(event);
-  });
-
-  modal.addEventListener("click", (event) => {
-    if (pointerStartedOutside && event.target === modal && isOutsideModal(event)) {
-      modal.close();
-    }
-    pointerStartedOutside = false;
-  });
-
   modal.addEventListener("close", () => {
-    pointerStartedOutside = false;
     requestNumber++;
     modal.classList.remove("is-loading");
     activeTrigger?.focus();
@@ -241,7 +288,7 @@ function initEventFilters() {
     ".wp-site-blocks > header.wp-block-template-part",
   );
 
-  // Keep filters below the header.
+  // Update the sticky offset on page load and resize.
   if (header) {
     function updateFilterOffset() {
       const headerTop = parseFloat(getComputedStyle(header).top) || 0;
@@ -282,7 +329,7 @@ function initEventFilters() {
     );
     if (!link) return;
 
-    // Use buttons for keyboard access.
+    // Use a real button for keyboard-accessible filtering.
     const button = document.createElement("button");
     button.type = "button";
     button.className = link.className;
@@ -306,7 +353,7 @@ function initEventFilters() {
     mobileFilter.append(select);
     filters.prepend(mobileFilter);
 
-    // Results area.
+    // Results count and card wrapper.
     const status = document.createElement("p");
     status.setAttribute("role", "status");
     status.className = "siff-event-results";
@@ -315,7 +362,7 @@ function initEventFilters() {
     grid.before(resultsSection);
     resultsSection.append(status, grid);
 
-    // Show six events at a time.
+    // Show six matching events at a time.
     const batchSize = 6;
     let visibleCards = [];
     const loadMore = document.createElement("button");
@@ -335,7 +382,7 @@ function initEventFilters() {
 
     reducedMotion.addEventListener("change", clearCardAnimations);
 
-    // Filter the cards.
+    // Match cards by category and search text.
     function applyFilter(type, animate = false, limit = batchSize) {
       clearCardAnimations();
       activeType = type;
@@ -397,7 +444,7 @@ function initEventFilters() {
         : "No matching events.";
     }
 
-    // Scroll to the results.
+    // Bring the first results below the sticky controls.
     function changeEventType(type) {
       applyFilter(type, true);
 
@@ -460,7 +507,7 @@ document.querySelectorAll(".siff-guests").forEach((query) => {
     let loadingGuests = false;
     let restoreFocusAfterLoad = false;
 
-    // Keep the grid steady while loading.
+    // Hold the grid height while guests load.
     function freezeGuestGrid() {
       const height = grid.getBoundingClientRect().height;
       heightAnimation?.cancel();
@@ -470,7 +517,7 @@ document.querySelectorAll(".siff-guests").forEach((query) => {
       return height;
     }
 
-    // Animate the grid height.
+    // Animate the height change.
     function animateGuestGrid(fromHeight) {
       grid.style.height = "auto";
       const toHeight = grid.getBoundingClientRect().height;
