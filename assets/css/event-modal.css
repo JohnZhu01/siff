@@ -241,6 +241,10 @@
     grid-row: 2;
   }
 
+  .siff-modal-layout:has(.siff-modal-image[hidden]) .siff-modal-info {
+    grid-row: 1;
+  }
+
   .siff-modal-description {
     grid-column: 2;
     grid-row: 1 / 3;

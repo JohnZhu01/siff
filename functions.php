@@ -2,6 +2,7 @@
 
 require_once get_theme_file_path('/inc/event-modal.php');
 require_once get_theme_file_path('/inc/schedule.php');
+require_once get_theme_file_path('/inc/events-page-update.php');
 
 // Allow the error page to use the numeric slug 404.
 function siff_allow_404_slug($override, $slug, $post_id, $status, $post_type)
