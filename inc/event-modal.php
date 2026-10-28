@@ -1,31 +1,56 @@
 <?php
 
-/*
-Contents
-  Page helpers
-  Events wrapper
-  Modal markup
-  Assets
-  Event data
-  REST route
-  Event links
-*/
-
 // Page helpers.
-// Keep the Synopsis heading out of automatic event excerpts.
+// Card excerpts.
 function siff_clean_event_excerpt($excerpt, $post) {
     if ($post->post_type === 'siff-event' && $post->post_excerpt === '') {
+        $is_session = has_term(array('panel', 'workshop'), 'siff-event-types', $post);
+        $description = get_post_meta($post->ID, $is_session ? 'short_description' : 'synopsis', true);
+        if (is_string($description) && trim(wp_strip_all_tags($description)) !== '') {
+            return wp_trim_words(
+                wp_strip_all_tags(strip_shortcodes($description)),
+                (int) apply_filters('excerpt_length', 55),
+                apply_filters('excerpt_more', ' [&hellip;]')
+            );
+        }
         return preg_replace('/^Synopsis\s+/i', '', $excerpt);
     }
     return $excerpt;
 }
 add_filter('get_the_excerpt', 'siff_clean_event_excerpt', 10, 2);
 
+// Director, speaker or instructor.
+function siff_event_card_presenter($html, $parsed_block, $block) {
+    $event_id = absint($block->context['postId'] ?? 0);
+    if (get_post_type($event_id) !== 'siff-event') {
+        return $html;
+    }
+
+    $field = 'director';
+    $label = 'Director';
+    if (has_term('panel', 'siff-event-types', $event_id)) {
+        $field = 'speaker';
+        $label = 'Speaker';
+    } elseif (has_term('workshop', 'siff-event-types', $event_id)) {
+        $field = 'instructor';
+        $label = 'Instructor';
+    }
+
+    $name = get_post_meta($event_id, $field, true);
+    if (!is_string($name) || trim($name) === '') {
+        return $html;
+    }
+
+    return $html . '<p class="siff-event-presenter"><span class="siff-event-presenter-label">'
+        . esc_html($label) . '</span> ' . esc_html($name) . '</p>';
+}
+add_filter('render_block_core/post-excerpt', 'siff_event_card_presenter', 10, 3);
+
 function siff_page_uses_event_modal() {
     return is_page(array('events', 'schedule'));
 }
 
-// Give the Events page a class for page-specific styles.
+// Events page class.
 function siff_event_page_classes($classes) {
     if (is_page('events')) {
         $classes[] = 'siff-events-page';
@@ -73,47 +98,16 @@ function siff_render_event_modal() {
                     <img id="siff-modal-image" alt="" hidden>
                 </div>
 
-                <div class="siff-modal-info">
+                <details class="siff-modal-info">
+                    <summary>Details</summary>
                     <div id="siff-modal-meta"></div>
-                </div>
+                    <div id="siff-modal-credits"></div>
+                </details>
 
-                <div class="siff-modal-description siff-modal-tabs">
-                    <div role="tablist" aria-label="Event information">
-                        <button
-                            type="button"
-                            id="siff-tab-overview"
-                            role="tab"
-                            aria-selected="true"
-                            aria-controls="siff-panel-overview"
-                        >Synopsis</button>
-                        <button
-                            type="button"
-                            id="siff-tab-details"
-                            role="tab"
-                            aria-selected="false"
-                            aria-controls="siff-panel-details"
-                            tabindex="-1"
-                        >Details</button>
-                    </div>
-
-                    <div
-                        id="siff-panel-overview"
-                        role="tabpanel"
-                        aria-labelledby="siff-tab-overview"
-                        tabindex="0"
-                    >
-                        <div id="siff-modal-content"></div>
-                    </div>
-                    <div
-                        id="siff-panel-details"
-                        role="tabpanel"
-                        aria-labelledby="siff-tab-details"
-                        tabindex="0"
-                        hidden
-                    >
-                        <div id="siff-modal-credits"></div>
-                    </div>
-                </div>
+                <section class="siff-modal-description" aria-labelledby="siff-modal-description-title">
+                    <h3 id="siff-modal-description-title">Synopsis</h3>
+                    <div id="siff-modal-content"></div>
+                </section>
             </div>
         </div>
     </dialog>
@@ -151,7 +145,7 @@ add_action('wp_enqueue_scripts', 'siff_enqueue_event_modal_assets');
 function siff_event_details_data($event_id) {
     $event = get_post($event_id);
 
-    // Only expose published event posts.
+    // Published events only.
     if (
         !$event ||
         $event->post_type !== 'siff-event' ||
@@ -172,7 +166,10 @@ function siff_event_details_data($event_id) {
         'instructor_profession' => get_field('instructor_profession', $event_id),
         'speaker' => get_field('speaker', $event_id),
         'speaker_profession' => get_field('speaker_profession', $event_id),
-        'image' => get_the_post_thumbnail_url($event_id, 'large') ?: '',
+        'image' => wp_get_attachment_image_url(
+            get_field('modal_image', $event_id),
+            'large'
+        ) ?: get_the_post_thumbnail_url($event_id, 'large') ?: '',
         'title' => html_entity_decode(
             get_the_title($event_id),
             ENT_QUOTES,
@@ -254,23 +251,3 @@ function siff_rest_event_details($request) {
 
     return rest_ensure_response($details);
 }
-
-// Event links.
-add_filter('render_block_core/post-title', function ($html, $parsed_block, $block) {
-    $classes = preg_split('/\s+/', trim($parsed_block['attrs']['className'] ?? ''));
-    $event_id = absint($block->context['postId'] ?? 0);
-
-    if (!in_array('siff-event-trigger', $classes, true)
-        || get_post_type($event_id) !== 'siff-event') {
-        return $html;
-    }
-
-    $processor = new WP_HTML_Tag_Processor($html);
-    if ($processor->next_tag('A')) {
-        $processor->set_attribute('data-event-id', $event_id);
-        $processor->set_attribute('aria-haspopup', 'dialog');
-        $processor->set_attribute('aria-controls', 'siff-event-modal');
-    }
-
-    return $processor->get_updated_html();
-}, 10, 3);
