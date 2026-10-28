@@ -120,6 +120,3 @@ node_modules/
 
 # dotenv environment variables file
 .env
-
-# Local ACF field exports
-/acf-json/

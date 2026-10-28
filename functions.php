@@ -111,8 +111,8 @@ function siff_enqueue_policy_navigation()
     }
 
     wp_enqueue_script(
-        'siff-policy-navigation',
-        get_theme_file_uri('assets/js/policy-navigation.js'),
+        'siff-vendor-directory',
+        get_theme_file_uri('assets/js/vendor-directory.js'),
         array(),
         filemtime(get_theme_file_path('/assets/js/policy-navigation.js')),
         true
@@ -185,21 +185,32 @@ function siff_event_type_labels($html, $parsed_block)
 
 add_filter('render_block_core/post-terms', 'siff_event_type_labels', 10, 2);
 
-// Load map assets on pages with a map.
+// Connect event titles to the modal.
+add_filter('render_block_core/post-title', function ($html, $parsed_block, $block) {
+    $classes = preg_split('/\s+/', trim($parsed_block['attrs']['className'] ?? ''));
+    $event_id = absint($block->context['postId'] ?? 0);
+
+    if (
+        !in_array('siff-event-trigger', $classes, true)
+        || get_post_type($event_id) !== 'siff-event'
+    ) {
+        return $html;
+    }
+
+    $processor = new WP_HTML_Tag_Processor($html);
+    if ($processor->next_tag('A')) {
+        $processor->set_attribute('data-event-id', $event_id);
+        $processor->set_attribute('aria-haspopup', 'dialog');
+        $processor->set_attribute('aria-controls', 'siff-event-modal');
+    }
+
+    return $processor->get_updated_html();
+}, 10, 3);
+
+
+//load leaflet css and js
 function siff_enqueue_leaflet_assets()
 {
-    $post = get_queried_object();
-    if (!is_singular() || !($post instanceof WP_Post)) {
-        return;
-    }
-
-    $content = $post->post_content;
-    if (!has_block('siff/event-locator', $post)
-        && strpos($content, 'wp-custom-map') === false
-        && strpos($content, 'siff-event-locator') === false) {
-        return;
-    }
-
     wp_enqueue_style(
         'leaflet',
         'https://cdn.jsdelivr.net/npm/leaflet@2.0.0-alpha.1/dist/leaflet.css',
@@ -373,4 +384,3 @@ function siff_enqueue_festival_highlights_assets()
         true
     );
 }
-
