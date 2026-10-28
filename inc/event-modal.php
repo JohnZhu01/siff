@@ -1,6 +1,5 @@
 <?php
 
-// Page helpers.
 // Card excerpts.
 function siff_clean_event_excerpt($excerpt, $post)
 {

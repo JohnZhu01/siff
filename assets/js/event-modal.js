@@ -4,6 +4,25 @@ function toRem(value) {
   return value / rootSize + "rem";
 }
 
+// Height of the sticky header.
+function getHeaderOffset() {
+  const header = document.querySelector(
+    ".wp-site-blocks > header.wp-block-template-part",
+  );
+
+  if (header) {
+    const styles = getComputedStyle(header);
+    if (styles.position === "sticky" || styles.position === "fixed") {
+      return header.getBoundingClientRect().height + (parseFloat(styles.top) || 0);
+    }
+  }
+
+  const adminBar = document.querySelector("#wpadminbar");
+  return adminBar && getComputedStyle(adminBar).position === "fixed"
+    ? adminBar.getBoundingClientRect().height
+    : 0;
+}
+
 // Loading spinner.
 function showEventLoader(container) {
   container.innerHTML = `
@@ -245,25 +264,6 @@ function initEventFilters() {
   const filterGroups = document.querySelectorAll(".siff-event-filters");
   if (!filterGroups.length) return;
 
-  const header = document.querySelector(
-    ".wp-site-blocks > header.wp-block-template-part",
-  );
-
-  // Only allow space for headers that stay on screen.
-  function getHeaderOffset() {
-    if (header) {
-      const styles = getComputedStyle(header);
-      if (styles.position === "sticky" || styles.position === "fixed") {
-        return header.getBoundingClientRect().height + (parseFloat(styles.top) || 0);
-      }
-    }
-
-    const adminBar = document.querySelector("#wpadminbar");
-    return adminBar && getComputedStyle(adminBar).position === "fixed"
-      ? adminBar.getBoundingClientRect().height
-      : 0;
-  }
-
   function updateFilterOffset() {
     document.documentElement.style.setProperty(
       "--siff-event-filters-top", toRem(getHeaderOffset()),
@@ -290,21 +290,21 @@ function initEventFilters() {
         link: element.querySelector(".wp-block-post-title a"),
       }));
 
-  const types = ["all", "film", "workshop", "panel"];
-  const controls = [];
+    const types = ["all", "film", "workshop", "panel"];
+    const controls = [];
 
-  types.forEach((type) => {
-    const link = filters.querySelector(
-      `.siff-filter-${type} .wp-block-button__link`,
-    );
-    if (!link) return;
+    types.forEach((type) => {
+      const link = filters.querySelector(
+        `.siff-filter-${type} .wp-block-button__link`,
+      );
+      if (!link) return;
 
-    // Use buttons for keyboard access.
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = link.className;
-    button.textContent = link.textContent;
-    link.replaceWith(button);
+      // Use buttons for keyboard access.
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = link.className;
+      button.textContent = link.textContent;
+      link.replaceWith(button);
 
       controls.push({ type, button });
     });
@@ -367,7 +367,7 @@ function initEventFilters() {
         const matchesType =
           type === "all" || element.classList.contains(`siff-event-types-${type}`);
 
-      const matches = matchesType && title.includes(searchText);
+        const matches = matchesType && title.includes(searchText);
 
         if (matches) count++;
         const wasHidden = element.hidden;
@@ -400,12 +400,9 @@ function initEventFilters() {
         }
       });
 
-    controls.forEach((control) => {
-      control.button.setAttribute(
-        "aria-pressed",
-        String(control.type === type),
-      );
-    });
+      controls.forEach((control) => {
+        control.button.setAttribute("aria-pressed", String(control.type === type));
+      });
 
       const shown = visibleCards.length;
       loadMore.hidden = shown >= count;
@@ -453,22 +450,22 @@ function initEventFilters() {
       applyFilter(activeType);
     });
 
-searchForm?.addEventListener("submit", (event) => {
-  event.preventDefault();
-  applyFilter(activeType);
-});
-  applyFilter("all");
-});
+    searchForm?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      applyFilter(activeType);
+    });
+    applyFilter("all");
+  });
 }
 
 // Guest controls.
 function initGuestControls() {
-document.querySelectorAll(".siff-guests").forEach((query) => {
-  const grid = query.querySelector(".wp-block-post-template");
-  const more = query.querySelector(".wp-load-more__button");
-  const pagination = more?.closest(".wp-block-buttons");
+  document.querySelectorAll(".siff-guests").forEach((query) => {
+    const grid = query.querySelector(".wp-block-post-template");
+    const more = query.querySelector(".wp-load-more__button");
+    const pagination = more?.closest(".wp-block-buttons");
 
-  if (!grid || !pagination) return;
+    if (!grid || !pagination) return;
 
     more.setAttribute("aria-expanded", "false");
     const originalPagination = pagination.cloneNode(true);
@@ -523,40 +520,39 @@ document.querySelectorAll(".siff-guests").forEach((query) => {
     less.textContent = "See less guests";
     less.setAttribute("aria-expanded", "true");
 
-  const lessPagination = originalPagination.cloneNode(true);
-  lessPagination.classList.add("siff-guests-less-controls");
-  lessPagination.querySelector(".wp-load-more__button").replaceWith(less);
-  lessPagination.hidden = true;
-  query.append(lessPagination);
+    const lessPagination = originalPagination.cloneNode(true);
+    lessPagination.classList.add("siff-guests-less-controls");
+    lessPagination.querySelector(".wp-load-more__button").replaceWith(less);
+    lessPagination.hidden = true;
+    query.append(lessPagination);
 
-  document.addEventListener("qllmLoadStart", () => {
-    if (!query.querySelector(".wp-load-more__button.loading")) return;
-    if (loadingGuests) return;
-    loadingGuests = true;
-    loadingHeight = freezeGuestGrid();
-    grid.setAttribute("aria-busy", "true");
-    less.disabled = true;
-  });
-
-  document.addEventListener("qllmLoadEnd", () => {
-    if (!loadingGuests || query.querySelector(".wp-load-more__button.loading")) return;
-    loadingGuests = false;
-    grid.setAttribute("aria-busy", "false");
-    animateGuestGrid(loadingHeight);
-    less.disabled = false;
-    lessPagination.hidden = grid.children.length <= initialCount;
-    query.querySelector(".wp-load-more__button")?.setAttribute(
-      "aria-expanded", String(grid.children.length > initialCount),
-    );
-  });
-
-  less.addEventListener("click", () => {
-    const fromHeight = freezeGuestGrid();
-    grid.innerHTML = originalCards;
-
-    query.querySelectorAll(".wp-load-more__button").forEach((button) => {
-      button.closest(".wp-block-buttons")?.remove();
+    document.addEventListener("qllmLoadStart", () => {
+      if (!query.querySelector(".wp-load-more__button.loading") || loadingGuests) return;
+      loadingGuests = true;
+      loadingHeight = freezeGuestGrid();
+      grid.setAttribute("aria-busy", "true");
+      less.disabled = true;
     });
+
+    document.addEventListener("qllmLoadEnd", () => {
+      if (!loadingGuests || query.querySelector(".wp-load-more__button.loading")) return;
+      loadingGuests = false;
+      grid.setAttribute("aria-busy", "false");
+      animateGuestGrid(loadingHeight);
+      less.disabled = false;
+      lessPagination.hidden = grid.children.length <= initialCount;
+      query.querySelector(".wp-load-more__button")?.setAttribute(
+        "aria-expanded", String(grid.children.length > initialCount),
+      );
+    });
+
+    less.addEventListener("click", () => {
+      const fromHeight = freezeGuestGrid();
+      grid.innerHTML = originalCards;
+
+      query.querySelectorAll(".wp-load-more__button").forEach((button) => {
+        button.closest(".wp-block-buttons")?.remove();
+      });
 
       const restoredPagination = originalPagination.cloneNode(true);
       lessPagination.before(restoredPagination);
@@ -566,11 +562,7 @@ document.querySelectorAll(".siff-guests").forEach((query) => {
         .querySelector(".wp-load-more__button")
         ?.focus({ preventScroll: true });
 
-      const header = document.querySelector(".wp-site-blocks > header");
-      const headerStyles = header ? getComputedStyle(header) : null;
-      const headerHeight = headerStyles && ["sticky", "fixed"].includes(headerStyles.position)
-        ? header.getBoundingClientRect().height + (parseFloat(headerStyles.top) || 0)
-        : 0;
+      const headerHeight = getHeaderOffset();
       if (grid.getBoundingClientRect().top + collapsedHeight < headerHeight + 24) {
         window.scrollTo({
           top: Math.max(

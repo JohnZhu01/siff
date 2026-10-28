@@ -277,42 +277,6 @@ function siff_register_event_locator()
 add_action('init', 'siff_register_event_locator');
 
 
-// Keep the Events patterns available after file-based deployments.
-function siff_register_events_grid_pattern()
-{
-    $registry = WP_Block_Patterns_Registry::get_instance();
-    $patterns = array(
-        'special-guests' => __('Special Guests', 'siff-theme'),
-        'events-grid' => __('Events Grid', 'siff-theme'),
-        'events-page' => __('Events Page', 'siff-theme'),
-    );
-
-    foreach ($patterns as $name => $title) {
-        $slug = 'siff-theme/' . $name;
-        if ($registry->is_registered($slug)) {
-            continue;
-        }
-
-        $file = get_theme_file_path('/patterns/' . $name . '.php');
-        if (!is_readable($file)) {
-            continue;
-        }
-
-        ob_start();
-        include $file;
-        $content = ob_get_clean();
-
-        register_block_pattern($slug, array(
-            'title' => $title,
-            'categories' => array('featured'),
-            'inserter' => true,
-            'content' => $content,
-        ));
-    }
-}
-
-add_action('init', 'siff_register_events_grid_pattern', 20);
-
 // Overwrite the add to cart button in the shop page
 add_filter('woocommerce_product_add_to_cart_url', 'custom_box_office_add_to_cart_url', 10, 2);
 function custom_box_office_add_to_cart_url($url, $product)
