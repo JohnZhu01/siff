@@ -31,8 +31,8 @@ if (!$date) {
             ? wp_date('l, F j', $event_date->getTimestamp(), wp_timezone())
             : $date_parts[1];
         ?>
-        <span><?php echo esc_html($display_date); ?></span>
-        <span><?php echo esc_html($date_parts[2]); ?></span>
+        <span><strong class="siff-event-date-label">Date:</strong> <?php echo esc_html($display_date); ?></span>
+        <span><strong class="siff-event-date-label">Time:</strong> <?php echo esc_html($date_parts[2]); ?></span>
     <?php else : ?>
         <?php echo esc_html($date); ?>
     <?php endif; ?>

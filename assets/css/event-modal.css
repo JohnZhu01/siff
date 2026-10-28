@@ -1,40 +1,19 @@
-/*
-Contents
-  Modal
-  Modal header
-  Modal content
-  Modal tabs
-  Modal loader
-  Modal animation
-  Events section and results
-  Load more events
-  Event cards
-  Filters
-  Mobile filter
-  Search
-  Guests
-  Desktop
-  Tablet
-  Mobile
-  Small phones
-  Short screens
-  Reduced motion
-*/
-
 /* Modal */
 #siff-event-modal {
-  --siff-modal-padding: clamp(1.25rem, 3vw, 2rem);
+  --siff-modal-padding: 1.25rem;
+  --siff-modal-accent: var(--wp--preset--color--custom-accents, #05c7f2);
   box-sizing: border-box;
   width: min(48rem, calc(100% - 2rem));
-  height: min(44rem, 85vh);
-  max-height: 85vh;
+  height: fit-content;
+  max-height: 85dvh;
   margin: auto;
   padding: 0;
-  border: none;
+  border: 1px solid #414141;
   border-radius: 1.25rem;
-  box-shadow: 0 1.5rem 5rem rgb(0 0 0 / 25%);
-  background: #fff;
-  color: #222;
+  box-shadow: 0 1.5rem 5rem rgb(0 0 0 / 55%);
+  background: #202020;
+  color: #eee;
+  color-scheme: dark;
   overflow: hidden;
 }
 
@@ -55,7 +34,7 @@ Contents
 #siff-event-modal h4,
 #siff-event-modal h5,
 #siff-event-modal h6 {
-  color: #222;
+  color: #f4f4f4;
 }
 
 /* Modal header */
@@ -66,8 +45,9 @@ Contents
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1.25rem clamp(1.25rem, 3vw, 2rem);
+  padding: 1rem 4rem 1rem 1.25rem;
   background: #000;
+  border-bottom: 2px solid var(--siff-modal-accent);
   color: #f4f4f4;
 }
 
@@ -76,7 +56,7 @@ Contents
   color: #f4f4f4;
   text-align: left;
   overflow-wrap: anywhere;
-  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
   line-height: 1.15;
   margin: 0;
 }
@@ -87,12 +67,23 @@ Contents
   right: 0.75rem;
   line-height: 1;
   margin-left: auto;
-  padding: 0.25rem 0.75rem;
-  border: none;
-  background: transparent;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid #454545;
+  border-radius: 50%;
+  background: #202020;
   color: inherit;
   font-size: 2rem;
   cursor: pointer;
+}
+
+#siff-modal-close:hover {
+  border-color: var(--siff-modal-accent);
+  background: var(--siff-modal-accent);
+  color: #000;
 }
 
 #siff-modal-close:focus-visible {
@@ -102,7 +93,7 @@ Contents
 
 /* Modal content */
 .siff-modal-scroll {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior-y: contain;
@@ -113,43 +104,64 @@ Contents
   box-sizing: border-box;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
   align-content: start;
-  gap: 1.25rem;
+  align-items: start;
+  gap: 1rem;
   padding: var(--siff-modal-padding);
 }
 
 .siff-modal-image {
   width: 100%;
-  height: clamp(14rem, 32vh, 22rem);
   align-self: start;
   border-radius: 0.75rem;
-  background: #f4f4f4;
+  background: #000;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 10%);
   overflow: hidden;
 }
 
 #siff-modal-image {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
+  max-height: min(16rem, 35dvh);
   object-fit: contain;
   object-position: center;
 }
 
 .siff-modal-info {
-  display: flex;
-  flex-direction: column;
+  display: block;
   min-width: 0;
 }
 
+.siff-modal-info summary,
+.siff-modal-description h3 {
+  margin: 0 0 0.5rem;
+  line-height: 1.3;
+}
+
+#siff-event-modal .siff-modal-info summary,
+#siff-event-modal .siff-modal-description h3 {
+  color: var(--siff-modal-accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.siff-modal-info summary {
+  list-style: none;
+}
+
+.siff-modal-info summary::-webkit-details-marker {
+  display: none;
+}
+
 #siff-modal-meta {
-  flex: 1;
-  display: grid;
-  grid-auto-rows: 1fr;
   padding: 0.25rem 0.75rem;
-  border: 0.0625rem solid #e5e5e5;
+  border: 0.0625rem solid #414141;
   border-radius: 0.5rem;
-  background: #f6f6f6;
+  background: #292929;
 }
 
 #siff-modal-meta p,
@@ -159,8 +171,8 @@ Contents
   gap: 0.25rem 1rem;
   overflow-wrap: anywhere;
   margin: 0;
-  padding: 0.5rem 0;
-  border-bottom: 0.0625rem solid #e5e5e5;
+  padding: 0.375rem 0;
+  border-bottom: 0.0625rem solid #414141;
   font-size: 0.95rem;
   line-height: 1.5;
 }
@@ -178,6 +190,21 @@ Contents
   white-space: nowrap;
 }
 
+#siff-modal-meta strong,
+#siff-modal-credits strong {
+  color: #aaa;
+  font-weight: 500;
+}
+
+#siff-modal-credits {
+  margin-top: 0.5rem;
+  padding-inline: 0.75rem;
+}
+
+#siff-modal-credits p:last-child {
+  border-bottom: 0;
+}
+
 .siff-modal-description {
   grid-column: 1 / -1;
   box-sizing: border-box;
@@ -185,71 +212,36 @@ Contents
   max-width: 66.5rem;
   min-width: 0;
   margin-inline: auto;
-  padding: 1.5rem 0 0;
-  border-top: 0.0625rem solid #e5e5e5;
+  padding: 0.75rem 0 0;
+  border-top: 0.0625rem solid #414141;
 }
 
 #siff-modal-content p {
   max-width: 41.5625rem;
   margin: 0.75rem 0 0;
-  font-size: 0.9375rem;
-  line-height: 1.6;
+  font-size: 1.125rem;
+  line-height: 1.7;
   overflow-wrap: anywhere;
+  color: #e0e0e0;
 }
 
-/* Modal tabs */
-.siff-modal-tabs [role="tablist"] {
-  display: flex;
-  gap: 0.375rem;
-  padding: 0.375rem;
-  border: 0.0625rem solid #d5d5d5;
-  border-radius: 0.75rem;
-  background: #eee;
-}
+@media (min-width: 48rem) {
+  .siff-modal-image {
+    grid-column: 1;
+    grid-row: 1;
+  }
 
-.siff-modal-tabs [role="tab"] {
-  box-sizing: border-box;
-  flex: 1;
-  min-width: 0;
-  min-height: 2.75rem;
-  padding: 0.625rem 0.5rem;
-  border: 0.0625rem solid transparent;
-  border-radius: 0.5rem;
-  background: transparent;
-  color: #444;
-  font: inherit;
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.3;
-  text-align: center;
-  cursor: pointer;
-}
+  .siff-modal-info {
+    grid-column: 1;
+    grid-row: 2;
+  }
 
-.siff-modal-tabs [role="tab"][aria-selected="false"]:hover {
-  border-color: #bbb;
-  background: #fff;
-  color: #111;
-}
-
-.siff-modal-tabs [role="tab"][aria-selected="true"] {
-  border-color: var(--wp--preset--color--custom-accents, #05c7f2);
-  background: var(--wp--preset--color--custom-accents, #05c7f2);
-  color: #000;
-  font-weight: 700;
-  box-shadow: 0 0.125rem 0.25rem rgb(0 0 0 / 12%);
-}
-
-.siff-modal-tabs [role="tab"]:focus-visible {
-  outline: 0.125rem solid #023859;
-  outline-offset: 0.1875rem;
-}
-
-.siff-modal-tabs [role="tabpanel"] {
-  padding-top: 1rem;
-}
-
-.siff-modal-tabs [hidden] {
-  display: none;
+  .siff-modal-description {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    padding-top: 0;
+    border-top: 0;
+  }
 }
 
 /* Modal loader (css-loaders.com/square) */
@@ -257,6 +249,7 @@ Contents
   width: 3.4375rem;
   aspect-ratio: 1;
   margin: 1rem auto;
+  color: var(--siff-modal-accent, #05c7f2);
   --g1: conic-gradient(
     from 90deg at 0.1875rem 0.1875rem,
     #0000 90deg,
@@ -306,21 +299,25 @@ Contents
   }
 }
 
-#siff-event-modal.is-loading [role="tablist"],
 #siff-event-modal.is-loading .siff-modal-image,
 #siff-event-modal.is-loading .siff-modal-info,
-#siff-event-modal.is-loading #siff-modal-title {
+#siff-event-modal.is-loading #siff-modal-description-title {
   display: none;
 }
 
 #siff-event-modal.is-loading .siff-modal-layout {
   grid-template-columns: 1fr;
+  grid-template-rows: auto;
+  min-height: min(16rem, 45dvh);
   align-items: center;
 }
 
 #siff-event-modal.is-loading .siff-modal-description {
+  grid-area: 1 / 1;
+  align-self: center;
   padding: 0;
   border: 0;
+  text-align: center;
 }
 
 /* Modal animation */
@@ -350,7 +347,7 @@ Contents
   }
 }
 
-/* Events section and results */
+/* Event results */
 .wp-block-query.siff-events-section {
   width: 100%;
   max-width: var(--wp--style--global--content-size);
@@ -363,17 +360,21 @@ Contents
   box-sizing: border-box;
   padding: clamp(1.25rem, 3vw, 2rem);
   margin-block-start: 0.75rem;
+  border: 1px solid #383838;
   border-radius: 1rem;
-  background: #fff;
-  color: #222;
+  background: #161616;
+  color: #eee;
+  box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 18%);
 }
 
 .siff-event-results-section > .siff-event-results {
   margin: 0 0 1rem;
-  color: #111;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #383838;
+  color: #bdbdbd;
   font-family: var(--wp--preset--font-family--montserrat, sans-serif);
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 500;
   line-height: 1.5;
 }
 
@@ -421,15 +422,18 @@ Contents
 .siff-event-card {
   height: 100%;
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1.25rem;
-  border: 0.0625rem solid #505050;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto clamp(15rem, 23vw, 21rem) auto auto auto;
+  align-content: start;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  border: 0.0625rem solid #414141;
   border-radius: 1rem;
-  background: #2b2b2b;
+  background: #202020;
   color: #f4f4f4;
-  box-shadow: 0 0.1875rem 0.75rem rgb(0 0 0 / 4%);
+  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 16%);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
   cursor: pointer;
 }
 
@@ -440,9 +444,15 @@ Contents
 }
 
 .siff-event-card .wp-block-post-title {
+  grid-area: 1 / 1;
   box-sizing: border-box;
   min-height: clamp(4.16rem, 5.2vw, 4.81rem);
-  padding: 0.25rem 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #000;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   text-wrap: balance;
   font-size: clamp(1.6rem, 2vw, 1.85rem);
@@ -459,30 +469,54 @@ Contents
 }
 
 .siff-event-card .wp-block-post-featured-image {
-  aspect-ratio: 16 / 9;
+  grid-area: 2 / 1;
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
-  background: #f2f2f2;
+  background: #000;
+  border-radius: 0.5rem;
 }
 
 .siff-event-card .wp-block-post-featured-image img {
   display: block;
   width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center;
+  height: 100% !important;
+  aspect-ratio: auto !important;
+  object-fit: contain !important;
+  object-position: center top;
 }
 
 .siff-event-card .wp-block-post-excerpt {
-  color: #ddd;
-  font-size: 1rem;
-  line-height: 1.6;
+  grid-area: 2 / 1;
+  align-self: end;
+  z-index: 1;
+  min-height: 0;
+  max-height: 100%;
+  overflow: auto;
+  padding: 0.75rem 0.875rem;
+  border-top: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 0 0 0.5rem 0.5rem;
+  background: rgb(8 12 16 / 55%);
+  backdrop-filter: blur(4px);
+  text-shadow: 0 1px 3px rgb(0 0 0 / 65%);
+  color: #fff;
+  font-size: 0.875rem;
+  line-height: 1.4;
 }
 
 .siff-event-card .siff-event-excerpt-label {
-  padding: 0;
+  display: none;
+}
+
+.siff-event-card .wp-block-post-excerpt::before {
+  content: "Synopsis";
+  display: block;
+  margin-bottom: 0.25rem;
   color: var(--wp--preset--color--custom-accents, #05c7f2);
-  font-size: 1rem;
+  font-size: 0.6875rem;
   font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .siff-event-card .wp-block-post-excerpt p {
@@ -490,27 +524,58 @@ Contents
   padding: 0;
 }
 
+:is(.siff-event-types-panel, .siff-event-types-workshop) .siff-event-card .wp-block-post-excerpt::before {
+  content: "Description";
+}
+
+.siff-event-card .siff-event-presenter {
+  grid-area: 3 / 1;
+  padding: 0.25rem;
+  color: #f4f4f4;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.siff-event-card .siff-event-presenter-label {
+  margin-right: 0.375rem;
+  color: #7ce6ff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
 .siff-event-card .siff-event-date {
+  grid-area: 4 / 1;
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem 1.5rem;
-  padding: 0.5rem 0;
+  padding: 0.375rem 0.25rem;
   color: #ccc;
   font-weight: 500;
-  font-size: 1.25rem;
+  font-size: 1rem;
   line-height: 1.6;
   font-variant-numeric: tabular-nums;
 }
 
 .siff-event-card .taxonomy-siff-event-types {
+  grid-area: 5 / 1;
+  justify-self: start;
+  width: fit-content;
   margin-top: auto;
   padding: 0.45rem 0.9rem;
   border-radius: 62.4375rem;
-  background: #f0f0f0;
-  color: #333;
-  font-size: 1rem;
+  border: 1px solid rgb(5 199 242 / 25%);
+  background: rgb(5 199 242 / 9%);
+  color: #7ce6ff;
+  font-size: 0.75rem;
   font-weight: 700;
   line-height: 1.4;
+}
+
+.siff-event-card .siff-event-date-label {
+  color: #7ce6ff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-right: 0.375rem;
 }
 
 .siff-event-card:focus-within {
@@ -523,7 +588,7 @@ Contents
 @media (hover: hover) and (pointer: fine) {
   .siff-event-card:hover {
     transform: translateY(-0.1875rem);
-    border-color: #bbb;
+    border-color: #05c7f2;
     box-shadow: 0 0.625rem 1.75rem rgb(0 0 0 / 10%);
   }
 }
@@ -615,17 +680,22 @@ Contents
 }
 
 /* Search */
+.siff-event-search .wp-block-search__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 form.siff-event-search {
   flex: 1 1 18rem;
   width: 100%;
   max-width: 26rem;
   margin: 0;
-}
-
-.siff-event-search .wp-block-search__label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
 }
 
 .siff-event-search .wp-block-search__inside-wrapper {
@@ -776,23 +846,24 @@ form.siff-event-search {
 /* Desktop */
 @media (min-width: 64rem) {
   #siff-event-modal {
-    width: min(72rem, calc(100% - 4rem));
-    height: 78vh;
-    max-height: 78vh;
+    width: min(52rem, calc(100% - 4rem));
   }
 
   #siff-event-modal #siff-modal-title {
-    font-size: 2.8rem;
+    font-size: 1.75rem;
+  }
+
+  .siff-modal-description {
+    padding-inline: 1rem;
   }
 
   #siff-modal-meta p,
   #siff-modal-credits p {
-    font-size: 1.2rem;
+    font-size: 0.9375rem;
   }
 
   #siff-modal-content p {
     max-width: 44.33rem;
-    font-size: 1rem;
   }
 }
 
@@ -856,11 +927,6 @@ form.siff-event-search {
     padding-block: 0.5rem;
   }
 
-  .siff-event-search .wp-block-search__label {
-    margin-bottom: 0.25rem;
-    font-size: 0.875rem;
-  }
-
   .siff-event-search .wp-block-search__input,
   .siff-event-search .wp-block-search__button {
     min-height: 2.75rem;
@@ -878,9 +944,41 @@ form.siff-event-search {
   }
 
   #siff-event-modal {
-    width: 100%;
-    max-width: 100%;
+    --siff-modal-padding: 1rem;
+    width: calc(100% - 1.5rem);
+    max-width: 36rem;
+    max-height: calc(100dvh - 1.5rem);
     border-radius: 0.75rem;
+  }
+
+  .siff-modal-header {
+    padding: 1rem 4rem 1rem 1rem;
+  }
+
+  #siff-event-modal #siff-modal-title {
+    font-size: 1.25rem;
+    line-height: 1.3;
+  }
+
+  #siff-modal-close {
+    top: 0.625rem;
+    right: 0.625rem;
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .siff-modal-image {
+    width: calc(100% + 2 * var(--siff-modal-padding));
+    margin-inline: calc(-1 * var(--siff-modal-padding));
+    margin-top: calc(-1 * var(--siff-modal-padding));
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #siff-modal-image {
+    width: 100%;
+    height: auto;
+    max-height: none;
   }
 
   .siff-guests .wp-block-post-title {
@@ -889,12 +987,51 @@ form.siff-event-search {
 
   #siff-modal-meta p,
   #siff-modal-credits p {
-    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    grid-template-columns: minmax(5rem, 0.65fr) minmax(0, 1.35fr);
     column-gap: 0.75rem;
+    font-size: 0.9375rem;
   }
 
   .siff-modal-layout {
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  #siff-modal-meta strong {
+    white-space: normal;
+  }
+
+  .siff-modal-description {
+    padding-top: 1rem;
+  }
+
+  #siff-event-modal .siff-modal-info summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 2.75rem;
+    margin: 0;
+    padding: 0.25rem 0;
+    cursor: pointer;
+  }
+
+  .siff-modal-info summary::after {
+    content: "+";
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .siff-modal-info[open] summary::after {
+    content: "\2212";
+  }
+
+  .siff-modal-info summary:focus-visible {
+    outline: 2px solid var(--siff-modal-accent);
+    outline-offset: 0.25rem;
+  }
+
+  #siff-modal-content p {
+    margin-top: 0.5rem;
   }
 }
 
@@ -956,7 +1093,7 @@ form.siff-event-search {
 
   .siff-event-card .wp-block-post-title {
     min-height: 0;
-    padding: 0;
+    padding: 0.5rem 0.75rem;
     font-size: 1.25rem;
     line-height: 1.3;
     letter-spacing: -0.025rem;
@@ -973,33 +1110,9 @@ form.siff-event-search {
     font-size: 0.875rem;
   }
 
-  #siff-event-modal {
-    --siff-modal-padding: 1rem;
-    height: calc(100vh - 1rem);
-    max-height: calc(100vh - 1rem);
-  }
-
   .siff-modal-header {
     gap: 0.75rem;
-    padding: 0.875rem 1rem;
-  }
-
-  #siff-event-modal #siff-modal-title {
-    font-size: 1.25rem;
-    line-height: 1.3;
-  }
-
-  #siff-modal-close {
-    width: 2.75rem;
-    height: 2.75rem;
-  }
-
-  .siff-modal-layout {
-    gap: 1rem;
-  }
-
-  .siff-modal-image {
-    height: clamp(12rem, 30vh, 16rem);
+    padding: 0.875rem 4rem 0.875rem 1rem;
   }
 
   #siff-modal-meta {
@@ -1007,16 +1120,8 @@ form.siff-event-search {
   }
 
   #siff-modal-meta p {
-    display: block;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     line-height: 1.4;
-  }
-
-  #siff-modal-meta strong {
-    display: block;
-    margin-bottom: 0.125rem;
-    color: #555;
-    font-size: 0.75rem;
   }
 }
 
