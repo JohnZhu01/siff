@@ -241,21 +241,30 @@ function initEventFilters() {
     ".wp-site-blocks > header.wp-block-template-part",
   );
 
-  // Keep filters below the header.
-  if (header) {
-    function updateFilterOffset() {
-      const headerTop = parseFloat(getComputedStyle(header).top) || 0;
-      const offset = header.getBoundingClientRect().height + headerTop;
-      document.documentElement.style.setProperty(
-        "--siff-event-filters-top",
-        toRem(offset),
-      );
+  // Only allow space for headers that stay on screen.
+  function getHeaderOffset() {
+    if (header) {
+      const styles = getComputedStyle(header);
+      if (styles.position === "sticky" || styles.position === "fixed") {
+        return header.getBoundingClientRect().height + (parseFloat(styles.top) || 0);
+      }
     }
 
-    window.addEventListener("load", updateFilterOffset);
-    window.addEventListener("resize", updateFilterOffset);
-    updateFilterOffset();
+    const adminBar = document.querySelector("#wpadminbar");
+    return adminBar && getComputedStyle(adminBar).position === "fixed"
+      ? adminBar.getBoundingClientRect().height
+      : 0;
   }
+
+  function updateFilterOffset() {
+    document.documentElement.style.setProperty(
+      "--siff-event-filters-top", toRem(getHeaderOffset()),
+    );
+  }
+
+  window.addEventListener("load", updateFilterOffset);
+  window.addEventListener("resize", updateFilterOffset);
+  updateFilterOffset();
 
   filterGroups.forEach((filters) => {
     const query = filters.closest(".wp-block-query");
@@ -402,12 +411,10 @@ function initEventFilters() {
       applyFilter(type, true);
 
       requestAnimationFrame(() => {
-        const headerTop = header ? parseFloat(getComputedStyle(header).top) || 0 : 0;
-        const headerOffset = header ? header.getBoundingClientRect().height + headerTop : 0;
         const filterStyles = getComputedStyle(filters);
         const offset = filterStyles.position === "sticky"
           ? (parseFloat(filterStyles.top) || 0) + filters.getBoundingClientRect().height
-          : headerOffset;
+          : getHeaderOffset();
 
         window.scrollTo({
           top: Math.max(
