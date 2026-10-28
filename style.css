@@ -130,6 +130,10 @@ body .wp-site-blocks {
   min-height: 2.75rem;
 }
 
+.wp-block-post-excerpt p {
+  padding-inline: 0 !important;
+}
+
 .siff-header-row .wp-block-navigation-submenu__toggle {
   min-width: 2.75rem;
   min-height: 2.75rem;
