@@ -21,25 +21,18 @@ defined( 'ABSPATH' ) || exit;
  * and copy the id of its outer <div class="postbox">.
  */
 function siff_remove_dashboard_widgets() {
-	// WordPress core widgets.
-	remove_meta_box( 'dashboard_quick_press', 'dashboard', 'side' );   // Quick Draft.
-	remove_meta_box( 'dashboard_primary', 'dashboard', 'side' );       // WordPress Events and News.
-	remove_meta_box( 'dashboard_activity', 'dashboard', 'normal' );    // Activity.
-	remove_meta_box( 'dashboard_right_now', 'dashboard', 'normal' );   // At a Glance.
+    remove_meta_box( 'wc_admin_dashboard_setup', 'dashboard', 'normal' ); 
+    remove_meta_box( 'dashboard_quick_press', 'dashboard', 'side' ); 
+    remove_meta_box( 'dashboard_primary', 'dashboard', 'side' ); 
+    remove_meta_box( 'wpseo-wincher-dashboard-overview', 'dashboard', 'normal' ); 
+    remove_meta_box( 'wpseo-dashboard-overview', 'dashboard', 'normal' ); 
+    remove_meta_box( 'dashboard_activity', 'dashboard', 'normal' ); 
+    remove_meta_box( 'dashboard_right_now', 'dashboard', 'normal' ); 
+    remove_meta_box( 'dashboard_site_health', 'dashboard', 'normal' ); 
+    remove_meta_box( 'wp_mail_smtp_reports_widget_lite', 'dashboard', 'normal' ); 
+    remove_meta_box( 'wpcom_daily_writing_prompt', 'dashboard', 'side' ); 
+    remove_meta_box( 'jetpack_newsletter_dashboard_widget', 'dashboard', 'side' ); 
 
-	// Site Health stays for administrators, who can act on it.
-	if ( ! current_user_can( 'manage_options' ) ) {
-		remove_meta_box( 'dashboard_site_health', 'dashboard', 'normal' );
-	}
-
-	// Plugin widgets.
-		// Plugin widgets.
-	remove_meta_box( 'woocommerce_dashboard_status', 'dashboard', 'normal' );   // WooCommerce Status.
-	remove_meta_box( 'wc_admin_dashboard_setup', 'dashboard', 'normal' );       // WooCommerce Setup.
-	remove_meta_box( 'rg_forms_dashboard', 'dashboard', 'normal' );                   // Gravity Forms.
-
-	// The "Welcome to WordPress" panel.
-	remove_action( 'welcome_panel', 'wp_welcome_panel' );
 }
 // Priority 20 runs after plugins have added their widgets, so they can be removed.
 add_action( 'wp_dashboard_setup', 'siff_remove_dashboard_widgets', 20 );
@@ -54,7 +47,7 @@ function siff_add_dashboard_widgets() {
 		'siff_render_how_to_widget'                           // Callback that prints the content.
 	);
 }
-// add_action( 'wp_dashboard_setup', 'siff_add_dashboard_widgets' );
+add_action( 'wp_dashboard_setup', 'siff_add_dashboard_widgets' );
 
 /**
  * Print the "How-to guides" widget.

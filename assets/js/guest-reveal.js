@@ -1,6 +1,6 @@
 // Reveal initial guest cards once.
 function initGuestReveal() {
-  const cards = document.querySelectorAll(".siff-guests .wp-block-post-template > li");
+  const cards = document.querySelectorAll(".siff-guests .wp-block-post-template > li:nth-child(-n + 3)");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   if (!cards.length || !window.IntersectionObserver || reducedMotion.matches) return;
@@ -21,12 +21,7 @@ function initGuestReveal() {
     });
   }, { threshold: 0.1 });
 
-  // Extra guests appear immediately when expanded.
-  cards.forEach((card) => {
-    if (Array.from(card.parentElement.children).indexOf(card) < 3) {
-      observer.observe(card);
-    }
-  });
+  cards.forEach((card) => observer.observe(card));
 }
 
 if (document.readyState === "loading") {
