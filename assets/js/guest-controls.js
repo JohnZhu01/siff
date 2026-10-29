@@ -16,7 +16,7 @@ function initGuestControls() {
     controls.className = "wp-block-buttons siff-guest-controls";
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "wp-block-button__link wp-element-button siff-guests-less";
+    button.className = "wp-block-button__link wp-element-button siff-guest-toggle";
     controls.append(button);
     grid.after(controls);
     let expanded = false;
@@ -37,7 +37,23 @@ function initGuestControls() {
     button.addEventListener("click", () => {
       expanded = !expanded;
       updateGuests();
-      if (!expanded) button.scrollIntoView({ block: "nearest" });
+
+      if (expanded) {
+        // Start at the first new guest, below the sticky header.
+        const header = document.querySelector(".wp-site-blocks > header");
+        const headerBottom = header ? Math.max(0, header.getBoundingClientRect().bottom) : 0;
+        const firstNewGuest = cards[firstCount];
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+        firstNewGuest.setAttribute("tabindex", "-1");
+        firstNewGuest.focus({ preventScroll: true });
+        window.scrollTo({
+          top: Math.max(0, window.scrollY + firstNewGuest.getBoundingClientRect().top - headerBottom - 24),
+          behavior: reducedMotion.matches ? "instant" : "smooth",
+        });
+      } else {
+        button.scrollIntoView({ block: "nearest" });
+      }
     });
     updateGuests();
   });
