@@ -22,9 +22,7 @@
 
   /* Buttons */
   .wp-block-button__link,
-  .siff-event-load-more,
-  .siff-guests .wp-load-more__button,
-  .siff-guests .siff-guests-less {
+  .siff-event-load-more {
     transition: background-color 160ms ease, color 160ms ease,
       border-color 160ms ease, box-shadow 160ms ease;
   }
