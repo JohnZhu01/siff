@@ -16,7 +16,33 @@ function siff_enqueues()
         wp_get_theme()->get('Version'),
         'all'
     );
-    
+    // Animation styles.
+    wp_enqueue_style(
+        'siff-animations',
+        get_theme_file_uri('/assets/css/animations.css'),
+        array('siff-theme'),
+        filemtime(get_theme_file_path('/assets/css/animations.css'))
+    );
+
+    // Guest reveal.
+    wp_enqueue_script(
+        'siff-guest-reveal',
+        get_theme_file_uri('/assets/js/guest-reveal.js'),
+        array(),
+        filemtime(get_theme_file_path('/assets/js/guest-reveal.js')),
+        true
+    );
+
+    // Guest controls.
+    wp_enqueue_script(
+        'siff-guest-controls',
+        get_theme_file_uri('/assets/js/guest-controls.js'),
+        array(),
+        filemtime(get_theme_file_path('/assets/js/guest-controls.js')),
+        true
+    );
+
+    // Load the scroll-to-top button.
     wp_enqueue_script(
         'scroll-to-top',
         get_theme_file_uri('assets/js/scroll-to-top.js'),

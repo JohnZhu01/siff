@@ -196,8 +196,29 @@ function initEventModal() {
     }
   });
 
-  closeButton.addEventListener("click", () => modal.close());
+  // Match the 180ms exit animation in animations.css.
+  const closeDuration = 180;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let closeTimer;
   let pointerStartedOutside = false;
+
+  function closeModal() {
+    if (!modal.open || modal.classList.contains("is-closing")) return;
+
+    if (reducedMotion.matches) {
+      modal.close();
+      return;
+    }
+
+    modal.classList.add("is-closing");
+    closeTimer = window.setTimeout(() => modal.close(), closeDuration);
+  }
+
+  closeButton.addEventListener("click", closeModal);
+  modal.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeModal();
+  });
 
   function isOutsideModal(event) {
     const bounds = modal.getBoundingClientRect();
@@ -215,15 +236,16 @@ function initEventModal() {
 
   modal.addEventListener("click", (event) => {
     if (pointerStartedOutside && event.target === modal && isOutsideModal(event)) {
-      modal.close();
+      closeModal();
     }
     pointerStartedOutside = false;
   });
 
   modal.addEventListener("close", () => {
+    window.clearTimeout(closeTimer);
     pointerStartedOutside = false;
     requestNumber++;
-    modal.classList.remove("is-loading");
+    modal.classList.remove("is-loading", "is-closing");
     activeTrigger?.focus();
   });
 }
@@ -427,125 +449,6 @@ function initEventFilters() {
   });
 }
 
-// Guest controls.
-function initGuestControls() {
-  document.querySelectorAll(".siff-guests").forEach((query) => {
-    const grid = query.querySelector(".wp-block-post-template");
-    const more = query.querySelector(".wp-load-more__button");
-    const pagination = more?.closest(".wp-block-buttons");
-
-    if (!grid || !pagination) return;
-
-    more.setAttribute("aria-expanded", "false");
-    const originalPagination = pagination.cloneNode(true);
-    const originalCards = grid.innerHTML;
-    const initialCount = grid.children.length;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let heightAnimation = null;
-    let loadingGuests = false;
-    let loadingHeight = 0;
-
-    // Keep the grid steady while loading.
-    function freezeGuestGrid() {
-      const height = grid.getBoundingClientRect().height;
-      heightAnimation?.cancel();
-      heightAnimation = null;
-      grid.style.height = toRem(height);
-      grid.style.overflow = "hidden";
-      return height;
-    }
-
-    // Animate the grid height.
-    function animateGuestGrid(fromHeight) {
-      grid.style.height = "auto";
-      const toHeight = grid.getBoundingClientRect().height;
-
-      function clearHeight() {
-        grid.style.removeProperty("height");
-        grid.style.removeProperty("overflow");
-        heightAnimation = null;
-      }
-
-      if (reducedMotion.matches || Math.abs(toHeight - fromHeight) < 1) {
-        clearHeight();
-        return toHeight;
-      }
-
-      grid.style.height = toRem(toHeight);
-      heightAnimation = grid.animate(
-        [{ height: toRem(fromHeight) }, { height: toRem(toHeight) }],
-        { duration: 400, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
-      );
-      heightAnimation.onfinish = clearHeight;
-      return toHeight;
-    }
-
-    // Collapse button.
-    const less = document.createElement("button");
-    less.type = "button";
-    less.className = more.className;
-    less.classList.remove("wp-load-more__button", "loading");
-    less.classList.add("siff-guests-less");
-    less.textContent = "See less guests";
-    less.setAttribute("aria-expanded", "true");
-
-    const lessPagination = originalPagination.cloneNode(true);
-    lessPagination.classList.add("siff-guests-less-controls");
-    lessPagination.querySelector(".wp-load-more__button").replaceWith(less);
-    lessPagination.hidden = true;
-    query.append(lessPagination);
-
-    document.addEventListener("qllmLoadStart", () => {
-      if (!query.querySelector(".wp-load-more__button.loading") || loadingGuests) return;
-      loadingGuests = true;
-      loadingHeight = freezeGuestGrid();
-      grid.setAttribute("aria-busy", "true");
-      less.disabled = true;
-    });
-
-    document.addEventListener("qllmLoadEnd", () => {
-      if (!loadingGuests || query.querySelector(".wp-load-more__button.loading")) return;
-      loadingGuests = false;
-      grid.setAttribute("aria-busy", "false");
-      animateGuestGrid(loadingHeight);
-      less.disabled = false;
-      lessPagination.hidden = grid.children.length <= initialCount;
-      query.querySelector(".wp-load-more__button")?.setAttribute(
-        "aria-expanded", String(grid.children.length > initialCount),
-      );
-    });
-
-    less.addEventListener("click", () => {
-      const fromHeight = freezeGuestGrid();
-      grid.innerHTML = originalCards;
-
-      query.querySelectorAll(".wp-load-more__button").forEach((button) => {
-        button.closest(".wp-block-buttons")?.remove();
-      });
-
-      const restoredPagination = originalPagination.cloneNode(true);
-      lessPagination.before(restoredPagination);
-      lessPagination.hidden = true;
-      const collapsedHeight = animateGuestGrid(fromHeight);
-      restoredPagination
-        .querySelector(".wp-load-more__button")
-        ?.focus({ preventScroll: true });
-
-      const headerHeight = getHeaderOffset();
-      if (grid.getBoundingClientRect().top + collapsedHeight < headerHeight + 24) {
-        window.scrollTo({
-          top: Math.max(
-            0,
-            window.scrollY + query.getBoundingClientRect().top - headerHeight - 24,
-          ),
-          behavior: reducedMotion.matches ? "instant" : "smooth",
-        });
-      }
-    });
-  });
-}
-
 // Setup.
 initEventModal();
 initEventFilters();
-initGuestControls();
