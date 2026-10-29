@@ -1277,6 +1277,9 @@ body.blog .wp-site-blocks > .wp-block-group > .wp-block-query > .wp-block-post-t
 color-mix(in srgb, currentColor 48%, transparent);
 }
 
+.wc-block-components-checkbox__mark{
+  color: #0b0b0b;
+}
 
 .wc-block-components-radio-control .wc-block-components-radio-control__input {
     appearance: none;
