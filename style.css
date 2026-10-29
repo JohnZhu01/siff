@@ -1247,6 +1247,15 @@ body.blog .wp-site-blocks > .wp-block-group > .wp-block-query > .wp-block-post-t
 
 
 /* Checkout Page Styles */
+.wc-blocks-components-select .wc-blocks-components-select__container,
+.wc-blocks-components-select .wc-blocks-components-select__select{
+  border: 0.0625rem solid #666;
+  border-radius: 0.5rem;
+  background: #0b0b0b;
+  background-color: #0b0b0b;
+  color: #f4f4f4;
+}
+
 .wc-block-components-checkbox__mark{
   color: var(--wp--preset--color--custom-accents, #05c7f2);
 } 
