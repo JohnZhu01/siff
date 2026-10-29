@@ -1311,6 +1311,9 @@ html {
 svg path {
 	fill: currentColor;
 }
+svg{
+  height: 2.5rem;
+}
 
 .scroll-top {
 	background: transparent;
