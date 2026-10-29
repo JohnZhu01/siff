@@ -278,3 +278,8 @@ function custom_box_office_add_to_cart_text($text, $product)
 
 // Load custom blocks
 require get_theme_file_path() . '/blocks/siff-blocks.php';
+
+
+///Removing not needed dashboards in wp-admin
+require get_theme_file_path() . '/inc/admin-dashboard.php';
+
