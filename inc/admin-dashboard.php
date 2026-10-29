@@ -30,6 +30,9 @@ function siff_remove_dashboard_widgets() {
     remove_meta_box( 'dashboard_right_now', 'dashboard', 'normal' ); 
     remove_meta_box( 'dashboard_site_health', 'dashboard', 'normal' ); 
     remove_meta_box( 'wp_mail_smtp_reports_widget_lite', 'dashboard', 'normal' ); 
+    remove_meta_box( 'wpcom_daily_writing_prompt', 'dashboard', 'side' ); 
+    remove_meta_box( 'jetpack_newsletter_dashboard_widget', 'dashboard', 'side' ); 
+
 }
 // Priority 20 runs after plugins have added their widgets, so they can be removed.
 add_action( 'wp_dashboard_setup', 'siff_remove_dashboard_widgets', 20 );
