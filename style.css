@@ -950,13 +950,31 @@ body .wp-site-blocks {
   outline-offset: 3px;
 }
 
-/* Apply the narrower layout to pages with the saved content wrapper. */
-main:has(.siff-page-content) {
+/* Keep Events and News aligned with pages using the saved content wrapper. */
+main:has(.siff-page-content),
+main:has(.siff-events-section),
+body.blog .wp-site-blocks > .wp-block-group {
   box-sizing: border-box;
   width: calc(100% - 2.5rem);
   max-width: 75rem;
   padding-inline: 0;
   margin-inline: auto;
+}
+main:has(.siff-events-section),
+body.blog .wp-site-blocks > .wp-block-group {
+  --wp--style--global--content-size: 75rem;
+  --wp--style--global--wide-size: 75rem;
+}
+/* Align the News cards with the heading rather than inset each card. */
+body.blog .wp-site-blocks > .wp-block-group > .wp-block-query {
+  padding-inline: 0;
+}
+body.blog .wp-site-blocks > .wp-block-group > .wp-block-query > .wp-block-post-template {
+  gap: 2.5rem;
+}
+body.blog .wp-site-blocks > .wp-block-group > .wp-block-query > .wp-block-post-template > li > .wp-block-group {
+  /* The News template stores card padding in an inline style. */
+  padding: 0 !important;
 }
 .siff-page-content {
   --wp--style--global--content-size: 75rem;
