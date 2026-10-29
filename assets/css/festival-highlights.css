@@ -1,7 +1,7 @@
 .siff-highlights-slider {
     position: relative;
     width: calc(100% - 2 * var(--wp--preset--spacing--30, 1rem));
-    max-width: var(--wp--style--global--content-size, 75rem);
+    max-width: 75rem;
     aspect-ratio: 4 / 3;
     margin-inline: auto;
     overflow: hidden;
@@ -162,6 +162,33 @@
 
 .siff-highlight-pagination .swiper-pagination-bullet-active {
     background: var(--wp--preset--color--custom-accents, #08bce0);
+}
+
+@media (max-width: 700px) {
+    .siff-highlights-slider {
+        aspect-ratio: auto;
+        min-height: 34rem;
+    }
+
+    .siff-highlights-slider .swiper-wrapper {
+        height: auto;
+    }
+
+    .siff-highlight-slide {
+        display: flex;
+        height: auto;
+        min-height: 34rem;
+    }
+
+    .siff-highlight-overlay {
+        position: relative;
+        flex: 1;
+        padding: 2rem 1.25rem 5rem;
+    }
+
+    .siff-highlight-content {
+        transform: none;
+    }
 }
 
 @media (min-width: 701px) {

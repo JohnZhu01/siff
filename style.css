@@ -1108,6 +1108,23 @@ body.blog .wp-site-blocks > .wp-block-group > .wp-block-query > .wp-block-post-t
   }
 }
 
+@media (max-width: 700px) {
+  .siff-volunteer-row.is-layout-flex {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .siff-volunteer-row > .wp-block-buttons {
+    width: auto;
+    max-width: 100%;
+  }
+
+  .siff-volunteer-row .wp-block-button__link {
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+}
+
 
 
 
