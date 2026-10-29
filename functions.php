@@ -4,6 +4,111 @@ require_once get_theme_file_path('/inc/event-modal.php');
 require_once get_theme_file_path('/inc/schedule.php');
 require_once get_theme_file_path('/inc/events-page-update.php');
 
+
+function siff_enqueues()
+{
+    // Load the theme stylesheet in front-end and block editor content.
+    wp_enqueue_style(
+        'siff-theme',
+        get_stylesheet_uri(),
+        array(),
+        wp_get_theme()->get('Version'),
+        'all'
+    );
+
+    if (is_page('vendors')) {
+        // Load type filtering on the Vendors page.
+        wp_enqueue_script(
+            'siff-vendor-directory',
+            get_theme_file_uri('assets/js/vendor-directory.js'),
+            array(),
+            filemtime(get_theme_file_path('assets/js/vendor-directory.js')),
+            true
+        );
+        $post = get_post();
+        if (is_page('vendors') ||  (is_admin() && $post && 'page' === $post->post_type && 'vendors' === $post->post_name)) {
+            wp_enqueue_style(
+                'siff-vendor-directory',
+                get_theme_file_uri('assets/css/vendor-directory.css'),
+                array(),
+                filemtime(get_theme_file_path('assets/css/vendor-directory.css'))
+            );
+        }
+    }
+
+    // Load map assets on pages with a map.
+    $post = get_queried_object();
+    if (is_singular() || ($post instanceof WP_Post)) {
+        $content = $post->post_content;
+        if (
+            has_block('siff/event-locator', $post)
+            || strpos($content, 'wp-custom-map') === true
+            || strpos($content, 'siff-event-locator') === true
+        ) {
+            wp_enqueue_style(
+                'leaflet',
+                'https://cdn.jsdelivr.net/npm/leaflet@2.0.0-alpha.1/dist/leaflet.css',
+                array(),
+                '2.0.0-alpha.1'
+            );
+
+            wp_register_script_module(
+                'leaflet',
+                'https://cdn.jsdelivr.net/npm/leaflet@2.0.0-alpha.1/dist/leaflet.js',
+                array(),
+                '2.0.0-alpha.1'
+            );
+
+            wp_enqueue_script_module(
+                'siff-location-map',
+                get_theme_file_uri('assets/js/custom-map-init.js'),
+                array('leaflet'),
+                filemtime(get_theme_file_path('assets/js/custom-map-init.js'))
+            );
+            wp_enqueue_style(
+                'custom-map',
+                get_theme_file_uri('assets/css/custom-map.css'),
+                array(),
+                filemtime(get_theme_file_path('assets/css/custom-map.css'))
+            );
+        }
+    }
+
+    wp_enqueue_style(
+        'siff-swiper',
+        'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
+        array(),
+        '11'
+    );
+
+    wp_enqueue_style(
+        'siff-festival-highlights',
+        get_theme_file_uri('assets/css/festival-highlights.css'),
+        array('siff-swiper'),
+        filemtime(get_theme_file_path('assets/css/festival-highlights.css'))
+    );
+
+    wp_enqueue_script(
+        'siff-swiper',
+        'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
+        array(),
+        '11',
+        true
+    );
+
+    wp_enqueue_script(
+        'siff-festival-highlights',
+        get_theme_file_uri('assets/js/festival-highlights.js'),
+        array('siff-swiper'),
+        '1.0',
+        true
+    );
+}
+add_action('wp_enqueue_scripts', 'siff_enqueues');
+
+
+// Filters 
+
 // Allow the error page to use the numeric slug 404.
 function siff_allow_404_slug($override, $slug, $post_id, $status, $post_type)
 {
@@ -58,9 +163,11 @@ function siff_guest_role_fallback($html, $parsed_block, $block)
 {
     $classes = explode(' ', $parsed_block['attrs']['className'] ?? '');
     $guest_id = absint($block->context['postId'] ?? get_the_ID());
-    if (!in_array('siff-guest-role', $classes, true)
+    if (
+        !in_array('siff-guest-role', $classes, true)
         || get_post_type($guest_id) !== 'guest'
-        || trim(wp_strip_all_tags($html)) !== '') {
+        || trim(wp_strip_all_tags($html)) !== ''
+    ) {
         return $html;
     }
 
@@ -75,126 +182,6 @@ function siff_guest_role_fallback($html, $parsed_block, $block)
 }
 add_filter('render_block_core/paragraph', 'siff_guest_role_fallback', 10, 3);
 
-// Register the vendor card block.
-function siff_register_vendor_card()
-{
-    register_block_type(
-        get_theme_file_path('blocks/vendor-card'),
-        array(
-            'render_callback' => 'siff_render_vendor_card',
-        )
-    );
-}
-
-add_action('init', 'siff_register_vendor_card');
-
-function siff_render_vendor_card($attributes, $content, $block)
-{
-    // Get the vendor ID from the Query Loop.
-    $vendor_id = absint($block->context['postId'] ?? 0);
-
-    if (! $vendor_id || 'siff-vendor' !== get_post_type($vendor_id) || 'publish' !== get_post_status($vendor_id)) {
-        return '';
-    }
-
-    ob_start();
-    include get_theme_file_path('blocks/vendor-card/render.php');
-    return ob_get_clean();
-}
-
-// Load the theme stylesheet in front-end and block editor content.
-function siff_enqueue_theme_styles()
-{
-    wp_enqueue_style(
-        'siff-theme',
-        get_stylesheet_uri(),
-        array(),
-        filemtime(get_stylesheet_directory() . '/style.css')
-    );
-}
-
-add_action('enqueue_block_assets', 'siff_enqueue_theme_styles');
-
-// Load the policy navigation on the policy page.
-function siff_policy_page_class($classes)
-{
-    if (is_page('policy') || is_privacy_policy()) {
-        $classes[] = 'siff-policy-page';
-    }
-    return $classes;
-}
-
-add_filter('body_class', 'siff_policy_page_class');
-
-// Load the policy dropdown script.
-function siff_enqueue_policy_navigation()
-{
-    if (!is_page(array('policy', 'privacy-policy')) && !is_privacy_policy()) {
-        return;
-    }
-
-    wp_enqueue_script(
-        'siff-policy-navigation',
-        get_theme_file_uri('assets/js/policy-navigation.js'),
-        array(),
-        filemtime(get_theme_file_path('/assets/js/policy-navigation.js')),
-        true
-    );
-}
-
-add_action('wp_enqueue_scripts', 'siff_enqueue_policy_navigation');
-
-// Load type filtering on the Vendors page.
-function siff_enqueue_vendor_directory_assets()
-{
-    if (! is_page('vendors')) {
-        return;
-    }
-
-    wp_enqueue_script(
-        'siff-vendor-directory',
-        get_theme_file_uri('assets/js/vendor-directory.js'),
-        array(),
-        filemtime(get_theme_file_path('assets/js/vendor-directory.js')),
-        true
-    );
-}
-
-add_action('wp_enqueue_scripts', 'siff_enqueue_vendor_directory_assets');
-
-function siff_enqueue_vendor_directory_styles()
-{
-    $post = get_post();
-    if (! is_page('vendors') && ! (is_admin() && $post && 'page' === $post->post_type && 'vendors' === $post->post_name)) {
-        return;
-    }
-
-    wp_enqueue_style(
-        'siff-vendor-directory',
-        get_theme_file_uri('assets/css/vendor-directory.css'),
-        array(),
-        filemtime(get_theme_file_path('assets/css/vendor-directory.css'))
-    );
-}
-
-add_action('enqueue_block_assets', 'siff_enqueue_vendor_directory_styles');
-
-function siff_register_event_date_block()
-{
-    wp_register_script(
-        'siff-event-date-editor',
-        get_theme_file_uri('/blocks/event-date/editor.js'),
-        array('wp-blocks', 'wp-element', 'wp-block-editor'),
-        filemtime(get_theme_file_path('/blocks/event-date/editor.js')),
-        true
-    );
-
-    register_block_type(
-        get_theme_file_path('/blocks/event-date')
-    );
-}
-
-add_action('init', 'siff_register_event_date_block');
 
 // Event type labels inside cards.
 function siff_event_type_labels($html, $parsed_block)
@@ -207,74 +194,6 @@ function siff_event_type_labels($html, $parsed_block)
 }
 
 add_filter('render_block_core/post-terms', 'siff_event_type_labels', 10, 2);
-
-// Load map assets on pages with a map.
-function siff_enqueue_leaflet_assets()
-{
-    $post = get_queried_object();
-    if (!is_singular() || !($post instanceof WP_Post)) {
-        return;
-    }
-
-    $content = $post->post_content;
-    if (!has_block('siff/event-locator', $post)
-        && strpos($content, 'wp-custom-map') === false
-        && strpos($content, 'siff-event-locator') === false) {
-        return;
-    }
-
-    wp_enqueue_style(
-        'leaflet',
-        'https://cdn.jsdelivr.net/npm/leaflet@2.0.0-alpha.1/dist/leaflet.css',
-        array(),
-        '2.0.0-alpha.1'
-    );
-
-    wp_register_script_module(
-        'leaflet',
-        'https://cdn.jsdelivr.net/npm/leaflet@2.0.0-alpha.1/dist/leaflet.js',
-        array(),
-        '2.0.0-alpha.1'
-    );
-
-    wp_enqueue_script_module(
-        'siff-location-map',
-        get_theme_file_uri('/assets/js/custom-map-init.js'),
-        array('leaflet'),
-        filemtime(get_theme_file_path('assets/js/custom-map-init.js'))
-    );
-    wp_enqueue_style(
-        'custom-map',
-        get_theme_file_uri('assets/css/custom-map.css'),
-        array(),
-        filemtime(get_theme_file_path('assets/css/custom-map.css'))
-    );
-}
-add_action('wp_enqueue_scripts', 'siff_enqueue_leaflet_assets');
-
-// Register the Event Map Locator Block.
-function siff_register_event_locator()
-{
-    register_block_type(
-        'siff/event-locator',
-        [
-            'title' => 'Event Locator Map',
-            'category' => 'theme',
-            'icon' => 'location-alt',
-            'description' => 'Display a location of the event in the map.',
-            'render_callback' => function () {
-                return sprintf(
-                    '<div id="siff-event-locator"></div>'
-                );
-            },
-            'supports' => [
-                'autoRegister' => true,
-            ]
-        ]
-    );
-}
-
-add_action('init', 'siff_register_event_locator');
 
 
 // Overwrite the add to cart button in the shop page
@@ -297,67 +216,6 @@ function custom_box_office_add_to_cart_text($text, $product)
     return $text;
 }
 
-// Registering custom ACF block
 
-function siff_register_festival_highlights_block()
-{
-    if (function_exists('acf_register_block_type')) {
-        acf_register_block_type(array(
-            'name'            => 'festival-highlights',
-            'title'           => 'Festival Highlights Slider',
-            'description'     => 'A featured slider for SIFF festival highlights.',
-            'render_template' => 'blocks/festival-highlights/render.php',
-            'category'        => 'design',
-            'icon'            => 'format-gallery',
-            'keywords'        => array(
-                'festival',
-                'highlights',
-                'slider'
-            ),
-            'mode'            => 'preview',
-            'supports'        => array(
-                'align' => array('wide', 'full'),
-                'anchor' => true
-            ),
-            'enqueue_assets'  => 'siff_enqueue_festival_highlights_assets'
-        ));
-    }
-}
-add_action('acf/init', 'siff_register_festival_highlights_block');
-
-
-function siff_enqueue_festival_highlights_assets()
-{
-    $theme_uri = get_template_directory_uri();
-
-    wp_enqueue_style(
-        'siff-swiper',
-        'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
-        array(),
-        '11'
-    );
-
-    wp_enqueue_style(
-        'siff-festival-highlights',
-        $theme_uri . '/assets/css/festival-highlights.css',
-        array('siff-swiper'),
-        filemtime(get_theme_file_path('/assets/css/festival-highlights.css'))
-    );
-
-    wp_enqueue_script(
-        'siff-swiper',
-        'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
-        array(),
-        '11',
-        true
-    );
-
-    wp_enqueue_script(
-        'siff-festival-highlights',
-        $theme_uri . '/assets/js/festival-highlights.js',
-        array('siff-swiper'),
-        '1.0',
-        true
-    );
-}
-
+// Load custom blocks
+require get_theme_file_path() . '/blocks/siff-blocks.php';
