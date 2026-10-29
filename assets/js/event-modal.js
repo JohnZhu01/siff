@@ -37,42 +37,6 @@ function showEventLoader(container) {
 function addEventDetail(container, label, value) {
   if (!value) return;
 
-  // Separate the date and time.
-  if (label === "Date and time") {
-    const parts = String(value).match(
-      /^(\d{1,2}\/\d{1,2}\/\d{4}|\d{4}-\d{2}-\d{2})[,\sT]*(\d{1,2}:\d{2}(?::\d{2})?\s*(?:am|pm)?)$/i,
-    );
-
-    if (parts) {
-      let year;
-      let month;
-      let day;
-
-      if (parts[1].includes("/")) {
-        const dateParts = parts[1].split("/");
-        day = Number(dateParts[0]);
-        month = Number(dateParts[1]);
-        year = Number(dateParts[2]);
-      } else {
-        const dateParts = parts[1].split("-");
-        year = Number(dateParts[0]);
-        month = Number(dateParts[1]);
-        day = Number(dateParts[2]);
-      }
-      const date = new Date(Date.UTC(year, month - 1, day));
-      const displayDate = date.toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-        timeZone: "UTC",
-      });
-
-      addEventDetail(container, "Date", displayDate);
-      addEventDetail(container, "Time", parts[2].toUpperCase());
-      return;
-    }
-  }
-
   const paragraph = document.createElement("p");
 
   if (label) {
@@ -145,7 +109,12 @@ function initEventModal() {
 
     content.replaceChildren();
     addEventDetail(content, "", details.description);
-    addEventDetail(meta, "Date and time", details.date);
+    if (details.display_date) {
+      addEventDetail(meta, "Date", details.display_date);
+      addEventDetail(meta, "Time", details.display_time);
+    } else {
+      addEventDetail(meta, "Date and time", details.date);
+    }
     addEventDetail(meta, "Venue", details.venue);
     addEventDetail(credits, "Duration", details.duration);
 
