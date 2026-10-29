@@ -208,6 +208,14 @@ function custom_box_office_add_to_cart_url($url, $product)
 }
 
 add_filter('woocommerce_product_add_to_cart_text', 'custom_box_office_add_to_cart_text', 10, 2);
+
+
+function yoast_to_bottom(){
+	return 'low';
+}
+add_filter( 'wpseo_metabox_prio', 'yoast_to_bottom' );
+
+
 function custom_box_office_add_to_cart_text($text, $product)
 {
     if ($product && 'yes' === get_post_meta($product->get_id(), '_ticket', true) && $product->is_purchasable() && $product->is_in_stock()) {
