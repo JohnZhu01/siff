@@ -16,6 +16,13 @@ function siff_enqueues()
         wp_get_theme()->get('Version'),
         'all'
     );
+    // Load Animations
+    wp_enqueue_style(
+        'siff-animations',
+        get_theme_file_uri('/assets/css/animations.css'),
+        array('siff-theme'),
+        filemtime(get_theme_file_path('/assets/css/animations.css'))
+    );
 
     if (is_page('vendors')) {
         // Load type filtering on the Vendors page.

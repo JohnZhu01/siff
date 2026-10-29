@@ -196,8 +196,29 @@ function initEventModal() {
     }
   });
 
-  closeButton.addEventListener("click", () => modal.close());
+  // Match the 180ms exit animation in animations.css.
+  const closeDuration = 180;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let closeTimer;
   let pointerStartedOutside = false;
+
+  function closeModal() {
+    if (!modal.open || modal.classList.contains("is-closing")) return;
+
+    if (reducedMotion.matches) {
+      modal.close();
+      return;
+    }
+
+    modal.classList.add("is-closing");
+    closeTimer = window.setTimeout(() => modal.close(), closeDuration);
+  }
+
+  closeButton.addEventListener("click", closeModal);
+  modal.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeModal();
+  });
 
   function isOutsideModal(event) {
     const bounds = modal.getBoundingClientRect();
@@ -215,15 +236,16 @@ function initEventModal() {
 
   modal.addEventListener("click", (event) => {
     if (pointerStartedOutside && event.target === modal && isOutsideModal(event)) {
-      modal.close();
+      closeModal();
     }
     pointerStartedOutside = false;
   });
 
   modal.addEventListener("close", () => {
+    window.clearTimeout(closeTimer);
     pointerStartedOutside = false;
     requestNumber++;
-    modal.classList.remove("is-loading");
+    modal.classList.remove("is-loading", "is-closing");
     activeTrigger?.focus();
   });
 }
