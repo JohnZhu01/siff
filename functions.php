@@ -2,6 +2,7 @@
 
 require_once get_theme_file_path('/inc/event-modal.php');
 require_once get_theme_file_path('/inc/schedule.php');
+require_once get_theme_file_path('/inc/policy.php');
 require_once get_theme_file_path('/inc/events-page-update.php');
 
 
