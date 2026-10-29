@@ -16,12 +16,21 @@ function siff_enqueues()
         wp_get_theme()->get('Version'),
         'all'
     );
-    // Load Animations
+    // Load animations after the main theme styles.
     wp_enqueue_style(
         'siff-animations',
         get_theme_file_uri('/assets/css/animations.css'),
         array('siff-theme'),
         filemtime(get_theme_file_path('/assets/css/animations.css'))
+    );
+
+    // Load the scroll-to-top button.
+    wp_enqueue_script(
+        'scroll-to-top',
+        get_theme_file_uri('assets/js/scroll-to-top.js'),
+        array(),
+        filemtime(get_theme_file_path('assets/js/scroll-to-top.js')),
+        true
     );
 
     if (is_page('vendors')) {
@@ -218,10 +227,11 @@ function custom_box_office_add_to_cart_url($url, $product)
 add_filter('woocommerce_product_add_to_cart_text', 'custom_box_office_add_to_cart_text', 10, 2);
 
 
-function yoast_to_bottom(){
-	return 'low';
+function yoast_to_bottom()
+{
+    return 'low';
 }
-add_filter( 'wpseo_metabox_prio', 'yoast_to_bottom' );
+add_filter('wpseo_metabox_prio', 'yoast_to_bottom');
 
 
 function custom_box_office_add_to_cart_text($text, $product)
