@@ -1171,3 +1171,12 @@ color-mix(in srgb, currentColor 48%, transparent);
     border: 1px solid 
 color-mix(in srgb, currentColor 48%, transparent);
 }
+
+.wc-block-components-order-summary .wc-block-components-order-summary-item__quantity{
+  background: var(--wp--preset--color--custom-panel);
+  
+}
+
+.wc-block-components-order-summary .wc-block-components-order-summary-item__quantity span {
+  color:var(--wp--preset--color--custom-accents, #05c7f2);
+}
