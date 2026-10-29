@@ -1197,3 +1197,34 @@ color-mix(in srgb, currentColor 48%, transparent);
 .wc-block-components-order-summary .wc-block-components-order-summary-item__quantity span {
   color:var(--wp--preset--color--custom-accents, #05c7f2);
 }
+
+
+
+
+/* Scroll to top button styles */
+html {
+	scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion) {
+	html {
+		scroll-behavior: auto;
+	}
+}
+
+svg path {
+	fill: currentColor;
+}
+
+.scroll-top {
+	background: transparent;
+	border: none;
+	padding: 1rem;
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	cursor: pointer;
+	transition: all ease 0.3s;
+	opacity: 0;
+	color: var(--wp--preset--color--custom-accents, #05c7f2);
+}
