@@ -1,7 +1,7 @@
 <!-- wp:template-part {"slug":"header","tagName":"header"} /-->
 
-<!-- wp:group {"layout":{"type":"constrained"}} -->
-<div class="wp-block-group"><!-- wp:heading {"level":1,"style":{"typography":{"textAlign":"left"},"spacing":{"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"}}},"fontSize":"large"} -->
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group"><!-- wp:heading {"level":1,"style":{"typography":{"textAlign":"left"},"spacing":{"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"}}},"fontSize":"large"} -->
 <h1 class="wp-block-heading has-text-align-left has-large-font-size" style="padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)">Latest News</h1>
 <!-- /wp:heading -->
 
@@ -10,14 +10,14 @@
 <!-- wp:group {"style":{"spacing":{"padding":{"top":"30px","right":"30px","bottom":"30px","left":"30px"},"blockGap":"var:preset|spacing|20"}},"layout":{"inherit":false}} -->
 <div class="wp-block-group" style="padding-top:30px;padding-right:30px;padding-bottom:30px;padding-left:30px"><!-- wp:post-featured-image {"isLink":true,"aspectRatio":"3/2"} /-->
 
-<!-- wp:post-title {"isLink":true,"style":{"elements":{"link":{"color":{"text":"var:preset|color|custom-deep-blue"}}}},"textColor":"custom-deep-blue","fontSize":"medium"} /-->
+<!-- wp:post-title {"isLink":true,"style":{"elements":{"link":{"color":{"text":"var:preset|color|custom-text"}}}},"textColor":"custom-text","fontSize":"medium"} /-->
 
-<!-- wp:post-date {"metadata":{"bindings":{"datetime":{"source":"core/post-data","args":{"field":"date"}}}},"fontSize":"small"} /-->
+<!-- wp:post-date {"metadata":{"bindings":{"datetime":{"source":"core/post-data","args":{"field":"date"}}}},"style":{"elements":{"link":{"color":{"text":"var:preset|color|custom-accents"}}}},"textColor":"custom-accents","fontSize":"small"} /-->
 
 <!-- wp:post-excerpt {"moreText":"Read more","showMoreOnNewLine":false,"excerptLength":20,"style":{"typography":{"textAlign":"left"},"spacing":{"padding":{"right":"0","left":"0","top":"0","bottom":"0"},"margin":{"right":"0","left":"0","top":"0","bottom":"0"}}},"fontSize":"medium"} /--></div>
 <!-- /wp:group -->
 <!-- /wp:post-template --></div>
-<!-- /wp:query --></div>
+<!-- /wp:query --></main>
 <!-- /wp:group -->
 
 <!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->
