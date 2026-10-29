@@ -21,7 +21,12 @@ function initGuestReveal() {
     });
   }, { threshold: 0.1 });
 
-  cards.forEach((card) => observer.observe(card));
+  // Extra guests appear immediately when expanded.
+  cards.forEach((card) => {
+    if (Array.from(card.parentElement.children).indexOf(card) < 3) {
+      observer.observe(card);
+    }
+  });
 }
 
 if (document.readyState === "loading") {

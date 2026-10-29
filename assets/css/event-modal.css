@@ -680,6 +680,15 @@ form.siff-event-search {
 }
 
 /* Guests */
+.siff-guest-controls {
+  display: flex;
+  justify-content: center;
+}
+
+.siff-guests .wp-block-post-template > li[hidden] {
+  display: none;
+}
+
 .siff-guests {
   overflow-anchor: none;
 }

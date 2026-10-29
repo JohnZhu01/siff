@@ -142,6 +142,21 @@ function siff_enqueues()
 add_action('wp_enqueue_scripts', 'siff_enqueues');
 
 
+// Load every guest, including queries saved in the page editor.
+function siff_load_all_guests($block)
+{
+    $classes = explode(' ', $block['attrs']['className'] ?? '');
+    if ($block['blockName'] === 'core/query'
+        && in_array('siff-guests', $classes, true)
+        && ($block['attrs']['query']['postType'] ?? '') === 'guest') {
+        $block['attrs']['query']['perPage'] = max(1, (int) wp_count_posts('guest')->publish);
+        $block['attrs']['query']['pages'] = 0;
+        $block['attrs']['query']['offset'] = 0;
+    }
+    return $block;
+}
+add_filter('render_block_data', 'siff_load_all_guests');
+
 // Filters 
 
 // Allow the error page to use the numeric slug 404.
