@@ -1247,6 +1247,9 @@ body.blog .wp-site-blocks > .wp-block-group > .wp-block-query > .wp-block-post-t
 
 
 /* Checkout Page Styles */
+.wc-block-components-checkbox__mark{
+  color: var(--wp--preset--color--custom-accents, #05c7f2);
+} 
 
 .wc-block-components-radio-control--highlight-checked .wc-block-components-radio-control-accordion-option--checked-option-highlighted, .wc-block-components-radio-control--highlight-checked label.wc-block-components-radio-control__option--checked-option-highlighted {
     border-radius: 4px;
