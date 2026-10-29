@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Title: Events Grid
  * Slug: siff-theme/events-grid
