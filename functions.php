@@ -141,6 +141,46 @@ function siff_enqueues()
 }
 add_action('wp_enqueue_scripts', 'siff_enqueues');
 
+// Brand WordPress login screens without loading front-end theme styles.
+function siff_login_enqueues()
+{
+    wp_enqueue_style(
+        'siff-login',
+        get_theme_file_uri('/assets/css/login.css'),
+        array('login'),
+        filemtime(get_theme_file_path('/assets/css/login.css'))
+    );
+
+    // WordPress maps the Site Logo setting to the custom_logo theme mod.
+    $logo_id = (int) get_theme_mod('custom_logo');
+    $logo_url = wp_attachment_is_image($logo_id)
+        ? wp_get_attachment_image_url($logo_id, 'full')
+        : false;
+    $logo_url = $logo_url ? esc_url($logo_url) : '';
+
+    // Leave the core logo intact when no usable image is configured.
+    if ($logo_url) {
+        wp_add_inline_style(
+            'siff-login',
+            'body.login .wp-login-logo a { background-image: url("' . $logo_url . '");'
+            . ' background-size: contain; width: 100%; height: 100px; }'
+        );
+    }
+}
+add_action('login_enqueue_scripts', 'siff_login_enqueues');
+
+function siff_login_headerurl()
+{
+    return home_url('/');
+}
+add_filter('login_headerurl', 'siff_login_headerurl');
+
+function siff_login_headertext()
+{
+    return get_bloginfo('name');
+}
+add_filter('login_headertext', 'siff_login_headertext');
+
 
 // Load every guest, including queries saved in the page editor.
 function siff_load_all_guests($block)
