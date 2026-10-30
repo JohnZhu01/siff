@@ -1,19 +1,6 @@
-/*
-Contents
-  Measurements
-  Loading spinner
-  Detail rows
-  Event modal
-  Event filters and search
-  Guest expand and collapse
-  Setup
-*/
-
 // Measurements.
 function toRem(value) {
-  const rootSize = parseFloat(
-    getComputedStyle(document.documentElement).fontSize,
-  );
+  const rootSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
   return value / rootSize + "rem";
 }
 
@@ -26,9 +13,7 @@ function getHeaderOffset() {
   if (header) {
     const styles = getComputedStyle(header);
     if (styles.position === "sticky" || styles.position === "fixed") {
-      return (
-        header.getBoundingClientRect().height + (parseFloat(styles.top) || 0)
-      );
+      return header.getBoundingClientRect().height + (parseFloat(styles.top) || 0);
     }
   }
 
@@ -43,7 +28,7 @@ function showEventLoader(container) {
   container.innerHTML = `
     <div role="status">
       <div class="siff-modal-loader" aria-hidden="true"></div>
-      <span class="screen-reader-text">Loading event details…</span>
+      <span class="screen-reader-text">Loading event details...</span>
     </div>
   `;
 }
@@ -100,8 +85,7 @@ function initEventModal() {
 
   let requestNumber = 0;
   let activeTrigger;
-  const modalSettings = window.siffModal || {};
-  const eventCache = modalSettings.events || {};
+  const eventCache = siffModal.events || {};
 
   image.addEventListener("error", () => {
     imageArea.hidden = true;
@@ -186,14 +170,7 @@ function initEventModal() {
       let details = eventCache[eventId];
 
       if (!details) {
-        // Support both pretty and plain WordPress permalinks.
-        const url = new URL(modalSettings.restUrl, window.location.href);
-        if (url.searchParams.has("rest_route")) {
-          const route = url.searchParams.get("rest_route").replace(/\/$/, "");
-          url.searchParams.set("rest_route", `${route}/${encodeURIComponent(eventId)}`);
-        } else {
-          url.pathname = url.pathname.replace(/\/$/, "") + "/" + encodeURIComponent(eventId);
-        }
+        const url = new URL(encodeURIComponent(eventId), siffModal.restUrl);
 
         const response = await fetch(url);
 
@@ -280,8 +257,7 @@ function initEventFilters() {
 
   function updateFilterOffset() {
     document.documentElement.style.setProperty(
-      "--siff-event-filters-top",
-      toRem(getHeaderOffset()),
+      "--siff-event-filters-top", toRem(getHeaderOffset()),
     );
   }
 
@@ -301,9 +277,7 @@ function initEventFilters() {
       .filter((card) => card.classList.contains("wp-block-post"))
       .map((element) => ({
         element,
-        title: (
-          element.querySelector(".wp-block-post-title")?.textContent || ""
-        ).toLowerCase(),
+        title: (element.querySelector(".wp-block-post-title")?.textContent || "").toLowerCase(),
         link: element.querySelector(".wp-block-post-title a"),
       }));
 
@@ -340,7 +314,7 @@ function initEventFilters() {
     mobileFilter.append(select);
     filters.prepend(mobileFilter);
 
-    // Results count and card wrapper.
+    // Results area.
     const status = document.createElement("p");
     status.setAttribute("role", "status");
     status.className = "siff-event-results";
@@ -349,7 +323,7 @@ function initEventFilters() {
     grid.before(resultsSection);
     resultsSection.append(status, grid);
 
-    // Show six matching events at a time.
+    // Show six events at a time.
     const batchSize = 6;
     let visibleCards = [];
     const loadMore = document.createElement("button");
@@ -369,7 +343,7 @@ function initEventFilters() {
 
     reducedMotion.addEventListener("change", clearCardAnimations);
 
-    // Match cards by category and search text.
+    // Filter the cards.
     function applyFilter(type, animate = false, limit = batchSize) {
       clearCardAnimations();
       activeType = type;
@@ -382,8 +356,7 @@ function initEventFilters() {
       cards.forEach((card) => {
         const { element, title } = card;
         const matchesType =
-          type === "all" ||
-          element.classList.contains(`siff-event-types-${type}`);
+          type === "all" || element.classList.contains(`siff-event-types-${type}`);
 
         const matches = matchesType && title.includes(searchText);
 
@@ -419,10 +392,7 @@ function initEventFilters() {
       });
 
       controls.forEach((control) => {
-        control.button.setAttribute(
-          "aria-pressed",
-          String(control.type === type),
-        );
+        control.button.setAttribute("aria-pressed", String(control.type === type));
       });
 
       const shown = visibleCards.length;
@@ -432,25 +402,20 @@ function initEventFilters() {
         : "No matching events.";
     }
 
-    // Bring the first results below the sticky controls.
+    // Scroll to the results.
     function changeEventType(type) {
       applyFilter(type, true);
 
       requestAnimationFrame(() => {
         const filterStyles = getComputedStyle(filters);
-        const offset =
-          filterStyles.position === "sticky"
-            ? (parseFloat(filterStyles.top) || 0) +
-              filters.getBoundingClientRect().height
-            : getHeaderOffset();
+        const offset = filterStyles.position === "sticky"
+          ? (parseFloat(filterStyles.top) || 0) + filters.getBoundingClientRect().height
+          : getHeaderOffset();
 
         window.scrollTo({
           top: Math.max(
             0,
-            window.scrollY +
-              resultsSection.getBoundingClientRect().top -
-              offset -
-              12,
+            window.scrollY + resultsSection.getBoundingClientRect().top - offset - 12,
           ),
           behavior: reducedMotion.matches ? "instant" : "smooth",
         });
@@ -485,13 +450,5 @@ function initEventFilters() {
 }
 
 // Setup.
-function initEvents() {
-  initEventModal();
-  initEventFilters();
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initEvents);
-} else {
-  initEvents();
-}
+initEventModal();
+initEventFilters();
