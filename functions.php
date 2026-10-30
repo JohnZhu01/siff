@@ -323,3 +323,7 @@ require get_theme_file_path() . '/blocks/siff-blocks.php';
 ///Removing not needed dashboards in wp-admin
 require get_theme_file_path() . '/inc/admin-dashboard.php';
 
+
+///Removing menu links for non admin users
+require get_theme_file_path() . '/inc/remove-admin-links.php';
+
