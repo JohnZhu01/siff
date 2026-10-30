@@ -54,7 +54,7 @@ add_action( 'wp_dashboard_setup', 'siff_add_dashboard_widgets' );
  */
 function siff_render_how_to_widget() {
 	// Replace with the real tutorial link once it's published.
-	$tutorial_url = 'add our link here';
+	$tutorial_url = 'https://siff.bcitwebdeveloper.ca/wp-content/uploads/2026/10/siff-client-website-guide.pdf';
 
 	?>
 	<p><?php esc_html_e( 'Step-by-step guides for running the site.', 'siff' ); ?></p>
