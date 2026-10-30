@@ -145,7 +145,6 @@ function initEventModal() {
       addEventDetail(credits, "Profession", details.speaker_profession);
     }
   }
-}
 
   document.addEventListener("click", async (event) => {
     // Ignore clicks inside the modal.
@@ -158,7 +157,11 @@ function initEventModal() {
       if (!card) return;
       if (event.target.closest("a, button, input, select, textarea, label"))
         return;
+      trigger = card.querySelector(".siff-event-trigger a[data-event-id]");
     }
+    if (!trigger) return;
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)
+      return;
 
     event.preventDefault();
     activeTrigger = trigger;
@@ -200,159 +203,75 @@ function initEventModal() {
           throw new Error(result.message || "Unable to load this event.");
         }
 
-  content.replaceChildren();
-  addEventDetail(content, "", details.description);
-  if (details.display_date) {
-    addEventDetail(meta, "Date", details.display_date);
-    addEventDetail(meta, "Time", details.display_time);
-  } else {
-    addEventDetail(meta, "Date and time", details.date);
-  }
-  addEventDetail(meta, "Venue", details.venue);
-  addEventDetail(credits, "Duration", details.duration);
-
-  if (types.includes("film")) {
-    addEventDetail(credits, "Filmmaker", details.filmmaker);
-    addEventDetail(credits, "Director", details.director);
-  } else if (types.includes("workshop")) {
-    addEventDetail(credits, "Instructor", details.instructor);
-    addEventDetail(credits, "Profession", details.instructor_profession);
-  } else if (types.includes("panel")) {
-    addEventDetail(credits, "Speaker", details.speaker);
-    addEventDetail(credits, "Profession", details.speaker_profession);
-  }
-}
+        if (currentRequest !== requestNumber) return;
 
         details = result;
         eventCache[eventId] = details;
       }
       if (currentRequest !== requestNumber || !modal.open) return;
 
-  if (!(event.target instanceof Element)) return;
-  let trigger = event.target.closest("[data-event-id]");
-  if (!trigger) {
-    const card = event.target.closest(".siff-event-card");
-    if (!card) return;
-    if (event.target.closest("a, button, input, select, textarea, label"))
-      return;
-    trigger = card.querySelector(".siff-event-trigger a[data-event-id]");
-  }
-  if (!trigger) return;
-  if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-
-  event.preventDefault();
-  activeTrigger = trigger;
-  requestNumber++;
-  const currentRequest = requestNumber;
-
-  const eventId = trigger.dataset.eventId;
-  const loadingStarted = performance.now();
-  const minimumLoadingTime = 500;
-  title.textContent = "Event details";
-  overviewTab.textContent = "Overview";
-  selectTab(0);
-
-  modal.classList.add("is-loading");
-  showEventLoader(content);
-  meta.replaceChildren();
-  credits.replaceChildren();
-  image.hidden = true;
-  imageArea.hidden = true;
-  image.removeAttribute("src");
-  if (!modal.open) modal.showModal();
-  modalBody.scrollTop = 0;
-
-  try {
-    let details = eventCache[eventId];
-
-    if (!details) {
-      const url = new URL(encodeURIComponent(eventId), siffModal.restUrl);
-
-      const response = await fetch(url);
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Unable to load this event.");
+      renderDetails(details);
+    } catch (error) {
+      if (currentRequest === requestNumber && modal.open) {
+        modal.classList.remove("is-loading");
+        content.textContent = "Unable to load event details. Please try again.";
       }
-
-      if (currentRequest !== requestNumber) return;
-
-      details = result;
-      eventCache[eventId] = details;
     }
-    const remaining = minimumLoadingTime - (performance.now() - loadingStarted);
-    if (remaining > 0) {
-      await new Promise((resolve) => setTimeout(resolve, remaining));
+  });
+
+  // Match the 180ms exit animation in animations.css.
+  const closeDuration = 180;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let closeTimer;
+  let pointerStartedOutside = false;
+
+  function closeModal() {
+    if (!modal.open || modal.classList.contains("is-closing")) return;
+
+    if (reducedMotion.matches) {
+      modal.close();
+      return;
     }
-    if (currentRequest !== requestNumber || !modal.open) return;
 
-    renderDetails(details);
-  } catch (error) {
-    if (currentRequest === requestNumber && modal.open) {
-      modal.classList.remove("is-loading");
-      content.textContent = "Unable to load event details. Please try again.";
-    }
-  }
-});
-
-// Match the 180ms exit animation in animations.css.
-const closeDuration = 180;
-const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-let closeTimer;
-let pointerStartedOutside = false;
-
-function closeModal() {
-  if (!modal.open || modal.classList.contains("is-closing")) return;
-
-  if (reducedMotion.matches) {
-    modal.close();
-    return;
+    modal.classList.add("is-closing");
+    closeTimer = window.setTimeout(() => modal.close(), closeDuration);
   }
 
-  modal.classList.add("is-closing");
-  closeTimer = window.setTimeout(() => modal.close(), closeDuration);
-}
-
-closeButton.addEventListener("click", closeModal);
-modal.addEventListener("cancel", (event) => {
-  event.preventDefault();
-  closeModal();
-});
-
-function isOutsideModal(event) {
-  const bounds = modal.getBoundingClientRect();
-  return (
-    event.clientX < bounds.left ||
-    event.clientX > bounds.right ||
-    event.clientY < bounds.top ||
-    event.clientY > bounds.bottom
-  );
-}
-
-modal.addEventListener("pointerdown", (event) => {
-  pointerStartedOutside =
-    event.button === 0 && event.target === modal && isOutsideModal(event);
-});
-
-modal.addEventListener("click", (event) => {
-  if (
-    pointerStartedOutside &&
-    event.target === modal &&
-    isOutsideModal(event)
-  ) {
+  closeButton.addEventListener("click", closeModal);
+  modal.addEventListener("cancel", (event) => {
+    event.preventDefault();
     closeModal();
-  }
-  pointerStartedOutside = false;
-});
+  });
 
-modal.addEventListener("close", () => {
-  window.clearTimeout(closeTimer);
-  pointerStartedOutside = false;
-  requestNumber++;
-  modal.classList.remove("is-loading", "is-closing");
-  activeTrigger?.focus();
-});
+  function isOutsideModal(event) {
+    const bounds = modal.getBoundingClientRect();
+    return (
+      event.clientX < bounds.left ||
+      event.clientX > bounds.right ||
+      event.clientY < bounds.top ||
+      event.clientY > bounds.bottom
+    );
+  }
+
+  modal.addEventListener("pointerdown", (event) => {
+    pointerStartedOutside = event.button === 0 && event.target === modal && isOutsideModal(event);
+  });
+
+  modal.addEventListener("click", (event) => {
+    if (pointerStartedOutside && event.target === modal && isOutsideModal(event)) {
+      closeModal();
+    }
+    pointerStartedOutside = false;
+  });
+
+  modal.addEventListener("close", () => {
+    window.clearTimeout(closeTimer);
+    pointerStartedOutside = false;
+    requestNumber++;
+    modal.classList.remove("is-loading", "is-closing");
+    activeTrigger?.focus();
+  });
+}
 
 // Event filters and search.
 function initEventFilters() {
