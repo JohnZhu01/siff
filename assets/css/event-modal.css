@@ -297,7 +297,7 @@ html:has(#siff-event-modal[open]) {
   overflow: hidden;
 }
 
-/* Event results */
+/* Events section and results */
 .wp-block-query.siff-events-section {
   width: 100%;
   max-width: var(--wp--style--global--content-size);
@@ -310,21 +310,17 @@ html:has(#siff-event-modal[open]) {
   box-sizing: border-box;
   padding: clamp(1.25rem, 3vw, 2rem);
   margin-block-start: 0.75rem;
-  border: 1px solid #383838;
   border-radius: 1rem;
-  background: #161616;
-  color: #eee;
-  box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 18%);
+  background: #fff;
+  color: #222;
 }
 
 .siff-event-results-section > .siff-event-results {
   margin: 0 0 1rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid #383838;
-  color: #bdbdbd;
+  color: #111;
   font-family: var(--wp--preset--font-family--montserrat, sans-serif);
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 1.25rem;
+  font-weight: 700;
   line-height: 1.5;
 }
 
@@ -631,22 +627,17 @@ html:has(#siff-event-modal[open]) {
 }
 
 /* Search */
-.siff-event-search .wp-block-search__label {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
 form.siff-event-search {
   flex: 1 1 18rem;
   width: 100%;
   max-width: 26rem;
   margin: 0;
+}
+
+.siff-event-search .wp-block-search__label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
 }
 
 .siff-event-search .wp-block-search__inside-wrapper {
@@ -1062,4 +1053,3 @@ form.siff-event-search {
     position: static;
   }
 }
-

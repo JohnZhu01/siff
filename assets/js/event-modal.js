@@ -1,3 +1,14 @@
+/*
+Contents
+  Measurements
+  Loading spinner
+  Detail rows
+  Event modal
+  Event filters and search
+  Guest expand and collapse
+  Setup
+*/
+
 // Measurements.
 function toRem(value) {
   const rootSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -28,7 +39,7 @@ function showEventLoader(container) {
   container.innerHTML = `
     <div role="status">
       <div class="siff-modal-loader" aria-hidden="true"></div>
-      <span class="screen-reader-text">Loading event details...</span>
+      <span class="screen-reader-text">Loading event details…</span>
     </div>
   `;
 }
@@ -85,7 +96,8 @@ function initEventModal() {
 
   let requestNumber = 0;
   let activeTrigger;
-  const eventCache = siffModal.events || {};
+  const modalSettings = window.siffModal || {};
+  const eventCache = modalSettings.events || {};
 
   image.addEventListener("error", () => {
     imageArea.hidden = true;
@@ -170,7 +182,14 @@ function initEventModal() {
       let details = eventCache[eventId];
 
       if (!details) {
-        const url = new URL(encodeURIComponent(eventId), siffModal.restUrl);
+        // Support both pretty and plain WordPress permalinks.
+        const url = new URL(modalSettings.restUrl, window.location.href);
+        if (url.searchParams.has("rest_route")) {
+          const route = url.searchParams.get("rest_route").replace(/\/$/, "");
+          url.searchParams.set("rest_route", `${route}/${encodeURIComponent(eventId)}`);
+        } else {
+          url.pathname = url.pathname.replace(/\/$/, "") + "/" + encodeURIComponent(eventId);
+        }
 
         const response = await fetch(url);
 
@@ -314,7 +333,7 @@ function initEventFilters() {
     mobileFilter.append(select);
     filters.prepend(mobileFilter);
 
-    // Results area.
+    // Results count and card wrapper.
     const status = document.createElement("p");
     status.setAttribute("role", "status");
     status.className = "siff-event-results";
@@ -323,7 +342,7 @@ function initEventFilters() {
     grid.before(resultsSection);
     resultsSection.append(status, grid);
 
-    // Show six events at a time.
+    // Show six matching events at a time.
     const batchSize = 6;
     let visibleCards = [];
     const loadMore = document.createElement("button");
@@ -343,7 +362,7 @@ function initEventFilters() {
 
     reducedMotion.addEventListener("change", clearCardAnimations);
 
-    // Filter the cards.
+    // Match cards by category and search text.
     function applyFilter(type, animate = false, limit = batchSize) {
       clearCardAnimations();
       activeType = type;
@@ -402,7 +421,7 @@ function initEventFilters() {
         : "No matching events.";
     }
 
-    // Scroll to the results.
+    // Bring the first results below the sticky controls.
     function changeEventType(type) {
       applyFilter(type, true);
 
@@ -450,5 +469,13 @@ function initEventFilters() {
 }
 
 // Setup.
-initEventModal();
-initEventFilters();
+function initEvents() {
+  initEventModal();
+  initEventFilters();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initEvents);
+} else {
+  initEvents();
+}
