@@ -15,6 +15,25 @@ function toRem(value) {
   return value / rootSize + "rem";
 }
 
+// Height of the sticky header.
+function getHeaderOffset() {
+  const header = document.querySelector(
+    ".wp-site-blocks > header.wp-block-template-part",
+  );
+
+  if (header) {
+    const styles = getComputedStyle(header);
+    if (styles.position === "sticky" || styles.position === "fixed") {
+      return header.getBoundingClientRect().height + (parseFloat(styles.top) || 0);
+    }
+  }
+
+  const adminBar = document.querySelector("#wpadminbar");
+  return adminBar && getComputedStyle(adminBar).position === "fixed"
+    ? adminBar.getBoundingClientRect().height
+    : 0;
+}
+
 // Loading spinner.
 function showEventLoader(container) {
   container.innerHTML = `
@@ -28,42 +47,6 @@ function showEventLoader(container) {
 // Detail rows.
 function addEventDetail(container, label, value) {
   if (!value) return;
-
-  // Split the event date and time into separate rows.
-  if (label === "Date and time") {
-    const parts = String(value).match(
-      /^(\d{1,2}\/\d{1,2}\/\d{4}|\d{4}-\d{2}-\d{2})[,\sT]*(\d{1,2}:\d{2}(?::\d{2})?\s*(?:am|pm)?)$/i,
-    );
-
-    if (parts) {
-      let year;
-      let month;
-      let day;
-
-      if (parts[1].includes("/")) {
-        const dateParts = parts[1].split("/");
-        day = Number(dateParts[0]);
-        month = Number(dateParts[1]);
-        year = Number(dateParts[2]);
-      } else {
-        const dateParts = parts[1].split("-");
-        year = Number(dateParts[0]);
-        month = Number(dateParts[1]);
-        day = Number(dateParts[2]);
-      }
-      const date = new Date(Date.UTC(year, month - 1, day));
-      const displayDate = date.toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-        timeZone: "UTC",
-      });
-
-      addEventDetail(container, "Date", displayDate);
-      addEventDetail(container, "Time", parts[2].toUpperCase());
-      return;
-    }
-  }
 
   const paragraph = document.createElement("p");
 
@@ -99,34 +82,10 @@ function initEventModal() {
     document.querySelector("#siff-panel-details"),
   ];
   const image = document.querySelector("#siff-modal-image");
+  const imageArea = image?.closest(".siff-modal-image");
 
-  if (
-    !modal ||
-    !modalBody ||
-    !closeButton ||
-    !title ||
-    !content ||
-    !image ||
-    !meta ||
-    !credits ||
-    tabs.some((tab) => !tab) ||
-    panels.some((panel) => !panel)
-  )
-    return;
-
-  // Modal tabs.
-  function selectTab(index, moveFocus = false) {
-    tabs.forEach((tab, tabIndex) => {
-      const selected = tabIndex === index;
-
-      tab.setAttribute("aria-selected", String(selected));
-      if (selected) {
-        tab.tabIndex = 0;
-      } else {
-        tab.tabIndex = -1;
-      }
-      panels[tabIndex].hidden = !selected;
-    });
+  if (!modal || !modalBody || !closeButton || !title || !content || !meta
+      || !credits || !detailsSection || !descriptionTitle || !imageArea) return;
 
     if (moveFocus) {
       tabs[index].focus({ preventScroll: true });
@@ -165,6 +124,10 @@ function initEventModal() {
   let activeTrigger;
   const eventCache = siffModal.events || {};
 
+  image.addEventListener("error", () => {
+    imageArea.hidden = true;
+  });
+
   function renderDetails(details) {
     const types = details.types || [];
     modal.classList.remove("is-loading");
@@ -174,6 +137,7 @@ function initEventModal() {
     } else {
       overviewTab.textContent = "Overview";
     }
+    imageArea.hidden = !details.image;
     if (details.image) {
       image.src = details.image;
       image.alt = "";
@@ -182,7 +146,12 @@ function initEventModal() {
 
     content.replaceChildren();
     addEventDetail(content, "", details.description);
-    addEventDetail(meta, "Date and time", details.date);
+    if (details.display_date) {
+      addEventDetail(meta, "Date", details.display_date);
+      addEventDetail(meta, "Time", details.display_time);
+    } else {
+      addEventDetail(meta, "Date and time", details.date);
+    }
     addEventDetail(meta, "Venue", details.venue);
     addEventDetail(credits, "Duration", details.duration);
 
@@ -232,6 +201,7 @@ function initEventModal() {
     meta.replaceChildren();
     credits.replaceChildren();
     image.hidden = true;
+    imageArea.hidden = true;
     image.removeAttribute("src");
     if (!modal.open) modal.showModal();
     modalBody.scrollTop = 0;
@@ -271,10 +241,56 @@ function initEventModal() {
     }
   });
 
-  closeButton.addEventListener("click", () => modal.close());
+  // Match the 180ms exit animation in animations.css.
+  const closeDuration = 180;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let closeTimer;
+  let pointerStartedOutside = false;
+
+  function closeModal() {
+    if (!modal.open || modal.classList.contains("is-closing")) return;
+
+    if (reducedMotion.matches) {
+      modal.close();
+      return;
+    }
+
+    modal.classList.add("is-closing");
+    closeTimer = window.setTimeout(() => modal.close(), closeDuration);
+  }
+
+  closeButton.addEventListener("click", closeModal);
+  modal.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeModal();
+  });
+
+  function isOutsideModal(event) {
+    const bounds = modal.getBoundingClientRect();
+    return (
+      event.clientX < bounds.left ||
+      event.clientX > bounds.right ||
+      event.clientY < bounds.top ||
+      event.clientY > bounds.bottom
+    );
+  }
+
+  modal.addEventListener("pointerdown", (event) => {
+    pointerStartedOutside = event.button === 0 && event.target === modal && isOutsideModal(event);
+  });
+
+  modal.addEventListener("click", (event) => {
+    if (pointerStartedOutside && event.target === modal && isOutsideModal(event)) {
+      closeModal();
+    }
+    pointerStartedOutside = false;
+  });
+
   modal.addEventListener("close", () => {
+    window.clearTimeout(closeTimer);
+    pointerStartedOutside = false;
     requestNumber++;
-    modal.classList.remove("is-loading");
+    modal.classList.remove("is-loading", "is-closing");
     activeTrigger?.focus();
   });
 }
@@ -284,25 +300,15 @@ function initEventFilters() {
   const filterGroups = document.querySelectorAll(".siff-event-filters");
   if (!filterGroups.length) return;
 
-  const header = document.querySelector(
-    ".wp-site-blocks > header.wp-block-template-part",
-  );
-
-  // Update the sticky offset on page load and resize.
-  if (header) {
-    function updateFilterOffset() {
-      const headerTop = parseFloat(getComputedStyle(header).top) || 0;
-      const offset = header.getBoundingClientRect().height + headerTop;
-      document.documentElement.style.setProperty(
-        "--siff-event-filters-top",
-        toRem(offset),
-      );
-    }
-
-    window.addEventListener("load", updateFilterOffset);
-    window.addEventListener("resize", updateFilterOffset);
-    updateFilterOffset();
+  function updateFilterOffset() {
+    document.documentElement.style.setProperty(
+      "--siff-event-filters-top", toRem(getHeaderOffset()),
+    );
   }
+
+  window.addEventListener("load", updateFilterOffset);
+  window.addEventListener("resize", updateFilterOffset);
+  updateFilterOffset();
 
   filterGroups.forEach((filters) => {
     const query = filters.closest(".wp-block-query");
@@ -320,21 +326,21 @@ function initEventFilters() {
         link: element.querySelector(".wp-block-post-title a"),
       }));
 
-  const types = ["all", "film", "workshop", "panel"];
-  const controls = [];
+    const types = ["all", "film", "workshop", "panel"];
+    const controls = [];
 
-  types.forEach((type) => {
-    const link = filters.querySelector(
-      `.siff-filter-${type} .wp-block-button__link`,
-    );
-    if (!link) return;
+    types.forEach((type) => {
+      const link = filters.querySelector(
+        `.siff-filter-${type} .wp-block-button__link`,
+      );
+      if (!link) return;
 
-    // Use a real button for keyboard-accessible filtering.
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = link.className;
-    button.textContent = link.textContent;
-    link.replaceWith(button);
+      // Use buttons for keyboard access.
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = link.className;
+      button.textContent = link.textContent;
+      link.replaceWith(button);
 
       controls.push({ type, button });
     });
@@ -397,7 +403,7 @@ function initEventFilters() {
         const matchesType =
           type === "all" || element.classList.contains(`siff-event-types-${type}`);
 
-      const matches = matchesType && title.includes(searchText);
+        const matches = matchesType && title.includes(searchText);
 
         if (matches) count++;
         const wasHidden = element.hidden;
@@ -430,12 +436,9 @@ function initEventFilters() {
         }
       });
 
-    controls.forEach((control) => {
-      control.button.setAttribute(
-        "aria-pressed",
-        String(control.type === type),
-      );
-    });
+      controls.forEach((control) => {
+        control.button.setAttribute("aria-pressed", String(control.type === type));
+      });
 
       const shown = visibleCards.length;
       loadMore.hidden = shown >= count;
@@ -449,12 +452,10 @@ function initEventFilters() {
       applyFilter(type, true);
 
       requestAnimationFrame(() => {
-        const headerTop = header ? parseFloat(getComputedStyle(header).top) || 0 : 0;
-        const headerOffset = header ? header.getBoundingClientRect().height + headerTop : 0;
         const filterStyles = getComputedStyle(filters);
         const offset = filterStyles.position === "sticky"
           ? (parseFloat(filterStyles.top) || 0) + filters.getBoundingClientRect().height
-          : headerOffset;
+          : getHeaderOffset();
 
         window.scrollTo({
           top: Math.max(
@@ -485,118 +486,14 @@ function initEventFilters() {
       applyFilter(activeType);
     });
 
-searchForm?.addEventListener("submit", (event) => {
-  event.preventDefault();
-  applyFilter(activeType);
-});
-  applyFilter("all");
-});
-
-document.querySelectorAll(".siff-guests").forEach((query) => {
-  const grid = query.querySelector(".wp-block-post-template");
-  const more = query.querySelector(".wp-load-more__button");
-  const pagination = more?.closest(".wp-block-buttons");
-
-  if (!grid || !pagination) return;
-
-    more.setAttribute("aria-expanded", "false");
-    const originalPagination = pagination.cloneNode(true);
-    const initialCount = grid.children.length;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let heightAnimation = null;
-    let loadingGuests = false;
-    let restoreFocusAfterLoad = false;
-
-    // Hold the grid height while guests load.
-    function freezeGuestGrid() {
-      const height = grid.getBoundingClientRect().height;
-      heightAnimation?.cancel();
-      heightAnimation = null;
-      grid.style.height = toRem(height);
-      grid.style.overflow = "hidden";
-      return height;
-    }
-
-    // Animate the height change.
-    function animateGuestGrid(fromHeight) {
-      grid.style.height = "auto";
-      const toHeight = grid.getBoundingClientRect().height;
-
-      function clearHeight() {
-        grid.style.removeProperty("height");
-        grid.style.removeProperty("overflow");
-        heightAnimation = null;
-      }
-
-      if (reducedMotion.matches || Math.abs(toHeight - fromHeight) < 1) {
-        clearHeight();
-        return toHeight;
-      }
-
-      grid.style.height = toRem(toHeight);
-      heightAnimation = grid.animate(
-        [{ height: toRem(fromHeight) }, { height: toRem(toHeight) }],
-        { duration: 400, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
-      );
-      heightAnimation.onfinish = clearHeight;
-      return toHeight;
-    }
-
-    // Collapse button.
-    const less = document.createElement("button");
-    less.type = "button";
-    less.className = more.className;
-    less.classList.remove("wp-load-more__button", "loading");
-    less.classList.add("siff-guests-less");
-    less.textContent = "See less guests";
-    less.setAttribute("aria-expanded", "true");
-
-  const lessPagination = originalPagination.cloneNode(true);
-  lessPagination.classList.add("siff-guests-less-controls");
-  lessPagination.querySelector(".wp-load-more__button").replaceWith(less);
-  lessPagination.hidden = true;
-  query.append(lessPagination);
-
-  document.addEventListener("qllmLoadStart", () => {
-    less.disabled = true;
-  });
-
-  document.addEventListener("qllmLoadEnd", () => {
-    less.disabled = false;
-    lessPagination.hidden = grid.children.length <= initialCount;
-  });
-
-  less.addEventListener("click", () => {
-    grid.innerHTML = originalCards;
-
-    query.querySelectorAll(".wp-load-more__button").forEach((button) => {
-      button.closest(".wp-block-buttons")?.remove();
+    searchForm?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      applyFilter(activeType);
     });
-
-      const restoredPagination = originalPagination.cloneNode(true);
-      lessPagination.before(restoredPagination);
-      lessPagination.hidden = true;
-      const collapsedHeight = animateGuestGrid(fromHeight);
-      restoredPagination
-        .querySelector(".wp-load-more__button")
-        ?.focus({ preventScroll: true });
-
-      const headerHeight =
-        document.querySelector(".wp-site-blocks > header")?.getBoundingClientRect().height || 0;
-      if (grid.getBoundingClientRect().top + collapsedHeight < headerHeight + 24) {
-        window.scrollTo({
-          top: Math.max(
-            0,
-            window.scrollY + query.getBoundingClientRect().top - headerHeight - 24,
-          ),
-          behavior: reducedMotion.matches ? "instant" : "smooth",
-        });
-      }
-    });
+    applyFilter("all");
   });
 }
 
 // Setup.
 initEventModal();
 initEventFilters();
-initGuestControls();

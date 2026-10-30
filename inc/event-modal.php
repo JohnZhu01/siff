@@ -1,20 +1,39 @@
 <?php
 
-/*
-Contents
-  Page helpers
-  Events wrapper
-  Modal markup
-  Assets
-  Event data
-  REST route
-  Event links
-*/
+// Date labels shared by cards and the modal.
+function siff_event_date_parts($value)
+{
+    if (!preg_match('/^(\d{1,2}\/\d{1,2}\/\d{4}|\d{4}-\d{2}-\d{2})[,\sT]*(\d{1,2}:\d{2}(?::\d{2})?\s*(?:am|pm)?)$/i', (string) $value, $parts)) {
+        return null;
+    }
+    $format = strpos($parts[1], '/') !== false ? '!d/m/Y' : '!Y-m-d';
+    $timezone = wp_timezone();
+    $date = DateTimeImmutable::createFromFormat($format, $parts[1], $timezone);
+    $errors = DateTimeImmutable::getLastErrors();
+    if (!$date || ($errors && ($errors['warning_count'] || $errors['error_count']))) {
+        return null;
+    }
+    return array(
+        'card_date' => wp_date('l, F j', $date->getTimestamp(), $timezone),
+        'date' => wp_date('j M Y', $date->getTimestamp(), $timezone),
+        'time' => $parts[2],
+    );
+}
 
-// Page helpers.
-// Keep the Synopsis heading out of automatic event excerpts.
-function siff_clean_event_excerpt($excerpt, $post) {
+// Card excerpts.
+function siff_clean_event_excerpt($excerpt, $post)
+{
     if ($post->post_type === 'siff-event' && $post->post_excerpt === '') {
+        $is_session = has_term(array('panel', 'workshop'), 'siff-event-types', $post);
+        $description = get_post_meta($post->ID, $is_session ? 'short_description' : 'synopsis', true);
+        $description = is_string($description) ? trim(wp_strip_all_tags(strip_shortcodes($description))) : '';
+        if ($description !== '') {
+            return wp_trim_words(
+                $description,
+                (int) apply_filters('excerpt_length', 55),
+                apply_filters('excerpt_more', ' [&hellip;]')
+            );
+        }
         return preg_replace('/^Synopsis\s+/i', '', $excerpt);
     }
     return $excerpt;
@@ -165,6 +184,8 @@ function siff_event_details_data($event_id) {
     }
 
     $event_types = get_the_terms($event_id, 'siff-event-types');
+    $date = get_field('screening_date_and_time', $event_id) ?: get_field('date_and_time', $event_id);
+    $date_parts = siff_event_date_parts($date);
 
     return array(
         'types' => is_array($event_types) ? wp_list_pluck($event_types, 'slug') : array(),
@@ -172,7 +193,10 @@ function siff_event_details_data($event_id) {
         'instructor_profession' => get_field('instructor_profession', $event_id),
         'speaker' => get_field('speaker', $event_id),
         'speaker_profession' => get_field('speaker_profession', $event_id),
-        'image' => get_the_post_thumbnail_url($event_id, 'large') ?: '',
+        'image' => wp_get_attachment_image_url(
+            get_field('modal_image', $event_id, false),
+            'large'
+        ) ?: get_the_post_thumbnail_url($event_id, 'large') ?: '',
         'title' => html_entity_decode(
             get_the_title($event_id),
             ENT_QUOTES,
@@ -180,8 +204,9 @@ function siff_event_details_data($event_id) {
         ),
         'description' => get_field('synopsis', $event_id)
             ?: get_field('short_description', $event_id),
-        'date' => get_field('screening_date_and_time', $event_id)
-            ?: get_field('date_and_time', $event_id),
+        'date' => $date,
+        'display_date' => $date_parts['date'] ?? '',
+        'display_time' => strtoupper($date_parts['time'] ?? ''),
         'filmmaker' => get_field('filmmaker', $event_id),
         'director' => get_field('director', $event_id),
         'venue' => get_field('venue', $event_id),

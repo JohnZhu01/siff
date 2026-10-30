@@ -2,6 +2,202 @@
 
 require_once get_theme_file_path('/inc/event-modal.php');
 require_once get_theme_file_path('/inc/schedule.php');
+require_once get_theme_file_path('/inc/policy.php');
+require_once get_theme_file_path('/inc/events-page-update.php');
+
+
+function siff_enqueues()
+{
+    // Load the theme stylesheet in front-end and block editor content.
+    wp_enqueue_style(
+        'siff-theme',
+        get_stylesheet_uri(),
+        array(),
+        wp_get_theme()->get('Version'),
+        'all'
+    );
+    // Animation styles.
+    wp_enqueue_style(
+        'siff-animations',
+        get_theme_file_uri('/assets/css/animations.css'),
+        array('siff-theme'),
+        filemtime(get_theme_file_path('/assets/css/animations.css'))
+    );
+
+    // Guest reveal.
+    wp_enqueue_script(
+        'siff-guest-reveal',
+        get_theme_file_uri('/assets/js/guest-reveal.js'),
+        array(),
+        filemtime(get_theme_file_path('/assets/js/guest-reveal.js')),
+        true
+    );
+
+    // Guest controls.
+    wp_enqueue_script(
+        'siff-guest-controls',
+        get_theme_file_uri('/assets/js/guest-controls.js'),
+        array(),
+        filemtime(get_theme_file_path('/assets/js/guest-controls.js')),
+        true
+    );
+
+    // Load the scroll-to-top button.
+    wp_enqueue_script(
+        'scroll-to-top',
+        get_theme_file_uri('assets/js/scroll-to-top.js'),
+        array(),
+        filemtime(get_theme_file_path('assets/js/scroll-to-top.js')),
+        true
+    );
+
+    if (is_page('vendors')) {
+        // Load type filtering on the Vendors page.
+        wp_enqueue_script(
+            'siff-vendor-directory',
+            get_theme_file_uri('assets/js/vendor-directory.js'),
+            array(),
+            filemtime(get_theme_file_path('assets/js/vendor-directory.js')),
+            true
+        );
+        $post = get_post();
+        if (is_page('vendors') ||  (is_admin() && $post && 'page' === $post->post_type && 'vendors' === $post->post_name)) {
+            wp_enqueue_style(
+                'siff-vendor-directory',
+                get_theme_file_uri('assets/css/vendor-directory.css'),
+                array(),
+                filemtime(get_theme_file_path('assets/css/vendor-directory.css'))
+            );
+        }
+    }
+
+    // Load map assets on pages with a map.
+    $post = get_queried_object();
+    if (is_singular() || ($post instanceof WP_Post)) {
+        $content = $post->post_content;
+        if (
+            has_block('siff/event-locator', $post)
+            || strpos($content, 'wp-custom-map') === true
+            || strpos($content, 'siff-event-locator') === true
+        ) {
+            wp_enqueue_style(
+                'leaflet',
+                'https://cdn.jsdelivr.net/npm/leaflet@2.0.0-alpha.1/dist/leaflet.css',
+                array(),
+                '2.0.0-alpha.1'
+            );
+
+            wp_register_script_module(
+                'leaflet',
+                'https://cdn.jsdelivr.net/npm/leaflet@2.0.0-alpha.1/dist/leaflet.js',
+                array(),
+                '2.0.0-alpha.1'
+            );
+
+            wp_enqueue_script_module(
+                'siff-location-map',
+                get_theme_file_uri('assets/js/custom-map-init.js'),
+                array('leaflet'),
+                filemtime(get_theme_file_path('assets/js/custom-map-init.js'))
+            );
+            wp_enqueue_style(
+                'custom-map',
+                get_theme_file_uri('assets/css/custom-map.css'),
+                array(),
+                filemtime(get_theme_file_path('assets/css/custom-map.css'))
+            );
+        }
+    }
+
+    wp_enqueue_style(
+        'siff-swiper',
+        'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
+        array(),
+        '11'
+    );
+
+    wp_enqueue_style(
+        'siff-festival-highlights',
+        get_theme_file_uri('assets/css/festival-highlights.css'),
+        array('siff-swiper'),
+        filemtime(get_theme_file_path('assets/css/festival-highlights.css'))
+    );
+
+    wp_enqueue_script(
+        'siff-swiper',
+        'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
+        array(),
+        '11',
+        true
+    );
+
+    wp_enqueue_script(
+        'siff-festival-highlights',
+        get_theme_file_uri('assets/js/festival-highlights.js'),
+        array('siff-swiper'),
+        '1.0',
+        true
+    );
+}
+add_action('wp_enqueue_scripts', 'siff_enqueues');
+
+// Brand WordPress login screens without loading front-end theme styles.
+function siff_login_enqueues()
+{
+    wp_enqueue_style(
+        'siff-login',
+        get_theme_file_uri('/assets/css/login.css'),
+        array('login'),
+        filemtime(get_theme_file_path('/assets/css/login.css'))
+    );
+
+    // WordPress maps the Site Logo setting to the custom_logo theme mod.
+    $logo_id = (int) get_theme_mod('custom_logo');
+    $logo_url = wp_attachment_is_image($logo_id)
+        ? wp_get_attachment_image_url($logo_id, 'full')
+        : false;
+    $logo_url = $logo_url ? esc_url($logo_url) : '';
+
+    // Leave the core logo intact when no usable image is configured.
+    if ($logo_url) {
+        wp_add_inline_style(
+            'siff-login',
+            'body.login .wp-login-logo a { background-image: url("' . $logo_url . '");'
+            . ' background-size: contain; width: 100%; height: 100px; }'
+        );
+    }
+}
+add_action('login_enqueue_scripts', 'siff_login_enqueues');
+
+function siff_login_headerurl()
+{
+    return home_url('/');
+}
+add_filter('login_headerurl', 'siff_login_headerurl');
+
+function siff_login_headertext()
+{
+    return get_bloginfo('name');
+}
+add_filter('login_headertext', 'siff_login_headertext');
+
+
+// Load every guest, including queries saved in the page editor.
+function siff_load_all_guests($block)
+{
+    $classes = explode(' ', $block['attrs']['className'] ?? '');
+    if ($block['blockName'] === 'core/query'
+        && in_array('siff-guests', $classes, true)
+        && ($block['attrs']['query']['postType'] ?? '') === 'guest') {
+        $block['attrs']['query']['perPage'] = max(1, (int) wp_count_posts('guest')->publish);
+        $block['attrs']['query']['pages'] = 0;
+        $block['attrs']['query']['offset'] = 0;
+    }
+    return $block;
+}
+add_filter('render_block_data', 'siff_load_all_guests');
+
+// Filters 
 
 // Allow the error page to use the numeric slug 404.
 function siff_allow_404_slug($override, $slug, $post_id, $status, $post_type)
@@ -50,128 +246,32 @@ function siff_enable_guest_role_binding($field)
     return $field;
 }
 
-add_filter('acf/load_field/key=field_6acf0ec10816f', 'siff_enable_guest_role_binding');
+add_filter('acf/load_field/name=role', 'siff_enable_guest_role_binding');
 
-// Register the vendor card block.
-function siff_register_vendor_card()
+// Show guest roles when ACF bindings are unavailable.
+function siff_guest_role_fallback($html, $parsed_block, $block)
 {
-    register_block_type(
-        get_theme_file_path('blocks/vendor-card'),
-        array(
-            'render_callback' => 'siff_render_vendor_card',
-        )
-    );
-}
-
-add_action('init', 'siff_register_vendor_card');
-
-function siff_render_vendor_card($attributes, $content, $block)
-{
-    // Get the vendor ID from the Query Loop.
-    $vendor_id = absint($block->context['postId'] ?? 0);
-
-    if (! $vendor_id || 'siff-vendor' !== get_post_type($vendor_id) || 'publish' !== get_post_status($vendor_id)) {
-        return '';
+    $classes = explode(' ', $parsed_block['attrs']['className'] ?? '');
+    $guest_id = absint($block->context['postId'] ?? get_the_ID());
+    if (
+        !in_array('siff-guest-role', $classes, true)
+        || get_post_type($guest_id) !== 'guest'
+        || trim(wp_strip_all_tags($html)) !== ''
+    ) {
+        return $html;
     }
 
-    ob_start();
-    include get_theme_file_path('blocks/vendor-card/render.php');
-    return ob_get_clean();
-}
-
-// Load the theme stylesheet in front-end and block editor content.
-function siff_enqueue_theme_styles()
-{
-    wp_enqueue_style(
-        'siff-theme',
-        get_stylesheet_uri(),
-        array(),
-        filemtime(get_stylesheet_directory() . '/style.css')
-    );
-}
-
-add_action('enqueue_block_assets', 'siff_enqueue_theme_styles');
-
-// Load the policy navigation on the policy page.
-function siff_policy_page_class($classes)
-{
-    if (is_page('policy') || is_privacy_policy()) {
-        $classes[] = 'siff-policy-page';
-    }
-    return $classes;
-}
-
-add_filter('body_class', 'siff_policy_page_class');
-
-// Load the policy dropdown script.
-function siff_enqueue_policy_navigation()
-{
-    if (!is_page(array('policy', 'privacy-policy')) && !is_privacy_policy()) {
-        return;
+    $role = get_post_meta($guest_id, 'role', true);
+    if (!is_string($role) || trim($role) === '') {
+        return $html;
     }
 
-    wp_enqueue_script(
-        'siff-vendor-directory',
-        get_theme_file_uri('assets/js/vendor-directory.js'),
-        array(),
-        filemtime(get_theme_file_path('/assets/js/policy-navigation.js')),
-        true
-    );
+    return preg_replace_callback('/(<p\b[^>]*>).*?(<\/p>)/s', function ($matches) use ($role) {
+        return $matches[1] . esc_html($role) . $matches[2];
+    }, $html, 1);
 }
+add_filter('render_block_core/paragraph', 'siff_guest_role_fallback', 10, 3);
 
-add_action('wp_enqueue_scripts', 'siff_enqueue_policy_navigation');
-
-// Load type filtering on the Vendors page.
-function siff_enqueue_vendor_directory_assets()
-{
-    if (! is_page('vendors')) {
-        return;
-    }
-
-    wp_enqueue_script(
-        'siff-vendor-directory',
-        get_theme_file_uri('assets/js/vendor-directory.js'),
-        array(),
-        filemtime(get_theme_file_path('assets/js/vendor-directory.js')),
-        true
-    );
-}
-
-add_action('wp_enqueue_scripts', 'siff_enqueue_vendor_directory_assets');
-
-function siff_enqueue_vendor_directory_styles()
-{
-    $post = get_post();
-    if (! is_page('vendors') && ! (is_admin() && $post && 'page' === $post->post_type && 'vendors' === $post->post_name)) {
-        return;
-    }
-
-    wp_enqueue_style(
-        'siff-vendor-directory',
-        get_theme_file_uri('assets/css/vendor-directory.css'),
-        array(),
-        filemtime(get_theme_file_path('assets/css/vendor-directory.css'))
-    );
-}
-
-add_action('enqueue_block_assets', 'siff_enqueue_vendor_directory_styles');
-
-function siff_register_event_date_block()
-{
-    wp_register_script(
-        'siff-event-date-editor',
-        get_theme_file_uri('/blocks/event-date/editor.js'),
-        array('wp-blocks', 'wp-element', 'wp-block-editor'),
-        filemtime(get_theme_file_path('/blocks/event-date/editor.js')),
-        true
-    );
-
-    register_block_type(
-        get_theme_file_path('/blocks/event-date')
-    );
-}
-
-add_action('init', 'siff_register_event_date_block');
 
 // Event type labels inside cards.
 function siff_event_type_labels($html, $parsed_block)
@@ -185,121 +285,6 @@ function siff_event_type_labels($html, $parsed_block)
 
 add_filter('render_block_core/post-terms', 'siff_event_type_labels', 10, 2);
 
-// Connect event titles to the modal.
-add_filter('render_block_core/post-title', function ($html, $parsed_block, $block) {
-    $classes = preg_split('/\s+/', trim($parsed_block['attrs']['className'] ?? ''));
-    $event_id = absint($block->context['postId'] ?? 0);
-
-    if (
-        !in_array('siff-event-trigger', $classes, true)
-        || get_post_type($event_id) !== 'siff-event'
-    ) {
-        return $html;
-    }
-
-    $processor = new WP_HTML_Tag_Processor($html);
-    if ($processor->next_tag('A')) {
-        $processor->set_attribute('data-event-id', $event_id);
-        $processor->set_attribute('aria-haspopup', 'dialog');
-        $processor->set_attribute('aria-controls', 'siff-event-modal');
-    }
-
-    return $processor->get_updated_html();
-}, 10, 3);
-
-
-//load leaflet css and js
-function siff_enqueue_leaflet_assets()
-{
-    wp_enqueue_style(
-        'leaflet',
-        'https://cdn.jsdelivr.net/npm/leaflet@2.0.0-alpha.1/dist/leaflet.css',
-        array(),
-        '2.0.0-alpha.1'
-    );
-
-    wp_register_script_module(
-        'leaflet',
-        'https://cdn.jsdelivr.net/npm/leaflet@2.0.0-alpha.1/dist/leaflet.js',
-        array(),
-        '2.0.0-alpha.1'
-    );
-
-    wp_enqueue_script_module(
-        'siff-location-map',
-        get_theme_file_uri('/assets/js/custom-map-init.js'),
-        array('leaflet'),
-        filemtime(get_theme_file_path('assets/js/custom-map-init.js'))
-    );
-    wp_enqueue_style(
-        'custom-map',
-        get_theme_file_uri('assets/css/custom-map.css'),
-        array(),
-        filemtime(get_theme_file_path('assets/css/custom-map.css'))
-    );
-}
-add_action('wp_enqueue_scripts', 'siff_enqueue_leaflet_assets');
-
-// Register the Event Map Locator Block.
-function siff_register_event_locator()
-{
-    register_block_type(
-        'siff/event-locator',
-        [
-            'title' => 'Event Locator Map',
-            'category' => 'theme',
-            'icon' => 'location-alt',
-            'description' => 'Display a location of the event in the map.',
-            'render_callback' => function () {
-                return sprintf(
-                    '<div id="siff-event-locator"></div>'
-                );
-            },
-            'supports' => [
-                'autoRegister' => true,
-            ]
-        ]
-    );
-}
-
-add_action('init', 'siff_register_event_locator');
-
-
-// Keep the Events patterns available after file-based deployments.
-function siff_register_events_grid_pattern()
-{
-    $registry = WP_Block_Patterns_Registry::get_instance();
-    $patterns = array(
-        'special-guests' => __('Special Guests', 'siff-theme'),
-        'events-grid' => __('Events Grid', 'siff-theme'),
-        'events-page' => __('Events Page', 'siff-theme'),
-    );
-
-    foreach ($patterns as $name => $title) {
-        $slug = 'siff-theme/' . $name;
-        if ($registry->is_registered($slug)) {
-            continue;
-        }
-
-        $file = get_theme_file_path('/patterns/' . $name . '.php');
-        if (!is_readable($file)) {
-            continue;
-        }
-
-        ob_start();
-        include $file;
-        $content = ob_get_clean();
-
-        register_block_pattern($slug, array(
-            'title' => $title,
-            'categories' => array('featured'),
-            'inserter' => true,
-            'content' => $content,
-        ));
-    }
-}
-
-add_action('init', 'siff_register_events_grid_pattern', 20);
 
 // Overwrite the add to cart button in the shop page
 add_filter('woocommerce_product_add_to_cart_url', 'custom_box_office_add_to_cart_url', 10, 2);
@@ -313,6 +298,15 @@ function custom_box_office_add_to_cart_url($url, $product)
 }
 
 add_filter('woocommerce_product_add_to_cart_text', 'custom_box_office_add_to_cart_text', 10, 2);
+
+
+function yoast_to_bottom()
+{
+    return 'low';
+}
+add_filter('wpseo_metabox_prio', 'yoast_to_bottom');
+
+
 function custom_box_office_add_to_cart_text($text, $product)
 {
     if ($product && 'yes' === get_post_meta($product->get_id(), '_ticket', true) && $product->is_purchasable() && $product->is_in_stock()) {
@@ -321,66 +315,15 @@ function custom_box_office_add_to_cart_text($text, $product)
     return $text;
 }
 
-// Registering custom ACF block
 
-function siff_register_festival_highlights_block()
-{
-    if (function_exists('acf_register_block_type')) {
-        acf_register_block_type(array(
-            'name'            => 'festival-highlights',
-            'title'           => 'Festival Highlights Slider',
-            'description'     => 'A featured slider for SIFF festival highlights.',
-            'render_template' => 'blocks/festival-highlights/render.php',
-            'category'        => 'design',
-            'icon'            => 'format-gallery',
-            'keywords'        => array(
-                'festival',
-                'highlights',
-                'slider'
-            ),
-            'mode'            => 'preview',
-            'supports'        => array(
-                'align' => array('wide', 'full'),
-                'anchor' => true
-            ),
-            'enqueue_assets'  => 'siff_enqueue_festival_highlights_assets'
-        ));
-    }
-}
-add_action('acf/init', 'siff_register_festival_highlights_block');
+// Load custom blocks
+require get_theme_file_path() . '/blocks/siff-blocks.php';
 
 
-function siff_enqueue_festival_highlights_assets()
-{
-    $theme_uri = get_template_directory_uri();
+///Removing not needed dashboards in wp-admin
+require get_theme_file_path() . '/inc/admin-dashboard.php';
 
-    wp_enqueue_style(
-        'siff-swiper',
-        'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
-        array(),
-        '11'
-    );
 
-    wp_enqueue_style(
-        'siff-festival-highlights',
-        $theme_uri . '/assets/css/festival-highlights.css',
-        array('siff-swiper'),
-        filemtime(get_theme_file_path('/assets/css/festival-highlights.css'))
-    );
+///Removing menu links for non admin users
+require get_theme_file_path() . '/inc/remove-admin-links.php';
 
-    wp_enqueue_script(
-        'siff-swiper',
-        'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
-        array(),
-        '11',
-        true
-    );
-
-    wp_enqueue_script(
-        'siff-festival-highlights',
-        $theme_uri . '/assets/js/festival-highlights.js',
-        array('siff-swiper'),
-        '1.0',
-        true
-    );
-}

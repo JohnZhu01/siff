@@ -20,19 +20,13 @@ $date = get_field('screening_date_and_time', $event_id)
 if (!$date) {
     return;
 }
+$date_parts = siff_event_date_parts($date);
 ?>
 
 <p <?php echo get_block_wrapper_attributes(array('class' => 'siff-event-date')); ?>>
-    <?php if (preg_match('/^(\d{1,2}\/\d{1,2}\/\d{4}|\d{4}-\d{2}-\d{2})[,\sT]*(\d{1,2}:\d{2}(?::\d{2})?\s*(?:am|pm)?)$/i', $date, $date_parts)) : ?>
-        <?php
-        $date_format = strpos($date_parts[1], '/') !== false ? '!d/m/Y' : '!Y-m-d';
-        $event_date = DateTimeImmutable::createFromFormat($date_format, $date_parts[1], wp_timezone());
-        $display_date = $event_date
-            ? wp_date('l, F j', $event_date->getTimestamp(), wp_timezone())
-            : $date_parts[1];
-        ?>
-        <span><?php echo esc_html($display_date); ?></span>
-        <span><?php echo esc_html($date_parts[2]); ?></span>
+    <?php if ($date_parts) : ?>
+        <span><strong class="siff-event-date-label">Date:</strong> <?php echo esc_html($date_parts['card_date']); ?></span>
+        <span><strong class="siff-event-date-label">Time:</strong> <?php echo esc_html($date_parts['time']); ?></span>
     <?php else : ?>
         <?php echo esc_html($date); ?>
     <?php endif; ?>
