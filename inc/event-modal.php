@@ -40,42 +40,12 @@ function siff_clean_event_excerpt($excerpt, $post)
 }
 add_filter('get_the_excerpt', 'siff_clean_event_excerpt', 10, 2);
 
-// Director, speaker or instructor.
-function siff_event_card_presenter($html, $parsed_block, $block)
-{
-    $event_id = absint($block->context['postId'] ?? 0);
-    if (get_post_type($event_id) !== 'siff-event') {
-        return $html;
-    }
-
-    $field = 'director';
-    $label = 'Director';
-    if (has_term('panel', 'siff-event-types', $event_id)) {
-        $field = 'speaker';
-        $label = 'Speaker';
-    } elseif (has_term('workshop', 'siff-event-types', $event_id)) {
-        $field = 'instructor';
-        $label = 'Instructor';
-    }
-
-    $name = get_post_meta($event_id, $field, true);
-    if (!is_string($name) || trim($name) === '') {
-        return $html;
-    }
-
-    return $html . '<p class="siff-event-presenter"><span class="siff-event-presenter-label">'
-        . esc_html($label) . '</span> ' . esc_html($name) . '</p>';
-}
-add_filter('render_block_core/post-excerpt', 'siff_event_card_presenter', 10, 3);
-
-function siff_page_uses_event_modal()
-{
+function siff_page_uses_event_modal() {
     return is_page(array('events', 'schedule'));
 }
 
-// Events page class.
-function siff_event_page_classes($classes)
-{
+// Give the Events page a class for page-specific styles.
+function siff_event_page_classes($classes) {
     if (is_page('events')) {
         $classes[] = 'siff-events-page';
     }
@@ -85,8 +55,7 @@ function siff_event_page_classes($classes)
 add_filter('body_class', 'siff_event_page_classes');
 
 // Events wrapper.
-function siff_add_events_section_class($block_content)
-{
+function siff_add_events_section_class($block_content) {
     if (strpos($block_content, 'siff-event-filters') === false) {
         return $block_content;
     }
@@ -103,8 +72,7 @@ function siff_add_events_section_class($block_content)
 add_filter('render_block_core/query', 'siff_add_events_section_class');
 
 // Modal markup.
-function siff_render_event_modal()
-{
+function siff_render_event_modal() {
     if (!siff_page_uses_event_modal()) {
         return;
     }
@@ -124,16 +92,47 @@ function siff_render_event_modal()
                     <img id="siff-modal-image" alt="" hidden>
                 </div>
 
-                <details class="siff-modal-info">
-                    <summary>Details</summary>
+                <div class="siff-modal-info">
                     <div id="siff-modal-meta"></div>
-                    <div id="siff-modal-credits"></div>
-                </details>
+                </div>
 
-                <section class="siff-modal-description" aria-labelledby="siff-modal-description-title">
-                    <h3 id="siff-modal-description-title">Synopsis</h3>
-                    <div id="siff-modal-content"></div>
-                </section>
+                <div class="siff-modal-description siff-modal-tabs">
+                    <div role="tablist" aria-label="Event information">
+                        <button
+                            type="button"
+                            id="siff-tab-overview"
+                            role="tab"
+                            aria-selected="true"
+                            aria-controls="siff-panel-overview"
+                        >Synopsis</button>
+                        <button
+                            type="button"
+                            id="siff-tab-details"
+                            role="tab"
+                            aria-selected="false"
+                            aria-controls="siff-panel-details"
+                            tabindex="-1"
+                        >Details</button>
+                    </div>
+
+                    <div
+                        id="siff-panel-overview"
+                        role="tabpanel"
+                        aria-labelledby="siff-tab-overview"
+                        tabindex="0"
+                    >
+                        <div id="siff-modal-content"></div>
+                    </div>
+                    <div
+                        id="siff-panel-details"
+                        role="tabpanel"
+                        aria-labelledby="siff-tab-details"
+                        tabindex="0"
+                        hidden
+                    >
+                        <div id="siff-modal-credits"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </dialog>
@@ -143,8 +142,7 @@ function siff_render_event_modal()
 add_action('wp_footer', 'siff_render_event_modal');
 
 // Assets.
-function siff_enqueue_event_modal_assets()
-{
+function siff_enqueue_event_modal_assets() {
     if (!siff_page_uses_event_modal()) {
         return;
     }
@@ -169,11 +167,10 @@ function siff_enqueue_event_modal_assets()
 add_action('wp_enqueue_scripts', 'siff_enqueue_event_modal_assets');
 
 // Event data.
-function siff_event_details_data($event_id)
-{
+function siff_event_details_data($event_id) {
     $event = get_post($event_id);
 
-    // Published events only.
+    // Only expose published event posts.
     if (
         !$event ||
         $event->post_type !== 'siff-event' ||
@@ -218,8 +215,7 @@ function siff_event_details_data($event_id)
     );
 }
 
-function siff_localize_event_modal()
-{
+function siff_localize_event_modal() {
     if (!siff_page_uses_event_modal()) {
         return;
     }
@@ -251,8 +247,7 @@ function siff_localize_event_modal()
 }
 
 // REST route.
-function siff_register_event_routes()
-{
+function siff_register_event_routes() {
     register_rest_route('siff/v1', '/events/(?P<id>[1-9]\d*)', array(
         'methods' => WP_REST_Server::READABLE,
         'callback' => 'siff_rest_event_details',
@@ -262,8 +257,7 @@ function siff_register_event_routes()
 
 add_action('rest_api_init', 'siff_register_event_routes');
 
-function siff_rest_event_details($request)
-{
+function siff_rest_event_details($request) {
     if (!function_exists('get_field')) {
         return new WP_Error(
             'siff_fields_unavailable',
@@ -286,7 +280,7 @@ function siff_rest_event_details($request)
     return rest_ensure_response($details);
 }
 
-// Connect event titles to the modal.
+// Event links.
 add_filter('render_block_core/post-title', function ($html, $parsed_block, $block) {
     $event_id = absint($block->context['postId'] ?? 0);
 

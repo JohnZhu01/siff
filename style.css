@@ -1247,24 +1247,18 @@ body.blog .wp-site-blocks > .wp-block-group > .wp-block-query > .wp-block-post-t
 
 
 /* Checkout Page Styles */
-.wc-block-components-form 
-.wc-block-components-text-input input[type=email], 
-.wc-block-components-form 
-.wc-block-components-text-input.is-active input[type=email],
 .wc-blocks-components-select .wc-blocks-components-select__container,
-.wc-blocks-components-select .wc-blocks-components-select__select,
-.wc-block-components-form 
-.wc-block-components-text-input input[type=text], 
-.wc-block-components-form 
-.wc-block-components-text-input.is-active input[type=text],
-.wc-block-components-text-input input[type=tel], 
-.wc-block-components-form 
-.wc-block-components-text-input.is-active input[type=tel]{
+.wc-blocks-components-select .wc-blocks-components-select__select{
   border: 0.0625rem solid #666;
   border-radius: 0.5rem;
   background: #0b0b0b;
+  background-color: #0b0b0b;
   color: #f4f4f4;
 }
+
+.wc-block-components-checkbox__mark{
+  color: var(--wp--preset--color--custom-accents, #05c7f2);
+} 
 
 .wc-block-components-radio-control--highlight-checked .wc-block-components-radio-control-accordion-option--checked-option-highlighted, .wc-block-components-radio-control--highlight-checked label.wc-block-components-radio-control__option--checked-option-highlighted {
     border-radius: 4px;
@@ -1310,6 +1304,9 @@ html {
 
 svg path {
 	fill: currentColor;
+}
+svg{
+  height: 2.5rem;
 }
 
 .scroll-top {

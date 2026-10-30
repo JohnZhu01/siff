@@ -1,3 +1,14 @@
+/*
+Contents
+  Measurements
+  Loading spinner
+  Detail rows
+  Event modal
+  Event filters and search
+  Guest expand and collapse
+  Setup
+*/
+
 // Measurements.
 function toRem(value) {
   const rootSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -28,7 +39,7 @@ function showEventLoader(container) {
   container.innerHTML = `
     <div role="status">
       <div class="siff-modal-loader" aria-hidden="true"></div>
-      <span class="screen-reader-text">Loading event details...</span>
+      <span class="screen-reader-text">Loading event details…</span>
     </div>
   `;
 }
@@ -61,26 +72,61 @@ function initEventModal() {
   const title = document.querySelector("#siff-modal-title");
   const content = document.querySelector("#siff-modal-content");
   const meta = document.querySelector("#siff-modal-meta");
-  const descriptionTitle = document.querySelector("#siff-modal-description-title");
+  const overviewTab = document.querySelector("#siff-tab-overview");
+  const detailsTab = document.querySelector("#siff-tab-details");
   const credits = document.querySelector("#siff-modal-credits");
-  const detailsSection = document.querySelector(".siff-modal-info");
-  const mobileModal = window.matchMedia("(max-width: 47.9375rem)");
 
+  const tabs = [overviewTab, detailsTab];
+  const panels = [
+    document.querySelector("#siff-panel-overview"),
+    document.querySelector("#siff-panel-details"),
+  ];
   const image = document.querySelector("#siff-modal-image");
   const imageArea = image?.closest(".siff-modal-image");
 
   if (!modal || !modalBody || !closeButton || !title || !content || !meta
-      || !credits || !detailsSection || !descriptionTitle || !imageArea) return;
+      || !credits || !overviewTab || !detailsTab || !imageArea
+      || panels.some((panel) => !panel)) return;
 
-  function resetDetails() {
-    detailsSection.open = !mobileModal.matches;
+  function selectTab(index, moveFocus = false) {
+    tabs.forEach((tab, tabIndex) => {
+      const selected = tabIndex === index;
+      tab.setAttribute("aria-selected", String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+      panels[tabIndex].hidden = !selected;
+    });
+
+    if (moveFocus) {
+      tabs[index].focus({ preventScroll: true });
+    }
   }
 
-  // Collapse details on mobile.
-  resetDetails();
-  mobileModal.addEventListener("change", resetDetails);
-  detailsSection.querySelector("summary").addEventListener("click", (event) => {
-    if (!mobileModal.matches) event.preventDefault();
+  tabs.forEach((tab, index) => {
+    tab.addEventListener("click", () => selectTab(index));
+
+    tab.addEventListener("keydown", (event) => {
+      let next;
+
+      switch (event.key) {
+        case "ArrowRight":
+          next = (index + 1) % tabs.length;
+          break;
+        case "ArrowLeft":
+          next = (index - 1 + tabs.length) % tabs.length;
+          break;
+        case "Home":
+          next = 0;
+          break;
+        case "End":
+          next = tabs.length - 1;
+          break;
+        default:
+          return;
+      }
+
+      event.preventDefault();
+      selectTab(next, true);
+    });
   });
 
   let requestNumber = 0;
@@ -97,9 +143,9 @@ function initEventModal() {
     modal.classList.remove("is-loading");
     title.textContent = details.title;
     if (types.includes("film")) {
-      descriptionTitle.textContent = "Synopsis";
+      overviewTab.textContent = "Synopsis";
     } else {
-      descriptionTitle.textContent = "Overview";
+      overviewTab.textContent = "Overview";
     }
     imageArea.hidden = !details.image;
     if (details.image) {
@@ -132,7 +178,7 @@ function initEventModal() {
   }
 
   document.addEventListener("click", async (event) => {
-    // Ignore clicks inside the modal.
+    // Leave links and controls inside the dialog alone.
     if (modal.contains(event.target)) return;
 
     if (!(event.target instanceof Element)) return;
@@ -154,9 +200,12 @@ function initEventModal() {
     const currentRequest = requestNumber;
 
     const eventId = trigger.dataset.eventId;
+    const loadingStarted = performance.now();
+    const minimumLoadingTime = 500;
     title.textContent = "Event details";
-    resetDetails();
-    descriptionTitle.textContent = "Overview";
+    overviewTab.textContent = "Overview";
+    selectTab(0);
+
     modal.classList.add("is-loading");
     showEventLoader(content);
     meta.replaceChildren();
@@ -192,6 +241,11 @@ function initEventModal() {
 
         details = result;
         eventCache[eventId] = details;
+      }
+      const remaining =
+        minimumLoadingTime - (performance.now() - loadingStarted);
+      if (remaining > 0) {
+        await new Promise((resolve) => setTimeout(resolve, remaining));
       }
       if (currentRequest !== requestNumber || !modal.open) return;
 
@@ -322,7 +376,7 @@ function initEventFilters() {
     mobileFilter.append(select);
     filters.prepend(mobileFilter);
 
-    // Results area.
+    // Results count and card wrapper.
     const status = document.createElement("p");
     status.setAttribute("role", "status");
     status.className = "siff-event-results";
@@ -331,7 +385,7 @@ function initEventFilters() {
     grid.before(resultsSection);
     resultsSection.append(status, grid);
 
-    // Show six events at a time.
+    // Show six matching events at a time.
     const batchSize = 6;
     let visibleCards = [];
     const loadMore = document.createElement("button");
@@ -351,7 +405,7 @@ function initEventFilters() {
 
     reducedMotion.addEventListener("change", clearCardAnimations);
 
-    // Filter the cards.
+    // Match cards by category and search text.
     function applyFilter(type, animate = false, limit = batchSize) {
       clearCardAnimations();
       activeType = type;
@@ -410,7 +464,7 @@ function initEventFilters() {
         : "No matching events.";
     }
 
-    // Scroll to the results.
+    // Bring the first results below the sticky controls.
     function changeEventType(type) {
       applyFilter(type, true);
 
