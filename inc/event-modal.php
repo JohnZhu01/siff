@@ -288,17 +288,26 @@ function siff_rest_event_details($request)
 
 // Connect event titles to the modal.
 add_filter('render_block_core/post-title', function ($html, $parsed_block, $block) {
-    $classes = preg_split('/\s+/', trim($parsed_block['attrs']['className'] ?? ''));
     $event_id = absint($block->context['postId'] ?? 0);
 
-    if (
-        !in_array('siff-event-trigger', $classes, true)
-        || get_post_type($event_id) !== 'siff-event'
-    ) {
+    if (!siff_page_uses_event_modal() || get_post_type($event_id) !== 'siff-event') {
         return $html;
     }
 
+    // Older saved titles may have linking disabled.
+    if (stripos($html, '<a ') === false) {
+        $html = preg_replace(
+            '/(<h[1-6]\b[^>]*>)(.*?)(<\/h[1-6]>)/s',
+            '$1<a href="' . esc_url(get_permalink($event_id)) . '">$2</a>$3',
+            $html,
+            1
+        );
+    }
+
     $processor = new WP_HTML_Tag_Processor($html);
+    if ($processor->next_tag()) {
+        $processor->add_class('siff-event-trigger');
+    }
     if ($processor->next_tag('A')) {
         $processor->set_attribute('data-event-id', $event_id);
         $processor->set_attribute('aria-haspopup', 'dialog');

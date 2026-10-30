@@ -85,7 +85,8 @@ function initEventModal() {
 
   let requestNumber = 0;
   let activeTrigger;
-  const eventCache = siffModal.events || {};
+  const modalSettings = window.siffModal || {};
+  const eventCache = modalSettings.events || {};
 
   image.addEventListener("error", () => {
     imageArea.hidden = true;
@@ -170,7 +171,14 @@ function initEventModal() {
       let details = eventCache[eventId];
 
       if (!details) {
-        const url = new URL(encodeURIComponent(eventId), siffModal.restUrl);
+        // Support both pretty and plain WordPress permalinks.
+        const url = new URL(modalSettings.restUrl, window.location.href);
+        if (url.searchParams.has("rest_route")) {
+          const route = url.searchParams.get("rest_route").replace(/\/$/, "");
+          url.searchParams.set("rest_route", `${route}/${encodeURIComponent(eventId)}`);
+        } else {
+          url.pathname = url.pathname.replace(/\/$/, "") + "/" + encodeURIComponent(eventId);
+        }
 
         const response = await fetch(url);
 
@@ -450,5 +458,13 @@ function initEventFilters() {
 }
 
 // Setup.
-initEventModal();
-initEventFilters();
+function initEvents() {
+  initEventModal();
+  initEventFilters();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initEvents);
+} else {
+  initEvents();
+}
