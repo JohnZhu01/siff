@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "siff/event-locator",
+	"version": "0.1.0",
+	"title": "Event Locator Map",
+	"category": "widgets",
+	"icon": "location-alt",
+	"description": "Display a location of the event in the map.",
+	"supports": {
+		"html": false
+	},
+	"textdomain": "siff-theme",
+	"editorScript": "file:./index.js",
+	"style": "file:./style-index.css",
+	"viewStyle": "file:./view.css",
+	"render": "file:./render.php",
+	"viewScript": "file:./view.js"
+}
