@@ -76,129 +76,88 @@ function initEventModal() {
   const title = document.querySelector("#siff-modal-title");
   const content = document.querySelector("#siff-modal-content");
   const meta = document.querySelector("#siff-modal-meta");
-  const descriptionTitle = document.querySelector("#siff-modal-description-title");
+  const overviewTab = document.querySelector("#siff-tab-overview");
+  const detailsTab = document.querySelector("#siff-tab-details");
   const credits = document.querySelector("#siff-modal-credits");
-  const detailsSection = document.querySelector(".siff-modal-info");
-  const mobileModal = window.matchMedia("(max-width: 47.9375rem)");
 
+  const tabs = [overviewTab, detailsTab];
+  const panels = [
+    document.querySelector("#siff-panel-overview"),
+    document.querySelector("#siff-panel-details"),
+  ];
   const image = document.querySelector("#siff-modal-image");
   const imageArea = image?.closest(".siff-modal-image");
 
-  if (!modal || !modalBody || !closeButton || !title || !content || !meta
-      || !credits || !detailsSection || !descriptionTitle || !imageArea) return;
+  if (
+    !modal ||
+    !modalBody ||
+    !closeButton ||
+    !title ||
+    !content ||
+    !meta ||
+    !credits ||
+    !detailsSection ||
+    !descriptionTitle ||
+    !imageArea
+  )
+    return;
 
-  function resetDetails() {
-    detailsSection.open = !mobileModal.matches;
-  }
-
-  // Collapse details on mobile.
-  resetDetails();
-  mobileModal.addEventListener("change", resetDetails);
-  detailsSection.querySelector("summary").addEventListener("click", (event) => {
-    if (!mobileModal.matches) event.preventDefault();
-  });
-
-  let requestNumber = 0;
-  let activeTrigger;
-  const modalSettings = window.siffModal || {};
-  const eventCache = modalSettings.events || {};
-
-  image.addEventListener("error", () => {
-    imageArea.hidden = true;
-  });
-
-  function renderDetails(details) {
-    const types = details.types || [];
-    modal.classList.remove("is-loading");
-    title.textContent = details.title;
-    if (types.includes("film")) {
-      descriptionTitle.textContent = "Synopsis";
-    } else {
-      descriptionTitle.textContent = "Overview";
-    }
-    imageArea.hidden = !details.image;
-    if (details.image) {
-      image.src = details.image;
-      image.alt = "";
-      image.hidden = false;
-    }
-
-    content.replaceChildren();
-    addEventDetail(content, "", details.description);
-    if (details.display_date) {
-      addEventDetail(meta, "Date", details.display_date);
-      addEventDetail(meta, "Time", details.display_time);
-    } else {
-      addEventDetail(meta, "Date and time", details.date);
-    }
-    addEventDetail(meta, "Venue", details.venue);
-    addEventDetail(credits, "Duration", details.duration);
-
-    if (types.includes("film")) {
-      addEventDetail(credits, "Filmmaker", details.filmmaker);
-      addEventDetail(credits, "Director", details.director);
-    } else if (types.includes("workshop")) {
-      addEventDetail(credits, "Instructor", details.instructor);
-      addEventDetail(credits, "Profession", details.instructor_profession);
-    } else if (types.includes("panel")) {
-      addEventDetail(credits, "Speaker", details.speaker);
-      addEventDetail(credits, "Profession", details.speaker_profession);
-    }
+  if (moveFocus) {
+    tabs[index].focus({ preventScroll: true });
   }
 }
 
-  document.addEventListener("click", async (event) => {
-    // Ignore clicks inside the modal.
-    if (modal.contains(event.target)) return;
+tabs.forEach((tab, index) => {
+  tab.addEventListener("click", () => selectTab(index));
 
-    if (!(event.target instanceof Element)) return;
-    let trigger = event.target.closest("[data-event-id]");
-    if (!trigger) {
-      const card = event.target.closest(".siff-event-card");
-      if (!card) return;
-      if (event.target.closest("a, button, input, select, textarea, label"))
+  tab.addEventListener("keydown", (event) => {
+    let next;
+
+    switch (event.key) {
+      case "ArrowRight":
+        next = (index + 1) % tabs.length;
+        break;
+      case "ArrowLeft":
+        next = (index - 1 + tabs.length) % tabs.length;
+        break;
+      case "Home":
+        next = 0;
+        break;
+      case "End":
+        next = tabs.length - 1;
+        break;
+      default:
         return;
     }
 
     event.preventDefault();
-    activeTrigger = trigger;
-    requestNumber++;
-    const currentRequest = requestNumber;
+    selectTab(next, true);
+  });
+});
 
-    const eventId = trigger.dataset.eventId;
-    title.textContent = "Event details";
-    resetDetails();
-    descriptionTitle.textContent = "Overview";
-    modal.classList.add("is-loading");
-    showEventLoader(content);
-    meta.replaceChildren();
-    credits.replaceChildren();
-    image.hidden = true;
-    imageArea.hidden = true;
-    image.removeAttribute("src");
-    if (!modal.open) modal.showModal();
-    modalBody.scrollTop = 0;
+let requestNumber = 0;
+let activeTrigger;
+const eventCache = siffModal.events || {};
 
-    try {
-      let details = eventCache[eventId];
+image.addEventListener("error", () => {
+  imageArea.hidden = true;
+});
 
-      if (!details) {
-        // Support both pretty and plain WordPress permalinks.
-        const url = new URL(modalSettings.restUrl, window.location.href);
-        if (url.searchParams.has("rest_route")) {
-          const route = url.searchParams.get("rest_route").replace(/\/$/, "");
-          url.searchParams.set("rest_route", `${route}/${encodeURIComponent(eventId)}`);
-        } else {
-          url.pathname = url.pathname.replace(/\/$/, "") + "/" + encodeURIComponent(eventId);
-        }
-
-        const response = await fetch(url);
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.message || "Unable to load this event.");
-        }
+function renderDetails(details) {
+  const types = details.types || [];
+  modal.classList.remove("is-loading");
+  title.textContent = details.title;
+  if (types.includes("film")) {
+    overviewTab.textContent = "Synopsis";
+  } else {
+    overviewTab.textContent = "Overview";
+  }
+  imageArea.hidden = !details.image;
+  if (details.image) {
+    image.src = details.image;
+    image.alt = "";
+    image.hidden = false;
+  }
 
   content.replaceChildren();
   addEventDetail(content, "", details.description);
@@ -223,10 +182,9 @@ function initEventModal() {
   }
 }
 
-        details = result;
-        eventCache[eventId] = details;
-      }
-      if (currentRequest !== requestNumber || !modal.open) return;
+document.addEventListener("click", async (event) => {
+  // Leave links and controls inside the dialog alone.
+  if (modal.contains(event.target)) return;
 
   if (!(event.target instanceof Element)) return;
   let trigger = event.target.closest("[data-event-id]");
@@ -566,13 +524,5 @@ function initEventFilters() {
 }
 
 // Setup.
-function initEvents() {
-  initEventModal();
-  initEventFilters();
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initEvents);
-} else {
-  initEvents();
-}
+initEventModal();
+initEventFilters();
