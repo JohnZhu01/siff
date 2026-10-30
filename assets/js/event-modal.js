@@ -72,61 +72,26 @@ function initEventModal() {
   const title = document.querySelector("#siff-modal-title");
   const content = document.querySelector("#siff-modal-content");
   const meta = document.querySelector("#siff-modal-meta");
-  const overviewTab = document.querySelector("#siff-tab-overview");
-  const detailsTab = document.querySelector("#siff-tab-details");
+  const descriptionTitle = document.querySelector("#siff-modal-description-title");
   const credits = document.querySelector("#siff-modal-credits");
+  const detailsSection = document.querySelector(".siff-modal-info");
+  const mobileModal = window.matchMedia("(max-width: 47.9375rem)");
 
-  const tabs = [overviewTab, detailsTab];
-  const panels = [
-    document.querySelector("#siff-panel-overview"),
-    document.querySelector("#siff-panel-details"),
-  ];
   const image = document.querySelector("#siff-modal-image");
   const imageArea = image?.closest(".siff-modal-image");
 
   if (!modal || !modalBody || !closeButton || !title || !content || !meta
-      || !credits || !overviewTab || !detailsTab || !imageArea
-      || panels.some((panel) => !panel)) return;
+      || !credits || !detailsSection || !descriptionTitle || !imageArea) return;
 
-  function selectTab(index, moveFocus = false) {
-    tabs.forEach((tab, tabIndex) => {
-      const selected = tabIndex === index;
-      tab.setAttribute("aria-selected", String(selected));
-      tab.tabIndex = selected ? 0 : -1;
-      panels[tabIndex].hidden = !selected;
-    });
-
-    if (moveFocus) {
-      tabs[index].focus({ preventScroll: true });
-    }
+  function resetDetails() {
+    detailsSection.open = !mobileModal.matches;
   }
 
-  tabs.forEach((tab, index) => {
-    tab.addEventListener("click", () => selectTab(index));
-
-    tab.addEventListener("keydown", (event) => {
-      let next;
-
-      switch (event.key) {
-        case "ArrowRight":
-          next = (index + 1) % tabs.length;
-          break;
-        case "ArrowLeft":
-          next = (index - 1 + tabs.length) % tabs.length;
-          break;
-        case "Home":
-          next = 0;
-          break;
-        case "End":
-          next = tabs.length - 1;
-          break;
-        default:
-          return;
-      }
-
-      event.preventDefault();
-      selectTab(next, true);
-    });
+  // Collapse details on mobile.
+  resetDetails();
+  mobileModal.addEventListener("change", resetDetails);
+  detailsSection.querySelector("summary").addEventListener("click", (event) => {
+    if (!mobileModal.matches) event.preventDefault();
   });
 
   let requestNumber = 0;
@@ -143,9 +108,9 @@ function initEventModal() {
     modal.classList.remove("is-loading");
     title.textContent = details.title;
     if (types.includes("film")) {
-      overviewTab.textContent = "Synopsis";
+      descriptionTitle.textContent = "Synopsis";
     } else {
-      overviewTab.textContent = "Overview";
+      descriptionTitle.textContent = "Overview";
     }
     imageArea.hidden = !details.image;
     if (details.image) {
@@ -178,7 +143,7 @@ function initEventModal() {
   }
 
   document.addEventListener("click", async (event) => {
-    // Leave links and controls inside the dialog alone.
+    // Ignore clicks inside the modal.
     if (modal.contains(event.target)) return;
 
     if (!(event.target instanceof Element)) return;
@@ -200,12 +165,9 @@ function initEventModal() {
     const currentRequest = requestNumber;
 
     const eventId = trigger.dataset.eventId;
-    const loadingStarted = performance.now();
-    const minimumLoadingTime = 500;
     title.textContent = "Event details";
-    overviewTab.textContent = "Overview";
-    selectTab(0);
-
+    resetDetails();
+    descriptionTitle.textContent = "Overview";
     modal.classList.add("is-loading");
     showEventLoader(content);
     meta.replaceChildren();
@@ -241,11 +203,6 @@ function initEventModal() {
 
         details = result;
         eventCache[eventId] = details;
-      }
-      const remaining =
-        minimumLoadingTime - (performance.now() - loadingStarted);
-      if (remaining > 0) {
-        await new Promise((resolve) => setTimeout(resolve, remaining));
       }
       if (currentRequest !== requestNumber || !modal.open) return;
 

@@ -72,7 +72,8 @@ function siff_add_events_section_class($block_content) {
 add_filter('render_block_core/query', 'siff_add_events_section_class');
 
 // Modal markup.
-function siff_render_event_modal() {
+function siff_render_event_modal()
+{
     if (!siff_page_uses_event_modal()) {
         return;
     }
@@ -92,47 +93,16 @@ function siff_render_event_modal() {
                     <img id="siff-modal-image" alt="" hidden>
                 </div>
 
-                <div class="siff-modal-info">
+                <details class="siff-modal-info">
+                    <summary>Details</summary>
                     <div id="siff-modal-meta"></div>
-                </div>
+                    <div id="siff-modal-credits"></div>
+                </details>
 
-                <div class="siff-modal-description siff-modal-tabs">
-                    <div role="tablist" aria-label="Event information">
-                        <button
-                            type="button"
-                            id="siff-tab-overview"
-                            role="tab"
-                            aria-selected="true"
-                            aria-controls="siff-panel-overview"
-                        >Synopsis</button>
-                        <button
-                            type="button"
-                            id="siff-tab-details"
-                            role="tab"
-                            aria-selected="false"
-                            aria-controls="siff-panel-details"
-                            tabindex="-1"
-                        >Details</button>
-                    </div>
-
-                    <div
-                        id="siff-panel-overview"
-                        role="tabpanel"
-                        aria-labelledby="siff-tab-overview"
-                        tabindex="0"
-                    >
-                        <div id="siff-modal-content"></div>
-                    </div>
-                    <div
-                        id="siff-panel-details"
-                        role="tabpanel"
-                        aria-labelledby="siff-tab-details"
-                        tabindex="0"
-                        hidden
-                    >
-                        <div id="siff-modal-credits"></div>
-                    </div>
-                </div>
+                <section class="siff-modal-description" aria-labelledby="siff-modal-description-title">
+                    <h3 id="siff-modal-description-title">Synopsis</h3>
+                    <div id="siff-modal-content"></div>
+                </section>
             </div>
         </div>
     </dialog>
