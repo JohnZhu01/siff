@@ -12,6 +12,7 @@ function fwd_remove_admin_links() {
         remove_menu_page('post-new.php?post_type=page');
         
         
+        
 
 	}
 }
@@ -30,6 +31,7 @@ function remove_submenus(){
         remove_submenu_page('woocommerce', 'wc-settings&tab=checkout&section=stripe_api');
         remove_submenu_page('edit.php?post_type=page', 'post-new.php?post_type=page');
         remove_submenu_page('users.php', 'users.php');
+        remove_menu_page( 'jetpack' );
         
 
     }
