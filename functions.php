@@ -13,7 +13,7 @@ function siff_enqueues()
         'siff-theme',
         get_stylesheet_uri(),
         array(),
-        wp_get_theme()->get('Version'),
+        filemtime(get_theme_file_path('/style.css')),
         'all'
     );
     // Animation styles.
